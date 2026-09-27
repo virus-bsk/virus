@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Throwaway SSR render harnesses (entry + rendered output). These are scratch
+# files used to render a page server-side for verification — never commit them.
+.tmp-ssr
+scripts/.tmp-*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
