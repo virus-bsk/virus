@@ -326,13 +326,13 @@ function App() {
                 <Route path="/kafka" element={<KafkaTopics />} />
                 <Route path="/kafka/course" element={<KafkaCourse />} />
                 <Route path="/kafka/interview" element={<KafkaInterview />} />
-                {/* MAANG Kit — grid page and all sub-topic pages require login + payment */}
+                {/* MAANG Kit — the overview hub and every sub-topic page are paid */}
                 <Route
                   path="/maang"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <MaangPreparation />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route

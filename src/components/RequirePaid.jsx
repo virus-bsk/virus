@@ -71,8 +71,8 @@ export default function RequirePaid({ children }) {
           <Link to="/payment" className="gate-cta">
             View payment options
           </Link>
-          <Link to="/maang" className="gate-secondary">
-            Back to overview
+          <Link to="/" className="gate-secondary">
+            Back to Home
           </Link>
         </div>
       </div>
