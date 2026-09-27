@@ -765,35 +765,36 @@ function DsaSheetPage({
             <h2 className="mdsa-section-title" aria-live="polite">
               Week {weeklyPlan.weekNo}
             </h2>
-            <div className="mdsa-wp-weekbar">
-              {/* Explicit week picker. The plan is still the selector (drag it
-                  sideways), but swiping walks one week at a time — going back
-                  to Week 1 from Week 5 would take four swipes, so the dropdown
-                  jumps straight to any week. A native <select>, so keyboard,
-                  touch and screen-reader behaviour come for free. */}
-              {weekChoices.length > 1 && (
-                <label className="mdsa-wp-week-select">
-                  <span className="mdsa-wp-week-select-label">Jump to week</span>
-                  <select
-                    value={weekOffset}
-                    onChange={(e) => goToWeek(Number(e.target.value))}
-                  >
-                    {weekChoices.map(({ weekNo, offset }) => (
-                      <option key={weekNo} value={offset}>
-                        Week {weekNo}
-                        {offset === 0 ? " · this week" : ""}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              <p className="mdsa-wp-drag-hint">
-                <span className="mdsa-wp-drag-icon" aria-hidden="true">
-                  ↔
+            {/* Explicit week picker. The plan is still the selector (drag it
+                sideways), but swiping walks one week at a time — going back to
+                Week 1 from Week 5 would take four swipes, so this jumps
+                straight to any week. The pill is only decoration: the control
+                is an invisible <select> stretched over all of it (see
+                `.mdsa-wp-week-select-input`), so a click ANYWHERE on the pill
+                opens the list. NOT a <label> wrapping the <select> — clicking a
+                label merely focuses a select, it never opens it, so the list
+                only appeared when the pointer hit the few pixels of select
+                text. */}
+            {weekChoices.length > 1 && (
+              <div className="mdsa-wp-week-select">
+                <span className="mdsa-wp-week-select-label" aria-hidden="true">
+                  Jump to week
                 </span>
-                Drag the plan left or right to change week
-              </p>
-            </div>
+                <select
+                  className="mdsa-wp-week-select-input"
+                  aria-label={`Jump to week — currently week ${weeklyPlan.weekNo}`}
+                  value={weekOffset}
+                  onChange={(e) => goToWeek(Number(e.target.value))}
+                >
+                  {weekChoices.map(({ weekNo, offset }) => (
+                    <option key={weekNo} value={offset}>
+                      Week {weekNo}
+                      {offset === 0 ? " · this week" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           {/* The carousel: one pane per week (previous · current · next) with

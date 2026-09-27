@@ -1316,24 +1316,22 @@ html[data-theme="dark"] .mdsa-solve-btn[data-platform="youtube"] {
   backface-visibility: hidden;
 }
 
-/* Row under the "Week N" title: week picker on the left, swipe hint beside it. */
-.mdsa-wp-weekbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.65rem 1.1rem;
-}
-
-/* Explicit week picker. The plan is still the selector (drag it sideways), but
-   a swipe only moves one week at a time — this jumps straight to any week
-   (e.g. back to Week 1 from Week 5). A native <select> sits underneath the
-   styling, so keyboard arrows, touch and screen readers all work for free. */
+/* Explicit week picker under the "Week N" title. The plan is still the week
+   selector (drag it sideways), but a swipe only moves one week at a time —
+   this jumps straight to any week (e.g. back to Week 1 from Week 5).
+   Everything here is decoration for the pill; the real control is an
+   invisible <select> stretched over ALL of it (`.mdsa-wp-week-select-input`),
+   so every pixel of the pill opens the native list while keyboard, touch and
+   screen-reader behaviour still come for free. */
 .mdsa-wp-week-select {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
   padding: 0.35rem 1.6rem 0.35rem 0.8rem;
+  /* The pill behaves like a button, so a press-drag must not select its text. */
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
   border-radius: 999px;
   border: 1.5px solid
     color-mix(in srgb, var(--page-accent, #ff5733) 45%, transparent);
@@ -1370,24 +1368,45 @@ html[data-theme="dark"] .mdsa-solve-btn[data-platform="youtube"] {
   color: rgba(203, 213, 225, 0.78);
   white-space: nowrap;
 }
-.mdsa-wp-week-select select {
+/* The real control: an invisible <select> stretched over the ENTIRE pill.
+   `opacity: 0` (NOT `visibility: hidden` / `display: none`) keeps it in the
+   hit test, in the tab order and in the accessibility tree, so a click on the
+   label text, the padding or the chevron lands on the select and opens the
+   native list. The visible styling lives on `.mdsa-wp-week-select`. */
+.mdsa-wp-week-select-input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
   appearance: none;
   -webkit-appearance: none;
-  border: 0;
-  outline: none;
   background: transparent;
-  color: #f0f4ff;
-  font: inherit;
-  font-size: 0.86rem;
-  font-weight: 800;
-  padding: 0;
+  opacity: 0;
   cursor: pointer;
+  font: inherit;
+  /* Only affects the option list, which is rendered by the browser. */
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+/* The focus ring is drawn on the pill by :focus-within — the select itself is
+   invisible, so its own outline would never be seen. */
+.mdsa-wp-week-select-input:focus {
+  outline: none;
 }
 /* The native popup ignores the pill's background, so style the options too. */
-.mdsa-wp-week-select select option {
+.mdsa-wp-week-select-input option {
   background: #0b1019;
   color: #f0f4ff;
   font-weight: 700;
+}
+/* Marks the week the learner is on, so the list reads at a glance. */
+.mdsa-wp-week-select-input option:checked {
+  background: #17233a;
+  color: #ffffff;
 }
 /* Accent chevron — decoration only, the whole pill is the hit area. */
 .mdsa-wp-week-select::after {
@@ -1402,24 +1421,6 @@ html[data-theme="dark"] .mdsa-solve-btn[data-platform="youtube"] {
   border-right: 4.5px solid transparent;
   border-top: 5.5px solid var(--page-accent, #ff5733);
   pointer-events: none;
-}
-
-/* Explainer that replaced the old Prev / This Week / Next row. */
-.mdsa-wp-drag-hint {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  margin: 0;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: rgba(203, 213, 225, 0.72);
-  user-select: none;
-  -webkit-user-select: none;
-}
-.mdsa-wp-drag-icon {
-  font-size: 0.95rem;
-  line-height: 1;
-  color: var(--page-accent, #ff5733);
 }
 
 /* One pane per week on the carousel rail — exactly one viewport wide, so the
@@ -1716,11 +1717,12 @@ html[data-theme="dark"] .mdsa-solve-btn[data-platform="youtube"] {
 }
 
 @media (max-width: 900px) {
-  .mdsa-wp-drag-hint {
-    font-size: 0.74rem;
-  }
-  .mdsa-wp-week-select select {
-    font-size: 0.8rem;
+  /* 16px, not smaller: iOS Safari zooms the whole page when a control it
+     focuses has text under 16px, and the select IS the thing that gets tapped.
+     (Its own text is invisible anyway — this only sizes the popup list, which
+     on phones is drawn by the OS.) */
+  .mdsa-wp-week-select-input {
+    font-size: 16px;
   }
   .mdsa-wp-week-select-label {
     font-size: 0.66rem;

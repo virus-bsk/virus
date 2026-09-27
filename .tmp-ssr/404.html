@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>BSK CODING</title>
+    <script>
+      // GitHub Pages serves this file for any unknown path (e.g. /login on refresh).
+      // Redirect to index.html with the original path in the query string.
+      // The app's RouteRestorer reads ?path= and navigates to the same page.
+      // Works on both the custom domain (base "/") and GitHub Pages
+      // (base "/<repo-name>/", e.g. /bskcoding/).
+      var path = window.location.pathname;
+      var host = window.location.host;
+
+      // Determine the deployment base path.
+      // On *.github.io, the first path segment is the repository name.
+      var base = "/";
+      if (host.indexOf("github.io") > -1 && path.charAt(0) === "/") {
+        var secondSlash = path.indexOf("/", 1);
+        if (secondSlash > -1) {
+          base = path.substring(0, secondSlash) + "/";
+        } else {
+          base = path.charAt(path.length - 1) === "/" ? path : path + "/";
+        }
+      }
+
+      // The app route is the path with the base prefix removed.
+      var appPath = path;
+      if (base !== "/" && appPath.indexOf(base) === 0) {
+        appPath = "/" + appPath.substring(base.length);
+      }
+
+      // Ignore /index.html itself and the root path
+      if (appPath === "/" || appPath === "/index.html") {
+        appPath = "";
+      }
+
+      var redirectUrl =
+        window.location.protocol +
+        "//" +
+        window.location.host +
+        base +
+        "index.html?path=" +
+        encodeURIComponent(appPath);
+
+      // Preserve any query string from the original URL
+      if (window.location.search) {
+        redirectUrl += "&" + window.location.search.substring(1);
+      }
+
+      window.location.replace(redirectUrl);
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
