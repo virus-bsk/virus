@@ -11,7 +11,7 @@ import { MAX_USER_NAME_LENGTH, userPath } from "../utils/userProfile";
 
 function saveErrorMessage(error) {
   if (error?.code === "permission-denied") {
-    return "Firestore denied the write. Publish rules that let a signed-in user write only their own users/{uid} document.";
+    return "Firestore denied the write. Publish rules that let a signed-in user write only their own users/{email-prefix} document.";
   }
   return error?.message || "Could not save your profile. Please try again.";
 }
@@ -25,7 +25,7 @@ function Profile() {
   const [toast, setToast] = useState(null); // { type: "success" | "error", message }
   const toastTimer = useRef(null);
 
-  const uid = user?.id;
+  const profilePath = user ? userPath(user) : "";
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -45,13 +45,13 @@ function Profile() {
     return () => unsubscribe();
   }, []);
 
-  // Live-read the Firestore document users/{uid} through utils/firestore.js.
+  // Live-read the Firestore document users/{email-prefix} through utils/firestore.js.
   // isPaid is only ever READ here: if the client could write it, any signed-in
   // user could mark themselves as paid.
   useEffect(() => {
-    if (!uid) return undefined;
+    if (!profilePath) return undefined;
 
-    const unsubscribe = subscribeDocument(userPath(uid), (value, error) => {
+    const unsubscribe = subscribeDocument(profilePath, (value, error) => {
       if (error) {
         setProfileError(error);
         return;
@@ -61,7 +61,7 @@ function Profile() {
     });
 
     return () => unsubscribe();
-  }, [uid]);
+  }, [profilePath]);
 
   useEffect(
     () => () => {
@@ -116,7 +116,7 @@ function Profile() {
           date: serverTimestamp(),
         };
 
-    const result = await setDocument(userPath(user.id), payload, {
+    const result = await setDocument(userPath(user), payload, {
       merge: true,
     });
     setSaving(false);
@@ -170,7 +170,7 @@ function Profile() {
           </div>
           <p className="profile-form-hint">
             {Math.max(0, MAX_USER_NAME_LENGTH - nameValue.length)} characters left
-            · saved to <code>{userPath(user.id)}</code>
+            · saved to <code>{userPath(user)}</code>
           </p>
         </form>
 
@@ -204,7 +204,7 @@ function Profile() {
           <div className="profile-detail-item">
             <span className="profile-detail-label">Firestore Document</span>
             <span className="profile-detail-value">
-              {profileDoc ? userPath(user.id) : "Not saved yet"}
+              {profileDoc ? userPath(user) : "Not saved yet"}
             </span>
           </div>
           {user.photoURL && (

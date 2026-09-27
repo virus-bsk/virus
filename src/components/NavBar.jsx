@@ -305,6 +305,17 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
                       className="profile-dropdown-item"
                       onClick={() => {
                         setProfileOpen(false);
+                        navigate("/payment");
+                      }}
+                    >
+                      <span className="profile-item-icon">💳</span>
+                      <span>Payment</span>
+                    </button>
+
+                    <button
+                      className="profile-dropdown-item"
+                      onClick={() => {
+                        setProfileOpen(false);
                         if (onOpenChangePassword) {
                           onOpenChangePassword();
                         }

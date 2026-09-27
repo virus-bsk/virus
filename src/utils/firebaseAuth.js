@@ -12,7 +12,7 @@ import {
 import { auth, googleProvider } from "../firebase";
 import { storeUserOnLogin } from "./userProfile";
 
-// Every successful sign-in mirrors the account into Firestore as users/{uid}, so
+// Every successful sign-in mirrors the account into Firestore as users/{email-prefix}, so
 // the document is stored on login instead of only when /profile is saved.
 // Best-effort by design: auth must never fail because Firestore is unreachable
 // or the security rules deny the write, so storeUserOnLogin reports the problem
@@ -25,7 +25,7 @@ async function storeUserInFirestore(user, name) {
       console.warn(
         `Could not store ${result.path || "the user document"} in Firestore:`,
         result.error?.code || result.error?.message || result.error,
-        "— check that the Firestore rules allow a signed-in user to write their own users/{uid} document.",
+        "— check that the Firestore rules allow a signed-in user to write their own user document.",
       );
     }
 

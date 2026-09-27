@@ -4,6 +4,7 @@ import "./App.css";
 import NavBar from "./components/NavBar";
 import ConfigBanner from "./components/ConfigBanner";
 import RequireAuth from "./components/RequireAuth";
+import RequirePaid from "./components/RequirePaid";
 import ChangePasswordModal from "./components/ChangePasswordModal";
 import ErrorBoundary from "./components/ErrorBoundary";
 import YouTubeLinkHandler from "./components/YouTubeLinkHandler";
@@ -207,6 +208,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Profile = lazy(() => import("./pages/Profile"));
+const Payment = lazy(() => import("./pages/Payment"));
 const ResumeBuilderPage = lazy(() => import("./pages/ResumeBuilderPage"));
 const FeaturesPage = lazy(() => import("./pages/FeaturesPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -324,7 +326,7 @@ function App() {
                 <Route path="/kafka" element={<KafkaTopics />} />
                 <Route path="/kafka/course" element={<KafkaCourse />} />
                 <Route path="/kafka/interview" element={<KafkaInterview />} />
-                {/* MAANG Kit — grid page and all sub-topic pages require login */}
+                {/* MAANG Kit — grid page and all sub-topic pages require login + payment */}
                 <Route
                   path="/maang"
                   element={
@@ -336,362 +338,362 @@ function App() {
                 <Route
                   path="/maang/interview-prep"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <InterviewPrep />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/basic-dsa"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <MaangDSABasic />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/advanced-dsa"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <MaangDSAAdvanced />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/graphs"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <MaangDSAGraph />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/dp"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <MaangDSADp />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/weekly-preparation"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <MaangWeeklyPreparation />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design-basics"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <SystemDesignBasics />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/oops"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <OopsPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/solid"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <SolidPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/patterns"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <DesignPatternsPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/uml"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <UmlPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/acid"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <AcidPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/cap"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <CapPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/scalability"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <ScalabilityPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/load-balancing"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <LoadBalancingPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/caching"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <CachingPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/database-concepts"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <DatabaseConceptsPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/api-design"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <ApiDesignPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/distributed-systems"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <DistributedSystemsPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/messaging"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <MessagingPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/microservices"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <MicroservicesPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/high-availability"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <HighAvailabilityPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/observability"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <ObservabilityPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/security"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <SecurityPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/cdn"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <CdnPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/search-systems"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <SearchSystemsPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/file-storage"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <FileStoragePage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/distributed-techniques"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <DistributedTechniquesPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/data-processing"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <DataProcessingPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/cloud-infrastructure"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <CloudInfrastructurePage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/advanced-modern"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <AdvancedModernPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/lld-parking-lot"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <ParkingLotPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/lld-elevator"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <ElevatorPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/lld-vending"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <VendingPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/lld-splitwise"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <SplitwisePage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/lld-atm"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <AtmPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/lld-chess"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <ChessPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/lld-tictactoe"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <TictactoePage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/lld-snake"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <SnakePage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/lld-lru"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <LruPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/lld-ratelimit"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <RatelimitPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/lld-library"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <LibraryPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/hld-url-shortener"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <UrlShortenerPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/system-design/lld-hotel"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <HotelPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
 
                  <Route
                    path="/maang/system-design/advanced"
                    element={
-                     <RequireAuth>
+                     <RequirePaid>
                        <AdvancedSystemDesign />
-                     </RequireAuth>
+                     </RequirePaid>
                    }
                  />
 
@@ -710,25 +712,25 @@ function App() {
                 <Route
                   path="/maang/llm-fundamentals"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <LLMCourse />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/forward-deployment-engineer"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <ForwardDeploymentEngineer />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route
                   path="/maang/forward-deployment-engineer/:moduleId"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <ForwardDeploymentEngineerModule />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 <Route path="/dsa" element={<DSATopics />} />
@@ -741,13 +743,22 @@ function App() {
                 />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/profile" element={<Profile />} />
+                {/* Payment: live account status from Firestore + Cashfree checkout (wired up later) */}
+                <Route
+                  path="/payment"
+                  element={
+                    <RequireAuth>
+                      <Payment />
+                    </RequireAuth>
+                  }
+                />
                 {/* Resume builder still requires login */}
                 <Route
                   path="/resume-builder"
                   element={
-                    <RequireAuth>
+                    <RequirePaid>
                       <ResumeBuilderPage />
-                    </RequireAuth>
+                    </RequirePaid>
                   }
                 />
                 {/* 404 */}

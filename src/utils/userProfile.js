@@ -1,4 +1,6 @@
-// The signed-in user's Firestore document lives at users/{uid}. This module is
+// The signed-in user's Firestore document lives at users/{email-prefix}: the
+// part before "@" in the account email, lowercased (the document "bharathbsk97"
+// in the Firebase console is the prefix of "bharathbsk97@gmail.com"). This module is
 // the single place that knows its shape: login writes it through
 // storeUserOnLogin() and /profile reads and edits it. Built on utils/firestore.js
 // so every call resolves to { ok, ... } or { ok: false, error } — never a throw.
@@ -15,9 +17,29 @@ export const USERS_COLLECTION = "users";
 // and with the security rules, which reject longer values.
 export const MAX_USER_NAME_LENGTH = 60;
 
-// "abc123" -> "users/abc123"
-export function userPath(uid) {
-  return `${USERS_COLLECTION}/${String(uid ?? "").trim()}`;
+/**
+ * Document id for an account: the lowercased email prefix ("bharathbsk97" for
+ * "bharathbsk97@gmail.com"). Accepts a Firebase Auth user ({ uid, email }), the
+ * localStorage session ({ id, email }), or a plain string (an email, or a raw
+ * id used verbatim as the fallback).
+ */
+export function userDocId(user) {
+  let email = "";
+  if (typeof user === "string") email = user;
+  else if (typeof user?.email === "string") email = user.email;
+
+  const trimmed = String(email ?? "").trim();
+  const at = trimmed.indexOf("@");
+  if (at > 0) return trimmed.slice(0, at).toLowerCase();
+  if (typeof user === "string") return trimmed;
+
+  // No usable email (rare): fall back to the Auth uid so a document still exists.
+  return String(user?.uid ?? user?.id ?? "").trim();
+}
+
+// { email: "bharathbsk97@gmail.com" } -> "users/bharathbsk97"
+export function userPath(user) {
+  return `${USERS_COLLECTION}/${userDocId(user)}`;
 }
 
 // Prefer a name the user typed, then the Auth display name, then the email
@@ -57,7 +79,7 @@ export function buildNewUserDocument(user, explicitName) {
  * without a database.
  *
  * @param {object} user - the Firebase Auth user (email, displayName)
- * @param {object|null} storedDoc - the existing users/{uid} data, or null
+ * @param {object|null} storedDoc - the existing users/{email-prefix} data, or null
  * @param {string} [explicitName] - a name the user just typed (sign up)
  * @returns {{ action: "create"|"patch"|"none", document?: object,
  *   fields?: object }} "create" for a missing document, "patch" with only stale
@@ -89,9 +111,9 @@ export function planUserStore(user, storedDoc, explicitName) {
 }
 
 /**
- * Store the signed-in account in Firestore as users/{uid}. Called after every
- * successful sign-in so the document exists even if the user never opens
- * /profile. Existing documents are never clobbered: only a blank userName and a
+ * Store the signed-in account in Firestore as users/{email-prefix}. Called
+ * after every successful sign-in so the document exists even if the user never
+ * opens /profile. Existing documents are never clobbered: only a blank userName and a
  * changed email are patched, and isPaid/date are left untouched.
  *
  * @param {object} user - the Firebase Auth user (uid, email, displayName)
@@ -109,7 +131,7 @@ export async function storeUserOnLogin(user, { name } = {}) {
       };
     }
 
-    const path = userPath(user.uid);
+    const path = userPath(user);
     const existing = await getDocument(path);
 
     if (!existing.ok) {

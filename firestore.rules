@@ -1,0 +1,71 @@
+rules_version = '2';
+
+// Firestore security rules for bskcoding.
+// Publish them from the Firebase console: Firestore -> Rules -> paste this
+// file's contents -> Publish. Until then every read/write below is denied and
+// the app fails closed (gated pages stay locked, /profile shows an error).
+//
+// Data model
+//   users/{email-prefix}   e.g. users/bharathbsk97 — the id is the part before
+//                          "@" in the account email, lowercased
+//     userName  string     client-owned, trimmed, max 60 chars
+//     email     string     must equal the signed-in account's email
+//     isPaid    boolean    SERVER-OWNED: clients may only create it as false;
+//                          only the server (Admin SDK / Cashfree webhook) may
+//                          ever set it to true
+//     date      timestamp  creation time (serverTimestamp), server-owned
+//   pricing/{plan}         e.g. pricing/maang_kit — the fee shown on /payment,
+//                          read-only for clients
+//
+// Everything else in the database is denied by default.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function authEmail() {
+      return signedIn() ? request.auth.token.email : "";
+    }
+
+    match /users/{userId} {
+      // Reading a document that does not exist yet must succeed so the app can
+      // decide between "create" and "patch" at login; an existing document is
+      // only readable by the account whose email it stores.
+      allow get: if signedIn() && (resource == null || resource.data.email == authEmail());
+      allow list: if false;
+
+      // First sign-in (or the first /profile save): the client may create its
+      // own document with exactly the four known fields and isPaid = false.
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['userName', 'email', 'isPaid', 'date'])
+        && request.resource.data.email == authEmail()
+        && request.resource.data.userName is string
+        && request.resource.data.userName.size() > 0
+        && request.resource.data.userName.size() <= 60
+        && request.resource.data.isPaid == false
+        && request.resource.data.date == request.time;
+
+      // Later edits may touch only the profile fields of the account's own
+      // document. affectedKeys() limits the DELTA, so isPaid/date — which are
+      // part of the resulting document — can never be written by a client.
+      allow update: if signedIn()
+        && resource.data.email == authEmail()
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['userName', 'email'])
+        && request.resource.data.email == authEmail()
+        && request.resource.data.userName is string
+        && request.resource.data.userName.size() > 0
+        && request.resource.data.userName.size() <= 60;
+
+      allow delete: if false;
+    }
+
+    match /pricing/{planId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+  }
+}
