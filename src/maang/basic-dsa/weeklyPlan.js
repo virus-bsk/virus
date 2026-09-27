@@ -66,11 +66,17 @@ function mondayOf(date) {
 // localStorage and every week afterwards is numbered relative to that:
 //   first visit .......... Week 1
 //   following Monday ..... Week 2   (and so on, forever)
-// Navigation (Prev/Next) simply moves ±1 in the same numbering.
+// Navigation (swiping the plan sideways, ← / → , or picking a week from the
+// week dropdown) simply moves within the same numbering, and Week 1 is a hard
+// floor — nothing before the start. The dropdown is what makes a jump of more
+// than one week possible: it lists every course week the bank can fill.
 // ---------------------------------------------------------------------------
 
 const START_WEEK_KEY = "maang-wp-start-monday";
 const DAY_MS_LOCAL = 24 * 60 * 60 * 1000;
+
+/** Problems handed out per course week (5 learn days × 2 problems). */
+export const WEEK_SLOTS = 10;
 
 function startMonday() {
   try {
@@ -96,8 +102,8 @@ function startMonday() {
 function slotsForWeek(order, weekIdx) {
   const out = [];
   const len = order.length;
-  for (let i = 0; i < 10; i++) {
-    const idx = (((weekIdx * 10 + i) % len) + len) % len;
+  for (let i = 0; i < WEEK_SLOTS; i++) {
+    const idx = (((weekIdx * WEEK_SLOTS + i) % len) + len) % len;
     out.push(order[idx]);
   }
   return out;
@@ -151,11 +157,103 @@ export function sundayAssessment(bank, weekIdx, nonce = 0) {
   return { hasPrevWeek, problems: [prevPick, curPick] };
 }
 
+// ---------------------------------------------------------------------------
+// Swipe / drag carousel — deciding which week to land on
+//
+// The weekly plan is a horizontal carousel: the day cards follow the finger or
+// mouse, and on release the rail snaps to the nearest week. That release
+// decision is pure arithmetic, so it lives here (and is unit-tested in
+// scripts/test-weekly-plan.mjs) instead of hiding inside the component.
+//
+//   index ..... 0-based pane the gesture STARTED on
+//   dx ........ horizontal travel in px (negative = content moved LEFT)
+//   velocity .. px per ms at release (negative = moving left)
+//   width ..... carousel viewport width in px
+//   paneCount . panes currently rendered (2 at Week 1, otherwise 3)
+//
+// Returns the pane index to snap to — always inside the rendered panes, so a
+// swipe can never leave the weeks that exist (Week 1 stays the floor).
+// ---------------------------------------------------------------------------
+export const SWIPE_FLICK_VELOCITY = 0.45; // px/ms — a quick flick counts as intent
+export const SWIPE_MIN_TRAVEL_PX = 48; // never change week on a tiny nudge
+export const SWIPE_TRAVEL_RATIO = 0.18; // …unless this share of the width moved
+
+export function resolveSwipeTarget(index, dx, velocity, width, paneCount) {
+  if (!(paneCount > 1)) return 0;
+  const flicked = Math.abs(velocity) > SWIPE_FLICK_VELOCITY;
+  const dragged =
+    Math.abs(dx) > Math.max(SWIPE_MIN_TRAVEL_PX, width * SWIPE_TRAVEL_RATIO);
+  let step = 0;
+  if (flicked) {
+    // A flick wins outright: its direction is the intent even if the pointer
+    // only travelled a few pixels.
+    step = velocity < 0 ? 1 : -1;
+  } else if (dragged) {
+    step = dx < 0 ? 1 : -1;
+  }
+  return Math.min(Math.max(index + step, 0), paneCount - 1);
+}
+
+// ---------------------------------------------------------------------------
+// Week picker (the dropdown) — choosing a week directly
+//
+// Swiping walks one week at a time and ←/→ do the same, which is slow when the
+// learner wants to go back to Week 1 from Week 5. The dropdown lists every week
+// and jumps straight to it.
+//
+// All the arithmetic lives here (and is unit-tested) so the component only has
+// to render the list:
+//
+//   minOffset . offset of Week 1 (the floor, negative once weeks have passed)
+//   offset .... 0 = the course week the learner is on, -1 = last week, +1 = next
+//   weekNo .... the number shown in the UI ("Week 1", "Week 2", …)
+// ---------------------------------------------------------------------------
+
+/** Course week number ("Week N") for a plan offset. */
+export function weekNoForOffset(offset, minOffset) {
+  return offset - minOffset + 1;
+}
+
+/** The plan offset that shows course week number `weekNo`. */
+export function offsetForWeekNo(weekNo, minOffset) {
+  return minOffset + weekNo - 1;
+}
+
+/**
+ * How many distinct course weeks the bank can fill. After this many weeks the
+ * 10 slots per week start repeating earlier problems (see slotsForWeek), so
+ * this is also the last week worth offering in the picker.
+ */
+export function courseWeekCount(bank) {
+  if (!bank || bank.length === 0) return 1;
+  return Math.max(1, Math.ceil(bank.length / WEEK_SLOTS));
+}
+
+/**
+ * The weeks the picker offers, ascending: [{ weekNo, offset }, …].
+ *
+ * Lists every distinct course week (Week 1 → the bank's last week) and ALWAYS
+ * includes the week currently on screen, even if the learner has browsed past
+ * the end of the bank: the plan wraps around there, and a <select> whose value
+ * has no matching option renders blank.
+ */
+export function weekPickerOptions(bank, minOffset, currentOffset = 0) {
+  const lastWeekNo = Math.max(
+    courseWeekCount(bank),
+    weekNoForOffset(currentOffset, minOffset),
+  );
+  const options = [];
+  for (let weekNo = 1; weekNo <= lastWeekNo; weekNo += 1) {
+    options.push({ weekNo, offset: offsetForWeekNo(weekNo, minOffset) });
+  }
+  return options;
+}
+
 /**
  * Build the plan for `offset` weeks relative to the user's CURRENT course
  * week (0 = this week, -1 = last week, +1 = next week …).
  *
- * Returns { weekNo, canGoPrev, days[] } where each day is
+ * Returns { weekNo, weekIdx, minOffset, canGoPrev, days[] } where each day is
  * { key, name, jsDay, type, problems[2] } and type is one of:
  * "practice" | "test-week" (Sat) | "test-mixed" (Sun).
  */
@@ -172,6 +270,15 @@ export function buildWeeklyPlan(bank, offset = 0, nonce = 0) {
   // Whole weeks elapsed since the course started (round guards DST drift).
   const currentIdx = Math.round((thisMonday.getTime() - base.getTime()) / (7 * DAY_MS_LOCAL));
   const targetIdx = currentIdx + offset;
+
+  // Earliest week the learner may browse back to. Week 1 (the course start) is
+  // the floor, so the week-selector's back button always has a real
+  // destination: it CLAMPS here instead of rendering as an inert `disabled`
+  // button that ignores taps and looks broken. `currentIdx` is negative only
+  // when the stored start Monday sits in the future (clock/DST oddities) —
+  // then the floor is the week the learner is on, never before the course
+  // began (no wrap-around to unreached topics).
+  const minOffset = -Math.max(currentIdx, 0);
 
   const current = slotsForWeek(order, targetIdx);
 
@@ -214,7 +321,8 @@ export function buildWeeklyPlan(bank, offset = 0, nonce = 0) {
   return {
     weekNo: Math.max(1, targetIdx + 1), // course-style: starts at Week 1
     weekIdx: targetIdx,                 // 0-based index for the assessment builders
-    canGoPrev: targetIdx > 0,           // nothing before Week 1
+    minOffset,                          // earliest offset (Week 1) — clamp nav here
+    canGoPrev: offset > minOffset,      // nothing before Week 1
     days,
   };
 }

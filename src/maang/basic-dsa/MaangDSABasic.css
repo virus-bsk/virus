@@ -1268,51 +1268,165 @@ html[data-theme="dark"] .mdsa-solve-btn[data-platform="youtube"] {
   margin: 0;
 }
 
-/* Navigation row — its own separate line below the title */
-.mdsa-wp-nav {
+/* ===== Swipe / drag week carousel =======================================
+   The plan ITSELF is the week selector now: the day cards follow the mouse,
+   finger or pen, and the rail snaps to the nearest week when you let go.
+   There is no Prev / Next / This Week row any more.
+
+   This block is also what stops a press from ever going "wrong": horizontal
+   gestures are claimed by the carousel (touch-action), taps keep firing
+   normally, and neither a text selection nor a native image drag can start in
+   the middle of a swipe.
+   ======================================================================= */
+.mdsa-wp-carousel {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  border-radius: 18px;
+  /* We own horizontal gestures; the page keeps vertical scrolling. */
+  touch-action: pan-y;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+  outline-offset: 4px;
+  /* A press inside the plan must never turn into a text selection — selecting
+     a label is exactly what swallows the click that should follow it. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.mdsa-wp-carousel:focus-visible {
+  outline: 3px solid
+    color-mix(in srgb, var(--page-accent, #ff5733) 55%, transparent);
+}
+.mdsa-wp-carousel.is-dragging {
+  cursor: grabbing;
+}
+/* Card logos/links must never start a native drag in the middle of a swipe. */
+.mdsa-wp-carousel img,
+.mdsa-wp-carousel a {
+  -webkit-user-drag: none;
+}
+
+/* The rail holding the week panes. It is moved with a transform (never
+   scrolled), so a drag has no momentum of its own — the snap is the only
+   movement the learner sees after letting go. */
+.mdsa-wp-track {
+  display: flex;
+  align-items: flex-start;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Row under the "Week N" title: week picker on the left, swipe hint beside it. */
+.mdsa-wp-weekbar {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.65rem 1.1rem;
 }
 
-.mdsa-wp-nav-btn {
-  background: rgba(255, 255, 255, 0.7);
-  color: #475569;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  border-radius: 10px;
-  padding: 7px 16px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
+/* Explicit week picker. The plan is still the selector (drag it sideways), but
+   a swipe only moves one week at a time — this jumps straight to any week
+   (e.g. back to Week 1 from Week 5). A native <select> sits underneath the
+   styling, so keyboard arrows, touch and screen readers all work for free. */
+.mdsa-wp-week-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 1.6rem 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1.5px solid
+    color-mix(in srgb, var(--page-accent, #ff5733) 45%, transparent);
+  background: rgba(15, 23, 42, 0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
 }
-.mdsa-wp-nav-btn:hover:not(:disabled) {
-  border-color: var(--page-accent, #38bdf8);
-  color: var(--page-accent, #38bdf8);
-  box-shadow: 0 4px 12px
-    color-mix(in srgb, var(--page-accent, #38bdf8) 25%, transparent);
-}
-.mdsa-wp-nav-btn.active,
-.mdsa-wp-nav-btn.mdsa-wp-now.active {
-  background: linear-gradient(
-    135deg,
-    var(--page-accent, #ff5733),
-    var(--page-accent-2, #33a1ff)
+.mdsa-wp-week-select:hover {
+  background: rgba(30, 41, 59, 0.75);
+  border-color: color-mix(
+    in srgb,
+    var(--page-accent, #ff5733) 70%,
+    transparent
   );
-  color: #ffffff;
-  border-color: transparent;
-  box-shadow:
-    0 4px 0 color-mix(in srgb, var(--page-accent, #ff5733) 50%, #000000),
-    0 8px 20px color-mix(in srgb, var(--page-accent, #ff5733) 40%, transparent);
 }
-.mdsa-wp-nav-btn:disabled {
-  opacity: 0.45;
-  cursor: default;
+/* Ring the whole pill when the <select> inside it takes focus. */
+.mdsa-wp-week-select:focus-within {
+  border-color: color-mix(
+    in srgb,
+    var(--page-accent, #ff5733) 85%,
+    transparent
+  );
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--page-accent, #ff5733) 26%, transparent);
+}
+.mdsa-wp-week-select-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(203, 213, 225, 0.78);
+  white-space: nowrap;
+}
+.mdsa-wp-week-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #f0f4ff;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  padding: 0;
+  cursor: pointer;
+}
+/* The native popup ignores the pill's background, so style the options too. */
+.mdsa-wp-week-select select option {
+  background: #0b1019;
+  color: #f0f4ff;
+  font-weight: 700;
+}
+/* Accent chevron — decoration only, the whole pill is the hit area. */
+.mdsa-wp-week-select::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 0.7rem;
+  width: 0;
+  height: 0;
+  margin-top: -2px;
+  border-left: 4.5px solid transparent;
+  border-right: 4.5px solid transparent;
+  border-top: 5.5px solid var(--page-accent, #ff5733);
+  pointer-events: none;
 }
 
-/* Day sections stack top-to-bottom (Mon → Sun); each is a full-width band */
-.mdsa-wp-days {
+/* Explainer that replaced the old Prev / This Week / Next row. */
+.mdsa-wp-drag-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(203, 213, 225, 0.72);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.mdsa-wp-drag-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--page-accent, #ff5733);
+}
+
+/* One pane per week on the carousel rail — exactly one viewport wide, so the
+   day rows inside it still stack top-to-bottom (Mon → Sun) as before. */
+.mdsa-wp-pane {
+  flex: 0 0 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -1320,12 +1434,12 @@ html[data-theme="dark"] .mdsa-solve-btn[data-platform="youtube"] {
 
 /* Every day after the first gets a thin divider line on top, so the weekly
    plan reads as clear separate rows (one line between each day). */
-.mdsa-wp-days .mdsa-wp-day:not(:first-child) {
+.mdsa-wp-pane .mdsa-wp-day:not(:first-child) {
   border-top: 1px solid rgba(148, 163, 184, 0.22);
 }
 
 /* While still keeping a tidy gap above the divider */
-.mdsa-wp-days .mdsa-wp-day + .mdsa-wp-day {
+.mdsa-wp-pane .mdsa-wp-day + .mdsa-wp-day {
   margin-top: 0.35rem;
 }
 
@@ -1602,9 +1716,14 @@ html[data-theme="dark"] .mdsa-solve-btn[data-platform="youtube"] {
 }
 
 @media (max-width: 900px) {
-  .mdsa-wp-nav {
-    margin-left: 0;
-    width: 100%;
+  .mdsa-wp-drag-hint {
+    font-size: 0.74rem;
+  }
+  .mdsa-wp-week-select select {
+    font-size: 0.8rem;
+  }
+  .mdsa-wp-week-select-label {
+    font-size: 0.66rem;
   }
 }
 
