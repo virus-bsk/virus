@@ -7,8 +7,7 @@ import {
   setDocument,
   subscribeDocument,
 } from "../utils/firestore";
-
-const MAX_NAME_LENGTH = 60;
+import { MAX_USER_NAME_LENGTH, userPath } from "../utils/userProfile";
 
 function saveErrorMessage(error) {
   if (error?.code === "permission-denied") {
@@ -52,7 +51,7 @@ function Profile() {
   useEffect(() => {
     if (!uid) return undefined;
 
-    const unsubscribe = subscribeDocument(`users/${uid}`, (value, error) => {
+    const unsubscribe = subscribeDocument(userPath(uid), (value, error) => {
       if (error) {
         setProfileError(error);
         return;
@@ -117,7 +116,7 @@ function Profile() {
           date: serverTimestamp(),
         };
 
-    const result = await setDocument(`users/${user.id}`, payload, {
+    const result = await setDocument(userPath(user.id), payload, {
       merge: true,
     });
     setSaving(false);
@@ -155,7 +154,7 @@ function Profile() {
               className="profile-form-input"
               type="text"
               value={nameValue}
-              maxLength={MAX_NAME_LENGTH}
+              maxLength={MAX_USER_NAME_LENGTH}
               autoComplete="name"
               placeholder="Your display name"
               onChange={(event) => setNameDraft(event.target.value)}
@@ -170,8 +169,8 @@ function Profile() {
             </button>
           </div>
           <p className="profile-form-hint">
-            {Math.max(0, MAX_NAME_LENGTH - nameValue.length)} characters left ·
-            stored in Firestore as <code>users/{user.id}</code>
+            {Math.max(0, MAX_USER_NAME_LENGTH - nameValue.length)} characters left
+            · saved to <code>{userPath(user.id)}</code>
           </p>
         </form>
 
@@ -205,7 +204,7 @@ function Profile() {
           <div className="profile-detail-item">
             <span className="profile-detail-label">Firestore Document</span>
             <span className="profile-detail-value">
-              {profileDoc ? `users/${user.id}` : "Not saved yet"}
+              {profileDoc ? userPath(user.id) : "Not saved yet"}
             </span>
           </div>
           {user.photoURL && (

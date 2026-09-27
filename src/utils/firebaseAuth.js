@@ -10,6 +10,31 @@ import {
   updatePassword,
 } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
+import { storeUserOnLogin } from "./userProfile";
+
+// Every successful sign-in mirrors the account into Firestore as users/{uid}, so
+// the document is stored on login instead of only when /profile is saved.
+// Best-effort by design: auth must never fail because Firestore is unreachable
+// or the security rules deny the write, so storeUserOnLogin reports the problem
+// instead of throwing and we only log it.
+async function storeUserInFirestore(user, name) {
+  try {
+    const result = await storeUserOnLogin(user, { name });
+
+    if (!result.ok) {
+      console.warn(
+        `Could not store ${result.path || "the user document"} in Firestore:`,
+        result.error?.code || result.error?.message || result.error,
+        "— check that the Firestore rules allow a signed-in user to write their own users/{uid} document.",
+      );
+    }
+
+    return result;
+  } catch (err) {
+    console.warn("Could not store the user document in Firestore:", err);
+    return { ok: false, path: null, error: err };
+  }
+}
 
 export async function registerWithEmail(name, email, password) {
   try {
@@ -17,6 +42,7 @@ export async function registerWithEmail(name, email, password) {
     if (auth.currentUser && name) {
       await updateProfile(auth.currentUser, { displayName: name });
     }
+    await storeUserInFirestore(cred.user, name);
     return cred.user;
   } catch (err) {
     console.error("Firebase register error:", err.code || err.message, err);
@@ -33,6 +59,7 @@ export async function registerWithEmail(name, email, password) {
 export async function loginWithEmail(email, password) {
   try {
     const cred = await signInWithEmailAndPassword(auth, email, password);
+    await storeUserInFirestore(cred.user);
     return cred.user;
   } catch (err) {
     console.error("Firebase login error:", err.code || err.message, err);
@@ -48,6 +75,7 @@ export async function loginWithEmail(email, password) {
 export async function loginWithGoogle() {
   try {
     const cred = await signInWithPopup(auth, googleProvider);
+    await storeUserInFirestore(cred.user);
     return cred.user;
   } catch (err) {
     console.error("Firebase Google login error:", err.code || err.message, err);
