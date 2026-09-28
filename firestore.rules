@@ -30,33 +30,34 @@ service cloud.firestore {
       return signedIn() ? request.auth.token.email : "";
     }
 
-    // The document id is the lowercased email prefix ("bharathbsk97" for
-    // "bharathbsk97@gmail.com"). Binding {userId} to it gives the strict 1:1
-    // mapping a UID would give, without migrating the existing documents.
-    function emailPrefix() {
-      return authEmail().lower().split("@")[0];
-    }
-
-    function ownsDoc(userId) {
-      return signedIn() && userId == emailPrefix();
-    }
-
     match /users/{userId} {
-      // Reading a document that does not exist yet must succeed so the app can
-      // decide between "create" and "patch" at login. The doc id is bound to
-      // the caller's email prefix, so no account can read (or squat) another
-      // account's document id — the email-field check below is the second
-      // layer for documents created before this binding existed.
       // NOTE: `read` (not just `get`) so single-document onSnapshot listeners
-      // are allowed; collection queries still fail because no query can prove
-      // every result belongs to the caller.
-      allow read: if ownsDoc(userId) && (resource == null || (resource.data.email is string
+      // are allowed. The doc id is the caller's lowercased email prefix
+      // ("bharathbsk97"), recomputed here without split() (which rules don't
+      // support): the prefix must match the start of the auth email and the
+      // next auth-email character must be "@".
+      function prefixLen() {
+        return userId.size();
+      }
+      function prefixMatches() {
+        return authEmail().lower().size() > prefixLen()
+          && authEmail().lower()[0:prefixLen()] == userId
+          && authEmail().lower()[prefixLen():prefixLen() + 1] == "@";
+      }
+      function ownsDoc() {
+        return signedIn() && userId == userId.lower() && prefixMatches();
+      }
+      // Reading a document that does not exist yet must succeed so the app can
+      // decide between "create" and "patch" at login. No account can read (or
+      // squat) another account's document id — the email-field check is the
+      // second layer for documents created before this binding existed.
+      allow read: if ownsDoc() && (resource == null || (resource.data.email is string
         && resource.data.email.lower() == authEmail().lower()));
 
       // First sign-in (or the first /profile save): the client may create ONLY
       // its own document id, with exactly the four known fields and
       // isPaid = false.
-      allow create: if ownsDoc(userId)
+      allow create: if ownsDoc()
         && request.resource.data.keys().hasOnly(['userName', 'email', 'isPaid', 'date'])
         && request.resource.data.email is string
         && request.resource.data.email.lower() == authEmail().lower()
@@ -69,7 +70,7 @@ service cloud.firestore {
       // Later edits may touch only the profile fields of the account's own
       // document id. affectedKeys() limits the DELTA, so isPaid/date — which
       // are part of the resulting document — can never be written by a client.
-      allow update: if ownsDoc(userId)
+      allow update: if ownsDoc()
         && resource.data.email is string
         && resource.data.email.lower() == authEmail().lower()
         && request.resource.data.diff(resource.data).affectedKeys()
