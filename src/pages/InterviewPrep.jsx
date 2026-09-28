@@ -71,7 +71,6 @@ function highlightCode(code) {
             {w}
           </span>
         );
-        // eslint-disable-next-line no-else-return
       } else if (/^\d+$/.test(w)) {
         return (
           <span className="ip-tok-num" key={`${i}-${j}`}>

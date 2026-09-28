@@ -35,17 +35,17 @@ export default function useMembership() {
   // restored the session sends an unauthenticated request and the rules
   // correctly deny it. So gate the subscription on the real auth state.
   const [session] = useState(() => getCurrentUser());
-  const [authReady, setAuthReady] = useState(() => !!auth.currentUser);
+  // Snapshot of the Firebase Auth user, kept in sync via onAuthStateChanged.
+  // Lazy initializers cover the already-signed-in case, so the effect below
+  // only ever subscribes — it never calls setState synchronously.
+  const [authReady, setAuthReady] = useState(() => auth.currentUser != null);
   const [authEmail, setAuthEmail] = useState(
     () => auth.currentUser?.email ?? null,
   );
 
   useEffect(() => {
-    if (auth.currentUser) {
-      setAuthReady(true);
-      setAuthEmail(auth.currentUser.email ?? null);
-      return undefined;
-    }
+    // Already restored (or restoration raced ahead): nothing to sync yet, but
+    // still subscribe for future sign-out/switch events.
     const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
       setAuthReady(true);
       setAuthEmail(fbUser?.email ?? null);
