@@ -69,6 +69,7 @@ export default function useMembership() {
   return {
     user: session,
     authEmail,
+    authReady,
     path,
     // No path (signed out) is not a loading state — RequirePaid redirects first.
     loading,

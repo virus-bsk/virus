@@ -34,7 +34,7 @@ function formatFee(pricing) {
 }
 
 function Payment() {
-  const { user, path, loading, error, doc, isPaid } = useMembership();
+  const { user, authReady, path, loading, error, doc, isPaid } = useMembership();
   const [pricing, setPricing] = useState({
     loaded: false,
     doc: null,
@@ -42,11 +42,15 @@ function Payment() {
   });
 
   useEffect(() => {
+    // Pricing is a signed-in-only read, so wait for Firebase Auth the same way
+    // the membership read does — otherwise the first request goes out with
+    // request.auth == null and the rules deny it.
+    if (!authReady) return undefined;
     const unsubscribe = subscribeDocument(PRICING_PATH, (value, err) => {
       setPricing({ loaded: true, doc: value, error: err });
     });
     return () => unsubscribe();
-  }, []);
+  }, [authReady]);
 
   const memberSince = asDate(doc?.date);
   const fee = formatFee(pricing.doc);
