@@ -34,7 +34,8 @@ function formatFee(pricing) {
 }
 
 function Payment() {
-  const { user, authReady, path, loading, error, doc, isPaid } = useMembership();
+  const { user, authReady, path, loading, error, doc, isPaid, grantedByBypass } =
+    useMembership();
   const [pricing, setPricing] = useState({
     loaded: false,
     doc: null,
@@ -92,6 +93,9 @@ function Payment() {
               {isPaid
                 ? "Full access is active for this account."
                 : "This account does not have access yet."}
+              {grantedByBypass && (
+                <> Temporary owner access is on — Firestore is bypassed.</>
+              )}
               {memberSince && (
                 <> Member since {memberSince.toLocaleDateString()}.</>
               )}{" "}
