@@ -200,7 +200,7 @@ export const dsaBasicProblems = [
     title: "Longest Substring with K Uniques",
     topic: "Strings",
     difficulty: "Medium",
-    link: "https://www.geeksforgeeks.org/find-the-longest-substring-with-k-unique-characters-in-a-given-string/",
+    link: "https://www.geeksforgeeks.org/problems/longest-k-unique-characters-substring0853/1",
     platform: "gfg",
     videoLink: null,
   },
