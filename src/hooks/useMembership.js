@@ -67,10 +67,9 @@ export default function useMembership() {
   });
 
   useEffect(() => {
-    if (grantedByBypass) {
-      setSnapshot({ loaded: true, doc: { isPaid: true }, error: null });
-      return undefined;
-    }
+    // Bypassed owners never touch Firestore, so there is nothing to sync —
+    // their membership is derived below without any state update.
+    if (grantedByBypass) return undefined;
     // Wait for Firebase Auth to restore before touching Firestore; otherwise
     // the first request goes out with request.auth == null and is denied.
     if (!path || !authReady) return undefined;
@@ -85,6 +84,9 @@ export default function useMembership() {
   }, [path, authReady, grantedByBypass]);
 
   // Bypassed owners are never "loading" and never error — they are paid.
+  // Derived directly (no setState) so the effect above stays subscription-only.
+  const doc = grantedByBypass ? { isPaid: true } : snapshot.doc;
+  const error = grantedByBypass ? null : authReady ? snapshot.error : null;
   const loading = grantedByBypass
     ? false
     : !!path && (!authReady || !snapshot.loaded);
@@ -96,8 +98,8 @@ export default function useMembership() {
     path: grantedByBypass ? userPath(session) : path,
     // No path (signed out) is not a loading state — RequirePaid redirects first.
     loading,
-    doc: snapshot.doc,
-    error: grantedByBypass ? null : authReady ? snapshot.error : null,
+    doc,
+    error,
     isPaid: grantedByBypass ? true : snapshot.doc?.isPaid === true,
     grantedByBypass,
   };

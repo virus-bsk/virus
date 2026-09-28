@@ -13,8 +13,7 @@ import useMembership from "../hooks/useMembership";
  */
 export default function RequirePaid({ children }) {
   const location = useLocation();
-  const { user, path, loading, error, doc, isPaid, grantedByBypass } =
-    useMembership();
+  const { user, path, loading, error, doc, isPaid } = useMembership();
 
   if (!isAuthenticated()) {
     return <Navigate to="/login" state={{ from: location }} replace />;
