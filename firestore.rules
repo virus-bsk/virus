@@ -33,15 +33,20 @@ service cloud.firestore {
     match /users/{userId} {
       // Reading a document that does not exist yet must succeed so the app can
       // decide between "create" and "patch" at login; an existing document is
-      // only readable by the account whose email it stores.
-      allow get: if signedIn() && (resource == null || resource.data.email == authEmail());
-      allow list: if false;
+      // only readable by the account whose email it stores (compared
+      // case-insensitively so "Name@Gmail.com" never locks itself out).
+      // NOTE: `read` (not just `get`) so single-document onSnapshot listeners
+      // are allowed; collection queries still fail because no query can prove
+      // every result belongs to the caller.
+      allow read: if signedIn() && (resource == null || (resource.data.email is string
+        && resource.data.email.lower() == authEmail().lower()));
 
       // First sign-in (or the first /profile save): the client may create its
       // own document with exactly the four known fields and isPaid = false.
       allow create: if signedIn()
         && request.resource.data.keys().hasOnly(['userName', 'email', 'isPaid', 'date'])
-        && request.resource.data.email == authEmail()
+        && request.resource.data.email is string
+        && request.resource.data.email.lower() == authEmail().lower()
         && request.resource.data.userName is string
         && request.resource.data.userName.size() > 0
         && request.resource.data.userName.size() <= 60
@@ -52,10 +57,12 @@ service cloud.firestore {
       // document. affectedKeys() limits the DELTA, so isPaid/date — which are
       // part of the resulting document — can never be written by a client.
       allow update: if signedIn()
-        && resource.data.email == authEmail()
+        && resource.data.email is string
+        && resource.data.email.lower() == authEmail().lower()
         && request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['userName', 'email'])
-        && request.resource.data.email == authEmail()
+        && request.resource.data.email is string
+        && request.resource.data.email.lower() == authEmail().lower()
         && request.resource.data.userName is string
         && request.resource.data.userName.size() > 0
         && request.resource.data.userName.size() <= 60;
