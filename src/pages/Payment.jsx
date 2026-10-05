@@ -1,8 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { asDate, subscribeDocument } from "../utils/firestore";
+import {
+  asDate,
+  setDocument,
+  subscribeDocument,
+} from "../utils/firestore";
 import { db } from "../firebase";
 import useMembership from "../hooks/useMembership";
+import { userPath } from "../utils/userProfile";
+import {
+  cashfreeConfigured,
+  cashfreeMode,
+  createCashfreeOrder,
+  fetchCashfreeOrder,
+  newOrderId,
+  openCashfreeCheckout,
+} from "../utils/cashfree";
 
 // The fee lives in Firestore, not in the code: create the document
 // pricing/maang_kit with { label, amount, currency } in the Firebase console
@@ -37,12 +50,17 @@ function formatFee(pricing) {
 }
 
 function Payment() {
-  const { user, authReady, path, loading, error, doc, isPaid } =
+  const { user, authReady, path, loading, error, doc, isPaid, orderId } =
     useMembership();
   const [pricing, setPricing] = useState({
     loaded: false,
     doc: null,
     error: null,
+  });
+  const [payState, setPayState] = useState({
+    busy: false,
+    error: null,
+    verifying: false,
   });
 
   useEffect(() => {
@@ -64,6 +82,122 @@ function Payment() {
 
   const memberSince = asDate(doc?.date);
   const fee = formatFee(pricing.doc);
+  const amount =
+    typeof pricing.doc?.amount === "number"
+      ? pricing.doc.amount
+      : Number(pricing.doc?.amount);
+  const feeReady =
+    pricing.loaded && !pricing.error && pricing.doc && Number.isFinite(amount);
+  const currency =
+    typeof pricing.doc?.currency === "string" && pricing.doc.currency
+      ? pricing.doc.currency
+      : "INR";
+  const username =
+    (typeof doc?.userName === "string" && doc.userName.trim()) ||
+    user?.displayName ||
+    (typeof path === "string" && path.includes("/")
+      ? path.split("/").pop()
+      : "") ||
+    user?.email?.split("@")[0] ||
+    "";
+
+  // After Cashfree redirects back (return_url = this page + ?order_id=...),
+  // verify via Get Order and — only when order_status is PAID — flip
+  // isPaid=false->true + orderId ""->order_id in ONE write.
+  useEffect(() => {
+    if (!authReady || !user || loading || !path) return;
+    if (isPaid) return;
+    let orderParam = null;
+    try {
+      orderParam = new URLSearchParams(window.location.search).get("order_id");
+    } catch {
+      orderParam = null;
+    }
+    if (!orderParam) return;
+    if (!doc) return; // users doc must exist for the one-time paid activation
+    let cancelled = false;
+    (async () => {
+      setPayState((s) => ({ ...s, verifying: true, error: null }));
+      try {
+        const fetched = await fetchCashfreeOrder(orderParam);
+        if (cancelled) return;
+        if (fetched?.order_status !== "PAID") {
+          setPayState((s) => ({
+            ...s,
+            verifying: false,
+            error: `Payment not complete — order status is ${fetched?.order_status || "unknown"}.`,
+          }));
+          return;
+        }
+        const result = await setDocument(
+          userPath(user),
+          { isPaid: true, orderId: fetched.order_id || orderParam },
+          { merge: true },
+        );
+        if (cancelled) return;
+        if (!result.ok) {
+          throw result.error || new Error("Could not activate access.");
+        }
+        try {
+          const clean = new URL(window.location.href);
+          clean.searchParams.delete("order_id");
+          window.history.replaceState({}, "", clean.toString());
+        } catch {
+          /* keep the param — harmless */
+        }
+        setPayState((s) => ({ ...s, verifying: false, error: null }));
+      } catch (err) {
+        if (cancelled) return;
+        setPayState((s) => ({
+          ...s,
+          verifying: false,
+          error: err?.message || "Verification failed. Please try again.",
+        }));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authReady, user, loading, path, isPaid]);
+
+  async function handlePay() {
+    if (!user || !feeReady || payState.busy || isPaid) return;
+    setPayState((s) => ({ ...s, busy: true, error: null }));
+    try {
+      const orderIdNew = newOrderId(
+        (typeof path === "string" && path.split("/").pop()) ||
+          user.email?.split("@")[0] ||
+          "user",
+      );
+      const returnUrl = `${window.location.origin}${window.location.pathname}?order_id=${encodeURIComponent(orderIdNew)}`;
+      const created = await createCashfreeOrder({
+        orderId: orderIdNew,
+        amount,
+        currency,
+        customerId: user.uid || orderIdNew,
+        customerEmail: user.email || "",
+        customerName:
+          (typeof doc?.userName === "string" && doc.userName.trim()) ||
+          user.displayName ||
+          "",
+        returnUrl,
+      });
+      if (!created?.payment_session_id) {
+        throw new Error("Cashfree did not return a payment session.");
+      }
+      await openCashfreeCheckout({
+        paymentSessionId: created.payment_session_id,
+      });
+      setPayState((s) => ({ ...s, busy: false }));
+    } catch (err) {
+      setPayState((s) => ({
+        ...s,
+        busy: false,
+        error: err?.message || "Could not start payment. Please try again.",
+      }));
+    }
+  }
 
   return (
     <div className="payment-page">
@@ -107,8 +241,13 @@ function Payment() {
               {memberSince && (
                 <> Member since {memberSince.toLocaleDateString()}.</>
               )}{" "}
-              Document: <code>{path}</code>
+              Username: <code>{username || "—"}</code>
             </p>
+            {orderId ? (
+              <p className="payment-note">
+                Order ID: <code>{orderId}</code>
+              </p>
+            ) : null}
             {isPaid && (
               <div className="gate-actions">
                 <Link to="/maang" className="gate-cta">
@@ -159,28 +298,61 @@ function Payment() {
         )}
 
         {/*
-          Cashfree checkout placeholder — wired up when the integration details
-          arrive. Planned flow (no secret ever lives in this repo):
-            1. Call a backend endpoint that creates a Cashfree order with the
-               merchant app id + secret (server-side only).
-            2. Open the Cashfree checkout with the returned order id.
-            3. On the webhook / return callback the server verifies the
-               signature and sets users/{email-prefix}.isPaid = true with the
-               Admin SDK.
-          Until then the button stays disabled; the status above is the single
-          source of truth for access.
+          Sandbox-direct Cashfree flow (test keys only — secret is in the
+          browser bundle, never do this with production keys):
+            1. handlePay() creates a Cashfree order (fee from
+               pricing/maang_kit) with return_url = this page + ?order_id=...
+            2. Cashfree hosted checkout opens; user pays.
+            3. Cashfree redirects back; we Get Order, and ONLY when
+               order_status is PAID we write isPaid=true + orderId in one
+               Firestore update (allowed once by the rules).
+          Webhooks: Cashfree can't reach a static site directly — when you add
+          a backend later, register its https endpoint at Developers > Webhooks
+          (PAYMENT_SUCCESS_WEBHOOK), verify x-webhook-signature with the secret
+          (HMAC-SHA256 of timestamp + raw body), check x-idempotency-key for
+          duplicates, then set isPaid/orderId via Admin SDK.
         */}
-        <button
-          type="button"
-          className="payment-btn"
-          disabled
-          title="Cashfree checkout will be enabled once the payment integration details are added."
-        >
-          Pay with Cashfree
-        </button>
+        {!cashfreeConfigured && (
+          <p className="payment-note payment-warning">
+            Cashfree test keys are not configured. Add{" "}
+            <code>VITE_CASHFREE_APP_ID</code> and{" "}
+            <code>VITE_CASHFREE_APP_SECRET</code> (Sandbox only) to enable
+            payment.
+          </p>
+        )}
+        {payState.verifying && (
+          <p className="payment-note">
+            Verifying your payment with Cashfree…
+          </p>
+        )}
+        {payState.error && (
+          <p className="payment-note payment-warning">{payState.error}</p>
+        )}
+        {!isPaid && (
+          <button
+            type="button"
+            className="payment-btn"
+            onClick={handlePay}
+            disabled={
+              !user || !feeReady || !cashfreeConfigured || payState.busy
+            }
+            title={
+              !cashfreeConfigured
+                ? "Add Cashfree Sandbox keys to enable payment."
+                : `Pay ${fee ?? ""} with Cashfree (${cashfreeMode})`
+            }
+          >
+            {payState.busy
+              ? "Opening Cashfree…"
+              : feeReady
+                ? `Pay ${fee} with Cashfree`
+                : "Pay with Cashfree"}
+          </button>
+        )}
         <p className="payment-note">
-          Online payment opens here once the Cashfree integration details are
-          added.
+          {isPaid
+            ? "Payment complete — access is active."
+            : `Test mode (${cashfreeMode}): you pay the fee from pricing/maang_kit, then this account flips to Paid with the Cashfree order id.`}
         </p>
       </section>
 

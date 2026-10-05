@@ -7,7 +7,8 @@ import { auth, db } from "../firebase";
  * Live membership for the signed-in Firebase account.
  *
  * @returns {{ user: object|null, path: string|null, authReady: boolean,
- *   loading: boolean, doc: object|null, error: Error|null, isPaid: boolean }}
+ *   loading: boolean, doc: object|null, error: Error|null, isPaid: boolean,
+ *   orderId: string }}
  */
 export default function useMembership() {
   const [firebaseUser, setFirebaseUser] = useState(() => auth.currentUser);
@@ -110,5 +111,9 @@ export default function useMembership() {
     doc: currentSnapshot.doc,
     error: currentSnapshot.error,
     isPaid: currentSnapshot.doc?.isPaid === true,
+    orderId:
+      typeof currentSnapshot.doc?.orderId === "string"
+        ? currentSnapshot.doc.orderId
+        : "",
   };
 }

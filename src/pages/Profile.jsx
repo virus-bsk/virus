@@ -105,14 +105,15 @@ function Profile() {
     setSaving(true);
 
     // The first write mirrors the document created in the Firestore console
-    // (userName, email, isPaid, date); later writes only touch what a client
-    // owns. isPaid and date stay server-owned and are never written again.
+    // (userName, email, isPaid, orderId, date); later writes only touch what a client
+    // owns. isPaid, orderId and date stay server-owned and are never written again.
     const payload = profileDoc
       ? { userName: trimmed, email: user.email ?? "" }
       : {
           userName: trimmed,
           email: user.email ?? "",
           isPaid: false,
+          orderId: "",
           date: serverTimestamp(),
         };
 
@@ -180,9 +181,9 @@ function Profile() {
             <span className="profile-detail-value">{user.email}</span>
           </div>
           <div className="profile-detail-item">
-            <span className="profile-detail-label">Display Name</span>
+            <span className="profile-detail-label">User Name</span>
             <span className="profile-detail-value">
-              {nameValue || user.name}
+              {nameValue || user.name || "—"}
             </span>
           </div>
           <div className="profile-detail-item">
@@ -193,6 +194,14 @@ function Profile() {
               >
                 {isPaid ? "Paid" : "Free"}
               </span>
+            </span>
+          </div>
+          <div className="profile-detail-item">
+            <span className="profile-detail-label">Order ID</span>
+            <span className="profile-detail-value">
+              {typeof profileDoc?.orderId === "string" && profileDoc.orderId
+                ? profileDoc.orderId
+                : "—"}
             </span>
           </div>
           <div className="profile-detail-item">

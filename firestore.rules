@@ -13,6 +13,9 @@ rules_version = '2';
 //     isPaid    boolean    SERVER-OWNED: clients may only create it as false;
 //                          only the server (Admin SDK / Cashfree webhook) may
 //                          ever set it to true
+//     orderId   string     SERVER-OWNED: the Cashfree / payment order id, set by
+//                          the server when the user pays ("" until then). Clients
+//                          may only create it as "" and never change it.
 //     date      timestamp  creation time (serverTimestamp), server-owned
 //   pricing/{plan}         e.g. pricing/maang_kit — the fee shown on /payment,
 //                          read-only for clients
@@ -55,31 +58,53 @@ service cloud.firestore {
         && resource.data.email.lower() == authEmail().lower()));
 
       // First sign-in (or the first /profile save): the client may create ONLY
-      // its own document id, with exactly the four known fields and
-      // isPaid = false.
+      // its own document id, with exactly the five known fields and
+      // isPaid = false, orderId = "".
       allow create: if ownsDoc()
-        && request.resource.data.keys().hasOnly(['userName', 'email', 'isPaid', 'date'])
+        && request.resource.data.keys().hasOnly(['userName', 'email', 'isPaid', 'orderId', 'date'])
         && request.resource.data.email is string
         && request.resource.data.email.lower() == authEmail().lower()
         && request.resource.data.userName is string
         && request.resource.data.userName.size() > 0
         && request.resource.data.userName.size() <= 60
         && request.resource.data.isPaid == false
+        && request.resource.data.orderId is string
+        && request.resource.data.orderId == ""
         && request.resource.data.date == request.time;
 
-      // Later edits may touch only the profile fields of the account's own
-      // document id. affectedKeys() limits the DELTA, so isPaid/date — which
-      // are part of the resulting document — can never be written by a client.
+      // Later edits may touch profile fields freely. Sandbox-direct paid
+      // activation: the owner may flip isPaid false->true together with setting
+      // orderId ""->non-empty in the SAME write (verified via Get Order on the
+      // return_url page). Never allow unsetting isPaid, clearing orderId, or
+      // changing orderId again — that only a server may do.
       allow update: if ownsDoc()
         && resource.data.email is string
         && resource.data.email.lower() == authEmail().lower()
-        && request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['userName', 'email'])
         && request.resource.data.email is string
         && request.resource.data.email.lower() == authEmail().lower()
         && request.resource.data.userName is string
         && request.resource.data.userName.size() > 0
-        && request.resource.data.userName.size() <= 60;
+        && request.resource.data.userName.size() <= 60
+        && (
+          // 1) plain profile edit: paid fields untouched
+          (
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['userName', 'email'])
+            && request.resource.data.isPaid == resource.data.isPaid
+            && request.resource.data.orderId == resource.data.orderId
+          )
+          ||
+          // 2) paid activation: false->true + orderId set, nothing else changes
+          (
+            resource.data.isPaid == false
+            && (resource.data.orderId == "" || !(resource.data.orderId is string))
+            && request.resource.data.isPaid == true
+            && request.resource.data.orderId is string
+            && request.resource.data.orderId.size() > 0
+            && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['isPaid', 'orderId'])
+          )
+        );
 
       allow delete: if false;
     }

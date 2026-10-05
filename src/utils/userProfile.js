@@ -61,14 +61,17 @@ export function resolveUserName(user, explicitName) {
 }
 
 // The fields written when an account signs in for the first time, mirroring the
-// shape used in the Firestore console (userName, email, isPaid, date).
+// shape used in the Firestore console (userName, email, isPaid, orderId, date).
 export function buildNewUserDocument(user, explicitName) {
   return {
     userName: resolveUserName(user, explicitName),
     email: user?.email ?? "",
-    // isPaid and date are written on creation only; from then on they are
-    // server-owned and the security rules reject any client write to them.
+    // isPaid, orderId and date are written on creation only; from then on they
+    // are server-owned and the security rules reject any client write to them.
+    // orderId holds the Cashfree / payment order id once the user pays, so
+    // paid details stay verifiable. Empty until the server sets it.
     isPaid: false,
+    orderId: "",
     date: serverTimestamp(),
   };
 }
@@ -96,7 +99,7 @@ export function planUserStore(user, storedDoc, explicitName) {
   const fields = {};
 
   // Only repair fields a client owns, and only when they are actually stale —
-  // isPaid and date are server-owned and must never appear in the patch.
+  // isPaid, orderId and date are server-owned and must never appear in the patch.
   if (!String(storedDoc.userName ?? "").trim()) {
     fields.userName = resolveUserName(user, explicitName);
   }
@@ -114,7 +117,7 @@ export function planUserStore(user, storedDoc, explicitName) {
  * Store the signed-in account in Firestore as users/{email-prefix}. Called
  * after every successful sign-in so the document exists even if the user never
  * opens /profile. Existing documents are never clobbered: only a blank userName and a
- * changed email are patched, and isPaid/date are left untouched.
+ * changed email are patched, and isPaid/orderId/date are left untouched.
  *
  * @param {object} user - the Firebase Auth user (uid, email, displayName)
  * @param {{ name?: string }} [options] - a name the user just typed (sign up)
