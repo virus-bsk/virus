@@ -136,7 +136,17 @@ function Payment() {
         );
         if (cancelled) return;
         if (!result.ok) {
-          throw result.error || new Error("Could not activate access.");
+          // Surface the Firestore error code (usually "permission-denied") and
+          // the path, so a rejected activation is diagnosable instead of
+          // silently leaving the account Free. The usual cause is rules in the
+          // Firebase console that predate firestore.rules' paid-activation
+          // clause (lines 97-106) — republish that file to fix it.
+          const code = result.error?.code;
+          throw new Error(
+            code
+              ? `Could not activate access (${code}). The Firestore rules in the Firebase console may be older than firestore.rules — republish it, then reload.`
+              : "Could not activate access. The Firestore rules in the Firebase console may be older than firestore.rules — republish it, then reload.",
+          );
         }
         try {
           const clean = new URL(window.location.href);
