@@ -98,6 +98,22 @@ export async function fetchCashfreeOrder(orderId) {
   return data; // { order_status: ACTIVE|PAID|EXPIRED|..., cf_order_id, ... }
 }
 
+export async function fetchCashfreeOrderStatus(orderId) {
+  // Simplified shape from the worker: { order_id, order_status, payment_status,
+  // payment_id, success }. `success` is true only once Cashfree reports PAID.
+  const res = await fetch(`${baseUrl()}/orders/${encodeURIComponent(orderId)}/status`, {
+    method: "GET",
+    headers: headers(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data?.message || `Get order status failed (${res.status})`);
+    err.details = data;
+    throw err;
+  }
+  return data;
+}
+
 let sdkPromise = null;
 // Loads https://sdk.cashfree.com/js/v3/cashfree.js once.
 export function loadCashfreeSdk() {

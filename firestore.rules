@@ -16,6 +16,8 @@ rules_version = '2';
 //     orderId   string     SERVER-OWNED: the Cashfree / payment order id, set by
 //                          the server when the user pays ("" until then). Clients
 //                          may only create it as "" and never change it.
+//     paymentId string     SERVER-OWNED: Cashfree's own payment id, written in
+//                          the same single paid-activation write as isPaid/orderId.
 //     date      timestamp  creation time (serverTimestamp), server-owned
 //   pricing/{plan}         e.g. pricing/maang_kit — the fee shown on /payment,
 //                          read-only for clients
@@ -94,7 +96,8 @@ service cloud.firestore {
             && request.resource.data.orderId == resource.data.orderId
           )
           ||
-          // 2) paid activation: false->true + orderId set, nothing else changes
+          // 2) paid activation: false->true + orderId (+ paymentId) set,
+          //    nothing else changes. paymentId is Cashfree's own payment id.
           (
             resource.data.isPaid == false
             && (resource.data.orderId == "" || !(resource.data.orderId is string))
@@ -102,7 +105,7 @@ service cloud.firestore {
             && request.resource.data.orderId is string
             && request.resource.data.orderId.size() > 0
             && request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['isPaid', 'orderId'])
+              .hasOnly(['isPaid', 'orderId', 'paymentId'])
           )
         );
 

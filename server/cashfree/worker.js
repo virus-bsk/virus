@@ -8,8 +8,10 @@
 // browser bundle entirely.
 //
 // Endpoints (relative to the worker URL):
-//   POST /orders            -> Create Order
-//   GET  /orders/{order_id} -> Get Order
+//   POST /orders                    -> Create Order
+//   GET  /orders/{order_id}         -> Get Order (raw Cashfree response)
+//   GET  /orders/{order_id}/status  -> Simplified payment status for the client
+//   GET  /orders/{order_id}/payments-> Raw Cashfree payments list for that order
 //
 // Secrets (Settings > Variables > Secrets, or `npx wrangler secret put ...`):
 //   CASHFREE_APP_ID     required  Cashfree app id
@@ -52,8 +54,62 @@ function jsonError(message, status) {
   );
 }
 
-// Only ever forward the two known order routes — never an open proxy.
-const ORDER_ROUTE = /^\/orders(\/[A-Za-z0-9_.-]+)?$/;
+// Only ever forward the known order routes — never an open proxy.
+const ORDER_ID = "[A-Za-z0-9_.-]+";
+const STATUS_ROUTE = new RegExp(`^/orders/(${ORDER_ID})/status$`);
+const PAYMENTS_ROUTE = new RegExp(`^/orders/(${ORDER_ID})/payments$`);
+const ORDER_ROUTE = new RegExp(`^/orders(/(${ORDER_ID}))?(/(status|payments))?$`);
+
+async function cashfreeFetch(base, path, method, body, env) {
+  const init = {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-version": "2023-08-01",
+      "x-client-id": env.CASHFREE_APP_ID,
+      "x-client-secret": env.CASHFREE_APP_SECRET,
+    },
+  };
+  if (body != null) init.body = body;
+  return fetch(`${base}${path}`, init).catch(() => null);
+}
+
+// GET /orders/{id}/status — a small, stable shape for the browser so the client
+// never has to parse Cashfree's nested payments array. success === true only
+// when the order is PAID, and payment_id is then Cashfree's payment id.
+async function orderStatus(base, orderId, env) {
+  const upstream = await cashfreeFetch(base, `/orders/${orderId}`, "GET", null, env);
+  if (!upstream) return jsonError("Could not reach Cashfree.", 502);
+  if (!upstream.ok) {
+    const text = await upstream.text();
+    return withCors(
+      new Response(text || JSON.stringify({ message: "Order not found." }), {
+        status: upstream.status,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+  }
+  const data = await upstream.json().catch(() => ({}));
+  const orderStatusValue = data?.order_status || "UNKNOWN";
+  // Cashfree reports the per-attempt outcome in payments[]; the first
+  // successful one carries the payment id we hand back to the client.
+  const payments = Array.isArray(data?.payments) ? data.payments : [];
+  const paid = payments.find((p) => p?.payment_status === "SUCCESS");
+  const isPaid = orderStatusValue === "PAID" || Boolean(paid);
+  return withCors(
+    new Response(
+      JSON.stringify({
+        order_id: data?.order_id || orderId,
+        order_status: orderStatusValue,
+        payment_status: isPaid ? "SUCCESS" : orderStatusValue,
+        payment_id: isPaid ? paid?.payment_id ?? null : null,
+        cf_order_id: data?.cf_order_id ?? null,
+        success: isPaid,
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    ),
+  );
+}
 
 export default {
   async fetch(request, env) {
@@ -74,6 +130,30 @@ export default {
     if (!ORDER_ROUTE.test(url.pathname)) {
       return jsonError("Not found", 404);
     }
+
+    const statusMatch = url.pathname.match(STATUS_ROUTE);
+    const paymentsMatch = url.pathname.match(PAYMENTS_ROUTE);
+    if (statusMatch || paymentsMatch) {
+      if (request.method !== "GET") {
+        return jsonError("Method not allowed", 405);
+      }
+      const mode =
+        String(env.CASHFREE_MODE || "production").toLowerCase() === "sandbox"
+          ? "sandbox"
+          : "production";
+      const base = BASES[mode];
+      if (statusMatch) return orderStatus(base, statusMatch[1], env);
+      const upstream = await cashfreeFetch(
+        base,
+        `/orders/${paymentsMatch[1]}/payments`,
+        "GET",
+        null,
+        env,
+      );
+      if (!upstream) return jsonError("Could not reach Cashfree.", 502);
+      return withCors(upstream);
+    }
+
     if (request.method !== "GET" && request.method !== "POST") {
       return jsonError("Method not allowed", 405);
     }
@@ -84,20 +164,8 @@ export default {
         : "production";
     const base = BASES[mode];
 
-    const init = {
-      method: request.method,
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-version": "2023-08-01",
-        "x-client-id": env.CASHFREE_APP_ID,
-        "x-client-secret": env.CASHFREE_APP_SECRET,
-      },
-    };
-    if (request.method === "POST") {
-      init.body = await request.text();
-    }
-
-    const upstream = await fetch(`${base}${url.pathname}`, init).catch(() => null);
+    const body = request.method === "POST" ? await request.text() : null;
+    const upstream = await cashfreeFetch(base, url.pathname, request.method, body, env);
     if (!upstream) {
       return jsonError("Could not reach Cashfree.", 502);
     }

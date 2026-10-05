@@ -12,7 +12,7 @@ import {
   cashfreeConfigured,
   cashfreeMode,
   createCashfreeOrder,
-  fetchCashfreeOrder,
+  fetchCashfreeOrderStatus,
   newOrderId,
   openCashfreeCheckout,
 } from "../utils/cashfree";
@@ -119,9 +119,9 @@ function Payment() {
     (async () => {
       setPayState((s) => ({ ...s, verifying: true, error: null }));
       try {
-        const fetched = await fetchCashfreeOrder(orderParam);
+        const fetched = await fetchCashfreeOrderStatus(orderParam);
         if (cancelled) return;
-        if (fetched?.order_status !== "PAID") {
+        if (!fetched?.success) {
           setPayState((s) => ({
             ...s,
             verifying: false,
@@ -131,7 +131,15 @@ function Payment() {
         }
         const result = await setDocument(
           userPath(user),
-          { isPaid: true, orderId: fetched.order_id || orderParam },
+          {
+            isPaid: true,
+            orderId: fetched.order_id || orderParam,
+            // Cashfree's own payment id, so support can trace the exact attempt.
+            paymentId:
+              fetched.payment_id === null || fetched.payment_id === undefined
+                ? null
+                : String(fetched.payment_id),
+          },
           { merge: true },
         );
         if (cancelled) return;
