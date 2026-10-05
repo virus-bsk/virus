@@ -23,6 +23,12 @@ import {
 // instead of a hardcoded price.
 const PRICING_PATH = "pricing/maang_kit";
 
+// The order id is stored before checkout opens so verification still runs even
+// if Cashfree's return_url redirect drops the query param or never fires.
+const PENDING_ORDER_KEY = "bskcoding.pendingCashfreeOrder";
+const VERIFY_ATTEMPTS = 6;
+const VERIFY_INTERVAL_MS = 3000;
+
 function formatFee(pricing) {
   if (
     pricing?.amount === null ||
@@ -62,6 +68,23 @@ function Payment() {
     error: null,
     verifying: false,
   });
+  // The last order id we created for this account, so a user who already paid
+  // can re-check without paying again.
+  const [hasPendingOrder, setHasPendingOrder] = useState(() => {
+    try {
+      return Boolean(window.localStorage.getItem(PENDING_ORDER_KEY));
+    } catch {
+      return false;
+    }
+  });
+
+  // Re-run verification for the stored order id. The verification effect keys
+  // off a nonce so a manual click re-triggers it even when nothing else changed.
+  const [verifyNonce, setVerifyNonce] = useState(0);
+  function recheckPendingOrder() {
+    setPayState((s) => ({ ...s, error: null }));
+    setVerifyNonce((n) => n + 1);
+  }
 
   useEffect(() => {
     if (!authReady || !user) return undefined;
@@ -101,39 +124,73 @@ function Payment() {
     user?.email?.split("@")[0] ||
     "";
 
-  // After Cashfree redirects back (return_url = this page + ?order_id=...),
-  // verify via Get Order and — only when order_status is PAID — flip
-  // isPaid=false->true + orderId ""->order_id in ONE write.
+  // Payment verification.
+  //
+  // The old flow depended entirely on Cashfree redirecting back to
+  // return_url?order_id=... . That round-trip is the fragile link: if the
+  // redirect loses the param (or never fires), the app silently never verifies
+  // and the account stays Free forever.
+  //
+  // Instead the pending order id is persisted in localStorage BEFORE opening
+  // checkout, and verification polls GET /orders/{id}/status until Cashfree
+  // reports success or the attempts run out. Cashfree's redirect then becomes
+  // only a nice-to-have that lets the check start sooner.
   useEffect(() => {
-    if (!authReady || !user || loading || !path) return;
-    if (isPaid) return;
-    let orderParam = null;
+    if (!authReady || !user || loading || !path) return undefined;
+    if (isPaid) return undefined;
+
+    // Prefer the redirect param, fall back to whatever we stored at checkout.
+    let pending = null;
     try {
-      orderParam = new URLSearchParams(window.location.search).get("order_id");
+      pending = new URLSearchParams(window.location.search).get("order_id");
     } catch {
-      orderParam = null;
+      pending = null;
     }
-    if (!orderParam) return;
-    if (!doc) return; // users doc must exist for the one-time paid activation
+    if (!pending) {
+      try {
+        pending = window.localStorage.getItem(PENDING_ORDER_KEY);
+      } catch {
+        pending = null;
+      }
+    }
+    if (!pending) return undefined;
+    if (!doc) return undefined; // users doc must exist for the paid activation
+
     let cancelled = false;
     (async () => {
       setPayState((s) => ({ ...s, verifying: true, error: null }));
       try {
-        const fetched = await fetchCashfreeOrderStatus(orderParam);
+        let fetched = null;
+        // Cashfree can take a moment to settle, so poll rather than trusting a
+        // single check on first paint.
+        for (let attempt = 0; attempt < VERIFY_ATTEMPTS; attempt += 1) {
+          if (cancelled) return;
+          if (attempt > 0) {
+            await new Promise((r) => setTimeout(r, VERIFY_INTERVAL_MS));
+            if (cancelled) return;
+          }
+          fetched = await fetchCashfreeOrderStatus(pending);
+          if (fetched?.success) break;
+        }
         if (cancelled) return;
+
         if (!fetched?.success) {
+          const reason = fetched?.message || fetched?.error;
           setPayState((s) => ({
             ...s,
             verifying: false,
-            error: `Payment not complete — order status is ${fetched?.order_status || "unknown"}.`,
+            error: `Payment not confirmed by Cashfree — order status is ${
+              fetched?.order_status || "unknown"
+            }${reason ? ` (${reason})` : ""}. If you were charged, contact support with order ${pending}.`,
           }));
           return;
         }
+
         const result = await setDocument(
           userPath(user),
           {
             isPaid: true,
-            orderId: fetched.order_id || orderParam,
+            orderId: fetched.order_id || pending,
             // Cashfree's own payment id, so support can trace the exact attempt.
             paymentId:
               fetched.payment_id === null || fetched.payment_id === undefined
@@ -144,18 +201,23 @@ function Payment() {
         );
         if (cancelled) return;
         if (!result.ok) {
-          // Surface the Firestore error code (usually "permission-denied") and
-          // the path, so a rejected activation is diagnosable instead of
-          // silently leaving the account Free. The usual cause is rules in the
-          // Firebase console that predate firestore.rules' paid-activation
-          // clause (lines 97-106) — republish that file to fix it.
+          // Surface the Firestore error code (usually "permission-denied") so a
+          // rejected activation is diagnosable instead of silently leaving the
+          // account Free. The usual cause is rules in the Firebase console that
+          // predate firestore.rules' paid-activation clause (lines 97-107).
           const code = result.error?.code;
           throw new Error(
             code
-              ? `Could not activate access (${code}). The Firestore rules in the Firebase console may be older than firestore.rules — republish it, then reload.`
-              : "Could not activate access. The Firestore rules in the Firebase console may be older than firestore.rules — republish it, then reload.",
+              ? `Cashfree confirmed payment ${pending}, but Firestore rejected the update (${code}). The rules in the Firebase console may be older than firestore.rules — republish it.`
+              : `Cashfree confirmed payment ${pending}, but the Firestore update failed. The rules in the Firebase console may be older than firestore.rules — republish it.`,
           );
         }
+        try {
+          window.localStorage.removeItem(PENDING_ORDER_KEY);
+        } catch {
+          /* ignore */
+        }
+        setHasPendingOrder(false);
         try {
           const clean = new URL(window.location.href);
           clean.searchParams.delete("order_id");
@@ -177,7 +239,7 @@ function Payment() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authReady, user, loading, path, isPaid]);
+  }, [authReady, user, loading, path, isPaid, verifyNonce]);
 
   async function handlePay() {
     if (!user || !feeReady || payState.busy || isPaid) return;
@@ -203,6 +265,16 @@ function Payment() {
       });
       if (!created?.payment_session_id) {
         throw new Error("Cashfree did not return a payment session.");
+      }
+      // Persist before opening checkout: if the user closes the tab, or the
+      // return_url redirect loses the param, the next visit can still verify.
+      try {
+        window.localStorage.setItem(
+          PENDING_ORDER_KEY,
+          created.order_id || orderIdNew,
+        );
+      } catch {
+        /* storage blocked — verification still works via the redirect param */
       }
       await openCashfreeCheckout({
         paymentSessionId: created.payment_session_id,
@@ -316,16 +388,16 @@ function Payment() {
         )}
 
         {/*
-          Sandbox-direct Cashfree flow (test keys only — secret is in the
-          browser bundle, never do this with production keys):
-            1. handlePay() creates a Cashfree order (fee from
-               pricing/maang_kit) with return_url = this page + ?order_id=...
+          Cashfree flow (keys live on the Worker, never in this bundle):
+            1. handlePay() creates an order (fee from pricing/maang_kit) and
+               stores the order id in localStorage.
             2. Cashfree hosted checkout opens; user pays.
-            3. Cashfree redirects back; we Get Order, and ONLY when
-               order_status is PAID we write isPaid=true + orderId in one
-               Firestore update (allowed once by the rules).
-          Webhooks: Cashfree can't reach a static site directly — when you add
-          a backend later, register its https endpoint at Developers > Webhooks
+            3. We poll GET /orders/{id}/status until it reports success — this
+               runs on page load whether or not the return_url redirect fired.
+            4. Only then do we write isPaid/orderId/paymentId in one Firestore
+               update (allowed once by the rules).
+          Webhooks: Cashfree can't reach a static site directly — when you add a
+          backend, register its https endpoint at Developers > Webhooks
           (PAYMENT_SUCCESS_WEBHOOK), verify x-webhook-signature with the secret
           (HMAC-SHA256 of timestamp + raw body), check x-idempotency-key for
           duplicates, then set isPaid/orderId via Admin SDK.
@@ -364,6 +436,19 @@ function Payment() {
               : feeReady
                 ? `Pay ${fee} with Cashfree`
                 : "Pay with Cashfree"}
+          </button>
+        )}
+        {!isPaid && hasPendingOrder && (
+          <button
+            type="button"
+            className="payment-secondary"
+            onClick={recheckPendingOrder}
+            disabled={payState.busy || payState.verifying}
+            title="Re-check the status of your last Cashfree order — no need to pay again."
+          >
+            {payState.verifying
+              ? "Checking your last payment…"
+              : "I already paid — check my last order"}
           </button>
         )}
         <p className="payment-note">

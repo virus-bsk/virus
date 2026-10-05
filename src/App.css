@@ -4789,6 +4789,27 @@
   opacity: 0.55;
 }
 
+/* Secondary action on /payment: re-verify a payment already made, so a user
+   whose Cashfree redirect was lost does not have to pay twice. */
+.payment-secondary {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px 20px;
+  border: 1px solid rgba(96, 165, 250, 0.5);
+  border-radius: 10px;
+  background: transparent;
+  color: #93c5fd;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.payment-secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 @media (max-width: 640px) {
   .payment-title {
     font-size: 1.7rem;

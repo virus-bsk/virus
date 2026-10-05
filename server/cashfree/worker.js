@@ -90,6 +90,26 @@ async function orderStatus(base, orderId, env) {
     );
   }
   const data = await upstream.json().catch(() => ({}));
+  // Cashfree reports errors as a 200 with a "code" body. Do not mask those as
+  // success:false — an unknown order and an unpaid order must be
+  // distinguishable, or a client can never tell a real failure from a pending
+  // payment.
+  if (data?.code) {
+    return withCors(
+      new Response(
+        JSON.stringify({
+          order_id: orderId,
+          order_status: "UNKNOWN",
+          payment_status: "UNKNOWN",
+          payment_id: null,
+          success: false,
+          error: data.code,
+          message: data.message || "Cashfree rejected the request.",
+        }),
+        { status: 404, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+  }
   const orderStatusValue = data?.order_status || "UNKNOWN";
   // Cashfree reports the per-attempt outcome in payments[]; the first
   // successful one carries the payment id we hand back to the client.
