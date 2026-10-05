@@ -37,6 +37,8 @@ jobs:
           CASHFREE_APP_ID: ${{ secrets.VITE_CASHFREE_APP_ID }}
           CASHFREE_APP_SECRET: ${{ secrets.VITE_CASHFREE_APP_SECRET }}
           CASHFREE_MODE: ${{ secrets.VITE_CASHFREE_MODE }}
+          CASHFREE_API_BASE: ${{ secrets.VITE_CASHFREE_API_BASE }}
+          CASHFREE_PROXY_TOKEN: ${{ secrets.VITE_CASHFREE_PROXY_TOKEN }}
         run: |
           if [ -z "$GEMINI_KEY" ]; then
             echo "❌ VITE_GEMINI_API_KEY secret is not set"
@@ -58,16 +60,18 @@ jobs:
             echo "VITE_EMAILJS_PUBLIC_KEY=$EMAILJS_PUBLIC_KEY" >> .env
           fi
 
-          if [ -z "$CASHFREE_APP_ID" ] || [ -z "$CASHFREE_APP_SECRET" ]; then
-            echo "⚠️ Cashfree secrets are not fully set — Pay button will be disabled"
-            echo "VITE_CASHFREE_MODE=${CASHFREE_MODE:-production}" >> .env
-            echo "VITE_CASHFREE_APP_ID=" >> .env
-            echo "VITE_CASHFREE_APP_SECRET=" >> .env
+          # Always write the Cashfree vars (empty values are fine). Warn only
+          # when neither the proxy URL nor direct keys are configured.
+          echo "VITE_CASHFREE_MODE=${CASHFREE_MODE:-production}" >> .env
+          echo "VITE_CASHFREE_APP_ID=$CASHFREE_APP_ID" >> .env
+          echo "VITE_CASHFREE_APP_SECRET=$CASHFREE_APP_SECRET" >> .env
+          echo "VITE_CASHFREE_API_BASE=$CASHFREE_API_BASE" >> .env
+          echo "VITE_CASHFREE_PROXY_TOKEN=$CASHFREE_PROXY_TOKEN" >> .env
+
+          if [ -z "$CASHFREE_API_BASE" ] && { [ -z "$CASHFREE_APP_ID" ] || [ -z "$CASHFREE_APP_SECRET" ]; }; then
+            echo "⚠️ Cashfree proxy URL and keys are both unset — Pay button will be disabled"
           else
-            echo "✅ Cashfree secrets are available"
-            echo "VITE_CASHFREE_MODE=${CASHFREE_MODE:-production}" >> .env
-            echo "VITE_CASHFREE_APP_ID=$CASHFREE_APP_ID" >> .env
-            echo "VITE_CASHFREE_APP_SECRET=$CASHFREE_APP_SECRET" >> .env
+            echo "✅ Cashfree configuration is available"
           fi
 
       - name: Check Gemini secret

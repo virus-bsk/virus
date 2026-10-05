@@ -1,27 +1,45 @@
-// Sandbox-direct Cashfree integration (no backend).
-// WARNING: the secret lives in the browser bundle — use ONLY with Sandbox
-// test keys. For production, move order creation + webhook to a backend and
-// keep the secret server-side.
+// Cashfree integration.
+//
+// Cashfree's Orders API refuses browser calls (CORS preflight does not allow
+// the x-client-id/x-client-secret headers -> fetch fails with "Failed to
+// fetch"), so in practice this app talks to a small Cloudflare Worker proxy
+// (server/cashfree/) that adds the credentials server-side. Set
+// VITE_CASHFREE_API_BASE to the worker URL to use it — the secret then stays
+// out of the bundle entirely.
+//
+// Direct mode (API base empty) still exists as a fallback, but only works if
+// Cashfree ever opens CORS; keep keys out of production bundles regardless.
 const MODE = (import.meta.env.VITE_CASHFREE_MODE || "sandbox").toLowerCase();
 const APP_ID = import.meta.env.VITE_CASHFREE_APP_ID || "";
 const SECRET = import.meta.env.VITE_CASHFREE_APP_SECRET || "";
+const PROXY_BASE = (import.meta.env.VITE_CASHFREE_API_BASE || "")
+  .trim()
+  .replace(/\/+$/, "");
+const PROXY_TOKEN = (import.meta.env.VITE_CASHFREE_PROXY_TOKEN || "").trim();
 
 export const cashfreeMode = MODE;
-export const cashfreeConfigured = Boolean(APP_ID && SECRET);
+// Enabled when either the proxy URL or direct keys are present.
+export const cashfreeConfigured = Boolean(PROXY_BASE || (APP_ID && SECRET));
 
 function baseUrl() {
+  if (PROXY_BASE) return PROXY_BASE;
   return MODE === "production"
     ? "https://api.cashfree.com/pg"
     : "https://sandbox.cashfree.com/pg";
 }
 
 function headers() {
-  return {
+  const h = {
     "Content-Type": "application/json",
     "x-api-version": "2023-08-01",
-    "x-client-id": APP_ID,
-    "x-client-secret": SECRET,
   };
+  if (PROXY_TOKEN) h.Authorization = `Bearer ${PROXY_TOKEN}`;
+  if (!PROXY_BASE) {
+    // Direct mode only — via the proxy these are injected server-side.
+    h["x-client-id"] = APP_ID;
+    h["x-client-secret"] = SECRET;
+  }
+  return h;
 }
 
 // orderId must be unique per attempt: <prefix>_<timestamp>

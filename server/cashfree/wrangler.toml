@@ -1,0 +1,10 @@
+name = "cashfree-proxy"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# Plain (non-secret) variables. Secrets must be set separately:
+#   npx wrangler secret put CASHFREE_APP_ID
+#   npx wrangler secret put CASHFREE_APP_SECRET
+#   npx wrangler secret put PROXY_TOKEN          (optional but recommended)
+[vars]
+CASHFREE_MODE = "production"

@@ -314,10 +314,11 @@ function Payment() {
         */}
         {!cashfreeConfigured && (
           <p className="payment-note payment-warning">
-            Cashfree test keys are not configured. Add{" "}
+            Cashfree is not configured. Set{" "}
+            <code>VITE_CASHFREE_API_BASE</code> to your Cloudflare Worker URL
+            (see <code>server/cashfree/README.md</code>), or add{" "}
             <code>VITE_CASHFREE_APP_ID</code> and{" "}
-            <code>VITE_CASHFREE_APP_SECRET</code> (Sandbox only) to enable
-            payment.
+            <code>VITE_CASHFREE_APP_SECRET</code>, to enable payment.
           </p>
         )}
         {payState.verifying && (
