@@ -2,30 +2,31 @@
 //
 // Cashfree's Orders API refuses browser calls (CORS preflight does not allow
 // the x-client-id/x-client-secret headers -> fetch fails with "Failed to
-// fetch"), so in practice this app talks to a small Cloudflare Worker proxy
+// fetch"), so all order traffic goes through a small Cloudflare Worker proxy
 // (server/cashfree/) that adds the credentials server-side. Set
-// VITE_CASHFREE_API_BASE to the worker URL to use it — the secret then stays
-// out of the bundle entirely.
+// VITE_CASHFREE_API_BASE to the worker URL; the app id/secret stay on the
+// Worker as secrets and never ship in this bundle.
 //
-// Direct mode (API base empty) still exists as a fallback, but only works if
-// Cashfree ever opens CORS; keep keys out of production bundles regardless.
+// Direct browser mode was removed deliberately: it cannot work against
+// Cashfree's CORS policy, and it published the secret key to every visitor.
 const MODE = (import.meta.env.VITE_CASHFREE_MODE || "sandbox").toLowerCase();
-const APP_ID = import.meta.env.VITE_CASHFREE_APP_ID || "";
-const SECRET = import.meta.env.VITE_CASHFREE_APP_SECRET || "";
 const PROXY_BASE = (import.meta.env.VITE_CASHFREE_API_BASE || "")
   .trim()
   .replace(/\/+$/, "");
 const PROXY_TOKEN = (import.meta.env.VITE_CASHFREE_PROXY_TOKEN || "").trim();
 
 export const cashfreeMode = MODE;
-// Enabled when either the proxy URL or direct keys are present.
-export const cashfreeConfigured = Boolean(PROXY_BASE || (APP_ID && SECRET));
+// Payments require the proxy. Without it we disable the Pay button up front
+// rather than failing at click time with an opaque network error.
+export const cashfreeConfigured = Boolean(PROXY_BASE);
 
 function baseUrl() {
-  if (PROXY_BASE) return PROXY_BASE;
-  return MODE === "production"
-    ? "https://api.cashfree.com/pg"
-    : "https://sandbox.cashfree.com/pg";
+  if (!PROXY_BASE) {
+    throw new Error(
+      "Cashfree is not configured: VITE_CASHFREE_API_BASE is missing (see server/cashfree/README.md).",
+    );
+  }
+  return PROXY_BASE;
 }
 
 function headers() {
@@ -34,11 +35,6 @@ function headers() {
     "x-api-version": "2023-08-01",
   };
   if (PROXY_TOKEN) h.Authorization = `Bearer ${PROXY_TOKEN}`;
-  if (!PROXY_BASE) {
-    // Direct mode only — via the proxy these are injected server-side.
-    h["x-client-id"] = APP_ID;
-    h["x-client-secret"] = SECRET;
-  }
   return h;
 }
 

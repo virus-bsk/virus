@@ -316,9 +316,7 @@ function Payment() {
           <p className="payment-note payment-warning">
             Cashfree is not configured. Set{" "}
             <code>VITE_CASHFREE_API_BASE</code> to your Cloudflare Worker URL
-            (see <code>server/cashfree/README.md</code>), or add{" "}
-            <code>VITE_CASHFREE_APP_ID</code> and{" "}
-            <code>VITE_CASHFREE_APP_SECRET</code>, to enable payment.
+            (see <code>server/cashfree/README.md</code>) to enable payment.
           </p>
         )}
         {payState.verifying && (
