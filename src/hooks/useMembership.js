@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../firebase";
 
 /**
@@ -53,20 +53,23 @@ export default function useMembership() {
     console.info("Firebase membership Firestore path:", path);
     console.info("Firebase membership project ID:", db.app.options.projectId);
 
-    async function readMembership() {
-      try {
-        const userRef = doc(db, "users", emailPrefix);
-        const userSnapshot = await getDoc(userRef);
-        const exists = userSnapshot.exists();
-        const userData = exists ? userSnapshot.data() : null;
-
+    // Subscribe rather than one-shot getDoc: after a payment the client writes
+    // isPaid=true, and a static read leaves this page showing "Free" (and the
+    // Pay button) until a full reload. onSnapshot pushes that write straight back
+    // into state, so the badge flips to Paid immediately.
+    const userRef = doc(db, "users", emailPrefix);
+    const unsubscribe = onSnapshot(
+      userRef,
+      (snap) => {
+        if (!active) return;
+        const exists = snap.exists();
+        const userData = exists ? snap.data() : null;
         console.info("Firebase membership document exists:", exists);
         console.info("Firebase membership Firestore data:", userData);
-
-        if (active) {
-          setSnapshot({ uid, path, loaded: true, doc: userData, error: null });
-        }
-      } catch (error) {
+        setSnapshot({ uid, path, loaded: true, doc: userData, error: null });
+      },
+      (error) => {
+        if (!active) return;
         console.error("Firebase membership Firestore read failed:", {
           projectId: db.app.options.projectId,
           uid,
@@ -74,15 +77,13 @@ export default function useMembership() {
           path,
           error,
         });
-        if (active) {
-          setSnapshot({ uid, path, loaded: true, doc: null, error });
-        }
-      }
-    }
+        setSnapshot({ uid, path, loaded: true, doc: null, error });
+      },
+    );
 
-    readMembership();
     return () => {
       active = false;
+      unsubscribe();
     };
   }, [authReady, firebaseUser, email, emailPrefix, path]);
 
