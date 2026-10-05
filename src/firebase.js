@@ -2,6 +2,10 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import {
+  initializeAppCheck,
+  ReCaptchaEnterpriseProvider,
+} from "firebase/app-check";
+import {
   getAuth,
   onAuthStateChanged,
   connectAuthEmulator,
@@ -24,6 +28,22 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// App Check must be initialized before Firestore so requests include attestation.
+const recaptchaEnterpriseSiteKey = import.meta.env
+  .VITE_RECAPTCHA_ENTERPRISE_SITE_KEY;
+if (typeof window !== "undefined") {
+  if (recaptchaEnterpriseSiteKey) {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider(recaptchaEnterpriseSiteKey),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } else {
+    console.error(
+      "Firebase App Check is enforced for Firestore, but VITE_RECAPTCHA_ENTERPRISE_SITE_KEY is not configured.",
+    );
+  }
+}
 
 // Firebase Services
 export const auth = getAuth(app);

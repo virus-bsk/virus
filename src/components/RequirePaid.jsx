@@ -1,5 +1,4 @@
 import { Link, Navigate, useLocation } from "react-router-dom";
-import { isAuthenticated } from "../utils/auth";
 import useMembership from "../hooks/useMembership";
 
 /**
@@ -13,9 +12,19 @@ import useMembership from "../hooks/useMembership";
  */
 export default function RequirePaid({ children }) {
   const location = useLocation();
-  const { user, path, loading, error, doc, isPaid } = useMembership();
+  const { user, authReady, path, loading, error, doc, isPaid } =
+    useMembership();
 
-  if (!isAuthenticated()) {
+  if (!authReady) {
+    return (
+      <div className="gate-screen" role="status">
+        <span className="gate-spinner" aria-hidden="true" />
+        <p className="gate-text">Checking your login…</p>
+      </div>
+    );
+  }
+
+  if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
@@ -32,12 +41,14 @@ export default function RequirePaid({ children }) {
     const denied = error?.code === "permission-denied";
     return (
       <div className="gate-screen" role="alert">
-        <span className="gate-lock" aria-hidden="true">🔒</span>
+        <span className="gate-lock" aria-hidden="true">
+          🔒
+        </span>
         <h1 className="gate-title">We could not verify your membership</h1>
         <p className="gate-text">
           {denied
-            ? `Firestore denied the read of ${path}. Publish the security rules so a signed-in user can read their own document.`
-            : "Firestore is unreachable, so this page stays locked. Please try again in a moment."}
+            ? `Firestore denied the read of ${path}: ${error.message}`
+            : `Firestore could not read ${path || "the user document"} (${error.code || "unknown error"}): ${error.message || "Please try again in a moment."}`}
         </p>
         <div className="gate-actions">
           <Link to="/payment" className="gate-secondary">
@@ -55,7 +66,9 @@ export default function RequirePaid({ children }) {
     const name = doc?.userName || user?.name || "";
     return (
       <div className="gate-screen gate-paywall" role="alert">
-        <span className="gate-lock" aria-hidden="true">🔒</span>
+        <span className="gate-lock" aria-hidden="true">
+          🔒
+        </span>
         <h1 className="gate-title">The MAANG Kit is a paid product</h1>
         <p className="gate-text">
           {name ? `${name}, your` : "Your"} current plan is{" "}

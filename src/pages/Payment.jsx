@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { asDate, subscribeDocument } from "../utils/firestore";
+import { db } from "../firebase";
 import useMembership from "../hooks/useMembership";
 
 // The fee lives in Firestore, not in the code: create the document
@@ -18,7 +19,9 @@ function formatFee(pricing) {
     return null;
   }
   const amount =
-    typeof pricing.amount === "number" ? pricing.amount : Number(pricing.amount);
+    typeof pricing.amount === "number"
+      ? pricing.amount
+      : Number(pricing.amount);
   if (!Number.isFinite(amount)) return null;
 
   const currency = typeof pricing.currency === "string" ? pricing.currency : "";
@@ -34,7 +37,7 @@ function formatFee(pricing) {
 }
 
 function Payment() {
-  const { user, authReady, path, loading, error, doc, isPaid, grantedByBypass } =
+  const { user, authReady, path, loading, error, doc, isPaid } =
     useMembership();
   const [pricing, setPricing] = useState({
     loaded: false,
@@ -43,15 +46,21 @@ function Payment() {
   });
 
   useEffect(() => {
-    // Pricing is a signed-in-only read, so wait for Firebase Auth the same way
-    // the membership read does — otherwise the first request goes out with
-    // request.auth == null and the rules deny it.
-    if (!authReady) return undefined;
+    if (!authReady || !user) return undefined;
     const unsubscribe = subscribeDocument(PRICING_PATH, (value, err) => {
+      if (err) {
+        console.error("Firebase pricing read failed:", {
+          projectId: db.app.options.projectId,
+          uid: user.uid,
+          email: user.email,
+          path: PRICING_PATH,
+          error: err,
+        });
+      }
       setPricing({ loaded: true, doc: value, error: err });
     });
     return () => unsubscribe();
-  }, [authReady]);
+  }, [authReady, user]);
 
   const memberSince = asDate(doc?.date);
   const fee = formatFee(pricing.doc);
@@ -75,8 +84,10 @@ function Payment() {
         )}
         {!loading && error && (
           <p className="payment-note payment-warning">
-            Could not read {path}: {error.code || error.message}. Publish the
-            Firestore security rules and reload.
+            Could not read {path}: {error.code || error.message}. Check the
+            Firestore Rules Playground for an authenticated read of this path,
+            verify the user's email matches the document ID and email field, and
+            confirm the app project ID in the browser console.
           </p>
         )}
         {!loading && !error && (
@@ -93,9 +104,6 @@ function Payment() {
               {isPaid
                 ? "Full access is active for this account."
                 : "This account does not have access yet."}
-              {grantedByBypass && (
-                <> Temporary owner access is on — Firestore is bypassed.</>
-              )}
               {memberSince && (
                 <> Member since {memberSince.toLocaleDateString()}.</>
               )}{" "}
@@ -118,11 +126,18 @@ function Payment() {
       {/* Fee — live from pricing/maang_kit so the price never lives in code. */}
       <section className="payment-card">
         <h2 className="payment-card-title">Plan</h2>
-        {!pricing.loaded && <p className="payment-note">Loading the fee…</p>}
+        {!user && authReady && (
+          <p className="payment-note">Sign in to view the plan details.</p>
+        )}
+        {user && !pricing.loaded && (
+          <p className="payment-note">Loading the fee…</p>
+        )}
         {pricing.loaded && pricing.error && (
           <p className="payment-note payment-warning">
             Could not read {PRICING_PATH}:{" "}
-            {pricing.error.code || pricing.error.message}.
+            {pricing.error.code || pricing.error.message}. Check the Firestore
+            Rules Playground for an authenticated read of this path and confirm
+            the app is using project {db.app.options.projectId}.
           </p>
         )}
         {pricing.loaded && !pricing.error && !pricing.doc && (

@@ -1,106 +1,114 @@
 import { useEffect, useState } from "react";
-import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { getCurrentUser } from "../utils/auth";
-import { subscribeDocument } from "../utils/firestore";
-import { userPath } from "../utils/userProfile";
-
-// TEMPORARY BYPASS — remove once Firestore reads work.
-// While the Firestore rules deny reads in production, these two accounts get
-// full access without a Firestore lookup. Delete this block (and the
-// `grantedByBypass` usage below) as soon as users/bharathbsk97 reads succeed,
-// so isPaid in Firestore is again the single source of truth.
-const BYPASS_EMAILS = ["bharathbsk97@gmail.com", "maheswarimadiri@gmail.com"];
-
-function isBypassEmail(email) {
-  if (typeof email !== "string") return false;
-  const normalized = email.trim().toLowerCase();
-  return BYPASS_EMAILS.some((allowed) => allowed.toLowerCase() === normalized);
-}
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebase";
 
 /**
- * Live membership for the signed-in account.
+ * Live membership for the signed-in Firebase account.
  *
- * Subscribes to the account's Firestore document (users/{email-prefix}) and
- * exposes whether isPaid is true. The flag is only ever READ here — it is owned
- * by the server, never by the client — so payment status always comes from
- * Firebase, never from code or localStorage.
- *
- * @returns {{ user: object|null, path: string|null, loading: boolean,
- *   doc: object|null, error: Error|null, isPaid: boolean }}
+ * @returns {{ user: object|null, path: string|null, authReady: boolean,
+ *   loading: boolean, doc: object|null, error: Error|null, isPaid: boolean }}
  */
 export default function useMembership() {
-  // Firebase Auth is the identity Firestore rules see (request.auth). The
-  // localStorage mirror alone is NOT enough — subscribing before Firebase has
-  // restored the session sends an unauthenticated request and the rules
-  // correctly deny it. So gate the subscription on the real auth state.
-  const [session] = useState(() => getCurrentUser());
-  // Snapshot of the Firebase Auth user, kept in sync via onAuthStateChanged.
-  // Lazy initializers cover the already-signed-in case, so the effect below
-  // only ever subscribes — it never calls setState synchronously.
+  const [firebaseUser, setFirebaseUser] = useState(() => auth.currentUser);
   const [authReady, setAuthReady] = useState(() => auth.currentUser != null);
-  const [authEmail, setAuthEmail] = useState(
-    () => auth.currentUser?.email ?? null,
-  );
-
-  useEffect(() => {
-    // Already restored (or restoration raced ahead): nothing to sync yet, but
-    // still subscribe for future sign-out/switch events.
-    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
-      setAuthReady(true);
-      setAuthEmail(fbUser?.email ?? null);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // TEMPORARY BYPASS: the two owner accounts skip the Firestore lookup
-  // entirely, so denied rules can't lock them out of the deployed site.
-  const grantedByBypass =
-    isBypassEmail(session?.email) || isBypassEmail(authEmail);
-
-  const path = grantedByBypass ? null : session ? userPath(session) : null;
-
   const [snapshot, setSnapshot] = useState({
+    uid: null,
+    path: null,
     loaded: false,
     doc: null,
     error: null,
   });
 
   useEffect(() => {
-    // Bypassed owners never touch Firestore, so there is nothing to sync —
-    // their membership is derived below without any state update.
-    if (grantedByBypass) return undefined;
-    // Wait for Firebase Auth to restore before touching Firestore; otherwise
-    // the first request goes out with request.auth == null and is denied.
-    if (!path || !authReady) return undefined;
-
-    // onSnapshot always delivers asynchronously, so no state is set
-    // synchronously during the effect itself.
-    const unsubscribe = subscribeDocument(path, (value, error) => {
-      setSnapshot({ loaded: true, doc: value, error });
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
+      setAuthReady(true);
     });
-
     return () => unsubscribe();
-  }, [path, authReady, grantedByBypass]);
+  }, []);
 
-  // Bypassed owners are never "loading" and never error — they are paid.
-  // Derived directly (no setState) so the effect above stays subscription-only.
-  const doc = grantedByBypass ? { isPaid: true } : snapshot.doc;
-  const error = grantedByBypass ? null : authReady ? snapshot.error : null;
-  const loading = grantedByBypass
-    ? false
-    : !!path && (!authReady || !snapshot.loaded);
+  const email = firebaseUser?.email ?? null;
+  const atIndex = typeof email === "string" ? email.indexOf("@") : -1;
+  const emailPrefix = atIndex > 0 ? email.slice(0, atIndex).toLowerCase() : "";
+  const path = emailPrefix ? `users/${emailPrefix}` : null;
+
+  useEffect(() => {
+    if (!authReady || !firebaseUser) return undefined;
+
+    if (!path || !email) {
+      console.error("Cannot read Firestore membership without an email:", {
+        user: firebaseUser,
+        email,
+      });
+      return undefined;
+    }
+
+    const uid = firebaseUser.uid;
+    let active = true;
+    console.info("Firebase membership lookup user:", firebaseUser);
+    console.info("Firebase membership lookup email:", email);
+    console.info("Firebase membership document ID:", emailPrefix);
+    console.info("Firebase membership Firestore path:", path);
+    console.info("Firebase membership project ID:", db.app.options.projectId);
+
+    async function readMembership() {
+      try {
+        const userRef = doc(db, "users", emailPrefix);
+        const userSnapshot = await getDoc(userRef);
+        const exists = userSnapshot.exists();
+        const userData = exists ? userSnapshot.data() : null;
+
+        console.info("Firebase membership document exists:", exists);
+        console.info("Firebase membership Firestore data:", userData);
+
+        if (active) {
+          setSnapshot({ uid, path, loaded: true, doc: userData, error: null });
+        }
+      } catch (error) {
+        console.error("Firebase membership Firestore read failed:", {
+          projectId: db.app.options.projectId,
+          uid,
+          email,
+          path,
+          error,
+        });
+        if (active) {
+          setSnapshot({ uid, path, loaded: true, doc: null, error });
+        }
+      }
+    }
+
+    readMembership();
+    return () => {
+      active = false;
+    };
+  }, [authReady, firebaseUser, email, emailPrefix, path]);
+
+  const matchesCurrentUser =
+    snapshot.uid === (firebaseUser?.uid ?? null) && snapshot.path === path;
+  const currentSnapshot = matchesCurrentUser
+    ? snapshot
+    : {
+        loaded: !firebaseUser || !path,
+        doc: null,
+        error:
+          firebaseUser && !path
+            ? new Error(
+                "The authenticated Firebase user has no usable email address.",
+              )
+            : null,
+      };
+  const loading =
+    !authReady || (!!firebaseUser && !!path && !currentSnapshot.loaded);
 
   return {
-    user: session,
-    authEmail,
+    user: firebaseUser,
     authReady,
-    path: grantedByBypass ? userPath(session) : path,
-    // No path (signed out) is not a loading state — RequirePaid redirects first.
+    path,
     loading,
-    doc,
-    error,
-    isPaid: grantedByBypass ? true : snapshot.doc?.isPaid === true,
-    grantedByBypass,
+    doc: currentSnapshot.doc,
+    error: currentSnapshot.error,
+    isPaid: currentSnapshot.doc?.isPaid === true,
   };
 }
