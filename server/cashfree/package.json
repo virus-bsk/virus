@@ -1,0 +1,13 @@
+{
+  "name": "cashfree",
+  "version": "1.0.0",
+  "description": "Cashfree's Orders API blocks browser calls (its CORS preflight does not allow\r the `x-client-id` / `x-client-secret` headers), so the site calls this worker\r instead. The worker adds your Cashfree credentials — the secret never ships in\r the browser bundle.",
+  "main": "worker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
