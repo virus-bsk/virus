@@ -284,7 +284,9 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
                       </div>
                       <div className="profile-info">
                         <div className="profile-name">{user.name}</div>
-                        <div className="profile-email">{user.email}</div>
+                        <div className="profile-dropdown-email">
+                          {user.email}
+                        </div>
                       </div>
                     </div>
 

@@ -704,6 +704,11 @@
   top: calc(100% + 8px);
   right: 0;
   width: 320px;
+  /* The global `div { max-width: 100% }` rule (src/index.css) would cap
+     this panel at the width of the avatar pill it lives inside (~180px),
+     squashing the menu and ellipsizing the email away. Component
+     specificity overrides it so the dropdown keeps its intended width. */
+  max-width: min(320px, calc(100vw - 32px));
   background: rgba(10, 18, 34, 0.98);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -714,6 +719,10 @@
     0 0 40px rgba(59, 130, 246, 0.1);
   z-index: 1001;
   overflow: hidden;
+  /* Keep the menu reachable on short viewports: cap the height and let it
+     scroll instead of pushing the Logout item below the fold. */
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
   animation: dropdownFadeIn 0.2s ease;
 }
 
@@ -775,7 +784,10 @@
   text-overflow: ellipsis;
 }
 
-.profile-email {
+/* Renamed from .profile-email: the profile PAGE reuses that class name
+   later in this file (font-size: 1rem; margin: 0) and, at equal
+   specificity, would override these dropdown styles. */
+.profile-dropdown-email {
   font-size: 0.85rem;
   color: #94a3b8;
   white-space: nowrap;
@@ -829,25 +841,19 @@
 
 /* Mobile responsive for profile dropdown */
 @media (max-width: 768px) {
+  /* Expand inline inside the slide-in menu instead of using a fixed
+     bottom sheet. `position: fixed` would be trapped by the
+     backdrop-filter on .nav-bar/.nav-links (they become the containing
+     block), so the "full-width" sheet renders against the 280px drawer
+     instead of the viewport and looks broken. Static + full width avoids
+     that and matches how the MAANG Kit dropdown behaves on mobile. */
   .profile-dropdown {
-    position: fixed;
-    top: auto;
-    bottom: 0;
-    right: 0;
-    left: 0;
+    position: static;
     width: 100%;
-    border-radius: 20px 20px 0 0;
-    border-bottom: none;
-    animation: slideUp 0.3s ease;
-  }
-
-  @keyframes slideUp {
-    from {
-      transform: translateY(100%);
-    }
-    to {
-      transform: translateY(0);
-    }
+    margin-top: 6px;
+    border-radius: 12px;
+    max-height: 60vh;
+    overflow-y: auto;
   }
 }
 
@@ -921,6 +927,10 @@
     border-left: 1px solid rgba(59, 130, 246, 0.1);
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
     align-items: stretch;
+    /* The profile dropdown expands inline here on mobile, so the drawer
+       must scroll when its content is taller than the viewport. */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .nav-links.open {
@@ -949,8 +959,19 @@
   }
 
   .nav-user-wrapper {
+    /* Column so the inline profile dropdown stacks under the trigger */
+    flex-direction: column;
+    align-items: stretch;
     justify-content: center;
+    width: 100%;
     padding: 8px 16px;
+    gap: 4px;
+    border-radius: 12px;
+  }
+
+  .nav-user-trigger {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .nav-logout-btn {
