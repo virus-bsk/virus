@@ -49,6 +49,69 @@ VITE_CASHFREE_PROXY_TOKEN=<same value as PROXY_TOKEN, if you set it>
 
 Restart `npm run dev` / push to `main` to redeploy.
 
+## Automatic activation (no user action)
+
+Cashfree can notify the worker the moment a payment settles, and the worker
+writes `isPaid` to Firestore through a **Firebase service account**. Because a
+service account is an Admin credential, this bypasses the client security rules
+— which is exactly why it can flip `isPaid` with no browser involved.
+
+### 4a. Create the service account
+
+Firebase console → **Project settings → Service accounts → Generate new private
+key** (JSON download). From that JSON take three values:
+
+| Worker secret | JSON field |
+|---|---|
+| `FIREBASE_PROJECT_ID` | `project_id` |
+| `FIREBASE_CLIENT_EMAIL` | `client_email` |
+| `FIREBASE_PRIVATE_KEY` | `private_key` (keep the `-----BEGIN/END-----` lines; paste on **one** line — `\n` escapes are handled) |
+
+```bash
+npx wrangler secret put FIREBASE_PROJECT_ID
+npx wrangler secret put FIREBASE_CLIENT_EMAIL
+npx wrangler secret put FIREBASE_PRIVATE_KEY
+```
+
+### 4b. Register the webhook
+
+Cashfree dashboard → **Developers → Webhooks**, endpoint URL:
+
+```
+https://cashfree-proxy.<your-account>.workers.dev/webhook/cashfree
+```
+
+Subscribe to `PAYMENT_SUCCESS`. Copy the webhook secret Cashfree shows you into:
+
+```bash
+npx wrangler secret put CASHFREE_WEBHOOK_SECRET
+```
+
+### How it works
+
+Order ids are minted as `<email-prefix>_<timestamp>` (see `newOrderId` in
+`src/utils/cashfree.js`), so the webhook maps a settled payment back to the right
+`users/{email-prefix}` document with no extra bookkeeping. On `PAYMENT_SUCCESS`
+it PATCHes `isPaid: true`, `orderId`, and `paymentId`.
+
+The endpoint sits **outside** the `PROXY_TOKEN` check — Cashfree cannot send
+your bearer token, it authenticates with an HMAC-SHA256 signature over the raw
+body (`x-webhook-signature`), verified in constant time. Without that check
+anyone could POST a fake "payment succeeded".
+
+Test it locally:
+```bash
+BODY='{"event_type":"PAYMENT_SUCCESS","data":{"order_id":"bsktrending11_1791189124500","payment_id":6664565849,"payment_status":"SUCCESS"}}'
+SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$CASHFREE_WEBHOOK_SECRET" -hex | sed 's/^.* //')
+curl -X POST https://cashfree-proxy.<your-account>.workers.dev/webhook/cashfree \
+  -H "x-webhook-signature: $SIG" -d "$BODY"
+# {"received":true,"activated":true,"doc_id":"bsktrending11",...}
+```
+
+The browser flow in `src/pages/Payment.jsx` is kept as a fallback: if a webhook
+delivery is ever missed, the page still verifies on load via
+`GET /orders/{id}/status`.
+
 ## Quick test
 
 ```bash

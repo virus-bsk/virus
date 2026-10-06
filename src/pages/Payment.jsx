@@ -238,8 +238,7 @@ function Payment() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authReady, user, loading, path, isPaid, verifyNonce]);
+  }, [authReady, user, loading, path, doc, isPaid, verifyNonce]);
 
   async function handlePay() {
     if (!user || !feeReady || payState.busy || isPaid) return;
@@ -396,11 +395,11 @@ function Payment() {
                runs on page load whether or not the return_url redirect fired.
             4. Only then do we write isPaid/orderId/paymentId in one Firestore
                update (allowed once by the rules).
-          Webhooks: Cashfree can't reach a static site directly — when you add a
-          backend, register its https endpoint at Developers > Webhooks
-          (PAYMENT_SUCCESS_WEBHOOK), verify x-webhook-signature with the secret
-          (HMAC-SHA256 of timestamp + raw body), check x-idempotency-key for
-          duplicates, then set isPaid/orderId via Admin SDK.
+          Webhooks: the worker also registers POST /webhook/cashfree, which Cashfree
+          notifies when a payment settles — it writes isPaid via a Firebase service
+          account (server/cashfree/README.md section 4), so activation happens with
+          no browser open at all. This polling path is the fallback when a delivery
+          is missed; both are idempotent.
         */}
         {!cashfreeConfigured && (
           <p className="payment-note payment-warning">
