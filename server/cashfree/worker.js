@@ -18,7 +18,11 @@
 // staying open, so Cashfree posts here the moment a payment settles and this
 // worker writes isPaid/orderId/paymentId to Firestore through a service account
 // (Admin SDK credentials bypass the client security rules, which is what makes
-// a true "no user action required" flow possible).
+// a true "no user action required" flow possible). The target document is
+// resolved from Cashfree's own customer_email record — NOT from the order id
+// alone, whose embedded prefix loses characters newOrderId strips (".", "+").
+// Unreached-Cashfree answers 5xx so deliveries retry; the route refuses to
+// run at all unless CASHFREE_WEBHOOK_SECRET is set.
 //
 // Secrets (Settings > Variables > Secrets, or `npx wrangler secret put ...`):
 //   CASHFREE_APP_ID      required  Cashfree app id
@@ -125,30 +129,92 @@ export function firebaseWriteConfigured(env) {
 // Sets isPaid/orderId/paymentId on users/{docId} through the Firestore REST API.
 // The service account is an Admin credential, so the client rules that block
 // client-side isPaid writes are bypassed here by design.
-export async function activateMembership(env, docId, { orderId, paymentId }) {
+//
+// When the document already exists (normal case: accounts are created at
+// login), only the three paid fields are patched. When it is MISSING — e.g.
+// a late webhook delivery after the user cleared their data — a complete
+// document is created instead: a PATCH-only write would leave a partial doc
+// with no email, and the rules' read binding (resource.data.email == the
+// signer's email) would then lock the account out entirely. The caller's
+// customer_email/customer_name come straight from Cashfree's order record.
+export async function activateMembership(
+  env,
+  docId,
+  { orderId, paymentId, email = "", name = "" } = {},
+) {
   if (!firebaseWriteConfigured(env)) {
     throw new Error("Firebase service-account secrets are not configured on the worker.");
   }
+  if (!docId) throw new Error("Cannot activate: no document id.");
   const token = await getAccessToken(env);
-  const url =
+  const docUrl =
     `https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}` +
-    `/databases/(default)/documents/users/${encodeURIComponent(docId)}` +
-    "?updateMask.fieldPaths=isPaid&updateMask.fieldPaths=orderId&updateMask.fieldPaths=paymentId";
-  const fields = {
+    `/databases/(default)/documents/users/${encodeURIComponent(docId)}`;
+  const auth = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+  const paidFields = {
     isPaid: { booleanValue: true },
     orderId: { stringValue: String(orderId) },
-    paymentId: paymentId == null ? { nullValue: null } : { stringValue: String(paymentId) },
+    paymentId:
+      paymentId == null ? { nullValue: null } : { stringValue: String(paymentId) },
   };
-  const res = await fetch(url, {
-    method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ fields }),
+
+  const existing = await fetch(docUrl, { method: "GET", headers: auth });
+  if (existing.status !== 404 && !existing.ok) {
+    throw new Error(`Firestore read failed (${existing.status}): ${await existing.text()}`);
+  }
+  if (existing.ok) {
+    const current = await existing.json().catch(() => null);
+    const fields = { ...paidFields };
+    const masks = Object.keys(fields);
+    // Repair identity fields if an older automation left them out — never
+    // touch values that are already there.
+    const storedEmail = current?.fields?.email?.stringValue;
+    if (!storedEmail && email) fields.email = { stringValue: String(email) };
+    const storedName = current?.fields?.userName?.stringValue;
+    const fallbackName = String(name || email.split("@")[0] || docId).trim();
+    if (!storedName && fallbackName) fields.userName = { stringValue: fallbackName };
+    for (const key of Object.keys(fields)) {
+      if (!masks.includes(key)) masks.push(key);
+    }
+    const url = `${docUrl}?${masks
+      .map((key) => `updateMask.fieldPaths=${encodeURIComponent(key)}`)
+      .join("&")}`;
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: auth,
+      body: JSON.stringify({ fields }),
+    });
+    if (!res.ok) {
+      throw new Error(`Firestore write failed (${res.status}): ${await res.text()}`);
+    }
+    return true;
+  }
+
+  // Document missing: create it whole so the account can read it back.
+  if (!email) {
+    throw new Error(
+      `Cannot create users/${docId}: the Cashfree order has no customer_email to anchor it with.`,
+    );
+  }
+  const created = await fetch(docUrl, {
+    method: "PUT",
+    headers: auth,
+    body: JSON.stringify({
+      fields: {
+        ...paidFields,
+        email: { stringValue: String(email) },
+        userName: {
+          stringValue: String(name || email.split("@")[0] || docId).trim(),
+        },
+        date: { timestampValue: new Date().toISOString() },
+      },
+    }),
   });
-  if (!res.ok) {
-    throw new Error(`Firestore write failed (${res.status}): ${await res.text()}`);
+  if (!created.ok) {
+    throw new Error(`Firestore create failed (${created.status}): ${await created.text()}`);
   }
   return true;
 }
@@ -219,24 +285,95 @@ async function verifyWebhookSignature(rawBody, signature, secret) {
 }
 
 // Order ids are minted by the client as "<email-prefix>_<timestamp>" (see
-// newOrderId in src/utils/cashfree.js), which is what lets the webhook map a
-// settled payment back to the right users/{email-prefix} document without the
-// browser being involved.
+// newOrderId in src/utils/cashfree.js) — a FALLBACK mapping only. It cannot
+// see characters newOrderId strips (".", "+"), so for a prefix like
+// "v.bharathbsk97" parsing alone yields "vbharathbsk97", the wrong document.
+// The webhook prefers customer_email (see resolveDocIdForOrder): exact, no
+// sanitisation involved.
 function docIdFromOrderId(orderId) {
-  const raw = String(orderId || "");
+  const raw = String(orderId || "").toLowerCase();
   const match = raw.match(/^([a-z0-9_-]+?)_\d+$/);
-  return match ? match[1].toLowerCase() : null;
+  return match ? match[1] : null;
+}
+
+// customer_email -> users/{docId}: the exact inverse of userDocId() in
+// src/utils/userProfile.js (the part before "@", lowercased).
+function docIdFromEmail(email) {
+  const trimmed = String(email || "").trim().toLowerCase();
+  const at = trimmed.indexOf("@");
+  return at > 0 ? trimmed.slice(0, at) : null;
+}
+
+function cashfreeBase(env) {
+  return BASES[
+    String(env.CASHFREE_MODE || "production").toLowerCase() === "sandbox"
+      ? "sandbox"
+      : "production"
+  ];
+}
+
+// Resolve the Firestore document for a settled order. Asks Cashfree for the
+// order first: customer_email tells us the exact doc id, and looking the
+// order up at all means a correctly-signed-but-forged event body still cannot
+// activate anything Cashfree does not actually show. Falls back to parsing
+// the order id only when Cashfree's response carries no email.
+async function resolveDocIdForOrder(orderId, env) {
+  try {
+    const res = await cashfreeFetch(
+      cashfreeBase(env),
+      `/orders/${encodeURIComponent(orderId)}`,
+      "GET",
+      null,
+      env,
+    );
+    if (!res) return { docId: null, order: null, reachable: false };
+    // Auth failures are a config problem on our side, not a bad order: say
+    // unreachable so the caller answers 5xx and Cashfree retries after we
+    // fix the keys. A 404 (wrong mode for the order, or sandbox test) still
+    // falls back to the order-id parse below.
+    if (!res.ok && res.status !== 404) {
+      return { docId: null, order: null, reachable: false };
+    }
+    const order = res.ok ? await res.json().catch(() => null) : null;
+    const email =
+      order?.customer_details?.customer_email ??
+      order?.customer_details?.customerEmail ??
+      "";
+    return {
+      docId: docIdFromEmail(email) || docIdFromOrderId(orderId),
+      order,
+      reachable: true,
+    };
+  } catch {
+    return { docId: null, order: null, reachable: false };
+  }
 }
 
 async function handleCashfreeWebhook(request, env) {
   const rawBody = await request.text();
-  if (env.CASHFREE_WEBHOOK_SECRET) {
-    const signature =
-      request.headers.get("x-webhook-signature") ||
-      request.headers.get("X-Webhook-Signature");
-    const ok = await verifyWebhookSignature(rawBody, signature, env.CASHFREE_WEBHOOK_SECRET);
-    if (!ok) return jsonError("Invalid webhook signature.", 401);
+  // Fail closed: without a shared secret anyone who finds this URL could POST
+  // a fake "payment succeeded" and activate an account. 200 (not an error) so
+  // Cashfree does not retry forever while the secret is still being set up —
+  // the payment is simply not activated from this path until it exists.
+  if (!env.CASHFREE_WEBHOOK_SECRET) {
+    console.warn(
+      "Cashfree webhook ignored: CASHFREE_WEBHOOK_SECRET is not set.",
+    );
+    return json({
+      received: true,
+      ignored: true,
+      reason: "CASHFREE_WEBHOOK_SECRET is not set on this worker.",
+    });
   }
+  const signature =
+    request.headers.get("x-webhook-signature") ||
+    request.headers.get("X-Webhook-Signature");
+  const ok = await verifyWebhookSignature(
+    rawBody,
+    signature,
+    env.CASHFREE_WEBHOOK_SECRET,
+  );
+  if (!ok) return jsonError("Invalid webhook signature.", 401);
   let event;
   try {
     event = JSON.parse(rawBody);
@@ -255,9 +392,8 @@ async function handleCashfreeWebhook(request, env) {
     return json({ received: true, ignored: true, event_type: eventType || null });
   }
 
-  const docId = docIdFromOrderId(orderId);
-  if (!docId) {
-    return jsonError(`Cannot map order "${orderId}" to a user document.`, 400);
+  if (!orderId) {
+    return jsonError("Webhook event has no data.order_id.", 400);
   }
   if (!firebaseWriteConfigured(env)) {
     return jsonError(
@@ -266,12 +402,48 @@ async function handleCashfreeWebhook(request, env) {
     );
   }
 
+  // Resolve the exact document via Cashfree's own customer_email record — the
+  // raw order-id parse is lossy for prefixes with dots or "+" (newOrderId
+  // strips them), so order-id parsing is only a fallback. If Cashfree cannot
+  // be reached at all, 500 so Cashfree retries: writing a real payment to a
+  // well-formed-but-wrong document is the bug that put one orderId on two
+  // accounts, and must not happen again.
+  const resolved = await resolveDocIdForOrder(orderId, env);
+  if (!resolved.reachable) {
+    return jsonError(
+      `Could not fetch order "${orderId}" from Cashfree to verify it.`,
+      500,
+    );
+  }
+  if (!resolved.docId) {
+    return jsonError(`Cannot map order "${orderId}" to a user document.`, 400);
+  }
+  const mappedDocId = resolved.docId;
+  const customerName =
+    resolved.order?.customer_details?.customer_name ??
+    resolved.order?.customer_details?.customerName ??
+    "";
+  const customerEmail =
+    resolved.order?.customer_details?.customer_email ??
+    resolved.order?.customer_details?.customerEmail ??
+    "";
+
   try {
-    await activateMembership(env, docId, { orderId, paymentId });
-    return json({ received: true, activated: true, doc_id: docId, order_id: orderId });
+    await activateMembership(env, mappedDocId, {
+      orderId,
+      paymentId,
+      email: customerEmail,
+      name: customerName,
+    });
+    return json({
+      received: true,
+      activated: true,
+      doc_id: mappedDocId,
+      order_id: orderId,
+    });
   } catch (err) {
     // 500 makes Cashfree retry, which is what we want for a transient failure.
-    return jsonError(`Could not activate ${docId}: ${err.message}`, 500);
+    return jsonError(`Could not activate ${mappedDocId}: ${err.message}`, 500);
   }
 }
 
@@ -354,6 +526,11 @@ async function orderStatus(base, orderId, env) {
         payment_status: isPaid ? "SUCCESS" : orderStatusValue,
         payment_id: isPaid ? paid?.payment_id ?? null : null,
         cf_order_id: data?.cf_order_id ?? null,
+        // Who the order was created for — the browser only activates its own
+        // account with a settled order (Payment.jsx gates on this), so one
+        // payment can never flip a different account on the same machine.
+        customer_email: data?.customer_details?.customer_email ?? null,
+        customer_id: data?.customer_details?.customer_id ?? null,
         success: isPaid,
       }),
       { status: 200, headers: { "Content-Type": "application/json" } },

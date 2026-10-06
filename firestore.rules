@@ -98,12 +98,21 @@ service cloud.firestore {
           ||
           // 2) paid activation: false->true + orderId (+ paymentId) set,
           //    nothing else changes. paymentId is Cashfree's own payment id.
+          //    The orderId must look like one this app mints
+          //    (<sanitized-email-prefix>_<timestamp>). That the order really
+          //    belongs to THIS account is enforced where the id is known:
+          //    Payment.jsx checks the minted prefix plus Cashfree's
+          //    customer_email before writing, and the webhook maps through
+          //    customer_email server-side. The rules language cannot strip
+          //    characters from userId ("v.bharathbsk97" -> "vbharathbsk97"), so
+          //    an exact prefix-binding check here would brick activation for
+          //    dotted emails — the format guard is what rules can express.
           (
             resource.data.isPaid == false
             && (resource.data.orderId == "" || !(resource.data.orderId is string))
             && request.resource.data.isPaid == true
             && request.resource.data.orderId is string
-            && request.resource.data.orderId.size() > 0
+            && request.resource.data.orderId.matches('^[A-Za-z0-9_-]+_[0-9]{10,}$')
             && request.resource.data.diff(resource.data).affectedKeys()
               .hasOnly(['isPaid', 'orderId', 'paymentId'])
           )

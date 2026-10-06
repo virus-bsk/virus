@@ -15,6 +15,9 @@ import {
   fetchCashfreeOrderStatus,
   newOrderId,
   openCashfreeCheckout,
+  orderBelongsToAccount,
+  orderOwnerPrefix,
+  sanitizeOrderPrefix,
 } from "../utils/cashfree";
 
 // The fee lives in Firestore, not in the code: create the document
@@ -28,6 +31,93 @@ const PRICING_PATH = "pricing/maang_kit";
 const PENDING_ORDER_KEY = "bskcoding.pendingCashfreeOrder";
 const VERIFY_ATTEMPTS = 6;
 const VERIFY_INTERVAL_MS = 3000;
+
+// Pending order ids are stored per account (<key>.<email-prefix>). The old
+// single shared key was the bug that let one settled payment activate EVERY
+// Google account signed into the same browser: the verification effect read
+// whatever order id was in storage and wrote isPaid into the then-current
+// user's document without ever checking the order belonged to that account.
+function pendingOrderKey(prefix) {
+  return `${PENDING_ORDER_KEY}.${prefix}`;
+}
+
+// Strip a leftover return_url param (Cashfree's own round-trip).
+function stripOrderParam() {
+  try {
+    const clean = new URL(window.location.href);
+    clean.searchParams.delete("order_id");
+    window.history.replaceState({}, "", clean.toString());
+  } catch {
+    /* keep the param — harmless */
+  }
+}
+
+// Returns this account's pending order id, or null. The legacy SHARED key is
+// always retired here, in one of two ways:
+//   - minted for this account  -> migrated to this account's scoped key;
+//   - minted for someone else   -> relocated under the PAYING account's key.
+// Never left in place: while it exists, any still-cached OLD bundle (the bug
+// is fixed only in the new code, which may not be deployed yet) reads that
+// shared key and activates whatever account is signed in — that is how a
+// deleted duplicate doc came back after console cleanup.
+function readPendingOrder(prefix) {
+  if (!prefix) return null;
+  try {
+    const scopedKey = pendingOrderKey(prefix);
+    // A relocated fallback (see below) is parked under the sanitized prefix
+    // from the order id, while a signed-in doc id may still carry "." or "+".
+    // Check both spellings so a payer always finds their own order.
+    const altScopedKey = pendingOrderKey(sanitizeOrderPrefix(prefix));
+    const scoped =
+      window.localStorage.getItem(scopedKey) ??
+      (altScopedKey === scopedKey ? null : window.localStorage.getItem(altScopedKey));
+    const legacy = window.localStorage.getItem(PENDING_ORDER_KEY);
+    if (legacy) {
+      if (orderBelongsToAccount(legacy, prefix)) {
+        window.localStorage.setItem(scopedKey, scoped || legacy);
+      } else {
+        // Another account's order: park it under its owner's key so the payer
+        // keeps the fallback but no shared location can replay it.
+        const owner = orderOwnerPrefix(legacy);
+        const ownerKey = owner ? pendingOrderKey(owner) : null;
+        if (ownerKey && !window.localStorage.getItem(ownerKey)) {
+          window.localStorage.setItem(ownerKey, legacy);
+        }
+      }
+      window.localStorage.removeItem(PENDING_ORDER_KEY);
+    }
+    return (
+      window.localStorage.getItem(scopedKey) ??
+      (altScopedKey === scopedKey ? null : window.localStorage.getItem(altScopedKey))
+    );
+  } catch {
+    return null;
+  }
+}
+
+function writePendingOrder(prefix, orderId) {
+  if (!prefix || !orderId) return;
+  try {
+    window.localStorage.setItem(pendingOrderKey(prefix), orderId);
+  } catch {
+    /* storage blocked — the return_url param still drives verification */
+  }
+}
+
+function clearPendingOrder(prefix) {
+  try {
+    if (prefix) {
+      window.localStorage.removeItem(pendingOrderKey(prefix));
+      window.localStorage.removeItem(pendingOrderKey(sanitizeOrderPrefix(prefix)));
+    }
+    const legacy = window.localStorage.getItem(PENDING_ORDER_KEY);
+    if (legacy && orderBelongsToAccount(legacy, prefix)) {
+      window.localStorage.removeItem(PENDING_ORDER_KEY);
+    }
+  } catch {
+    /* ignore */
+  }
+}
 
 function formatFee(pricing) {
   if (
@@ -68,15 +158,15 @@ function Payment() {
     error: null,
     verifying: false,
   });
-  // The last order id we created for this account, so a user who already paid
-  // can re-check without paying again.
-  const [hasPendingOrder, setHasPendingOrder] = useState(() => {
-    try {
-      return Boolean(window.localStorage.getItem(PENDING_ORDER_KEY));
-    } catch {
-      return false;
-    }
-  });
+  // The last order id created for THIS account, so a user who already paid
+  // can re-check without paying again. Pending orders are stored per account
+  // (<PENDING_ORDER_KEY>.<email-prefix>) — a single shared key is what let one
+  // payment activate every account signed into the same browser.
+  const [hasPendingOrder, setHasPendingOrder] = useState(false);
+  useEffect(() => {
+    if (!path) return;
+    setHasPendingOrder(Boolean(readPendingOrder(path.split("/").pop())));
+  }, [path]);
 
   // Re-run verification for the stored order id. The verification effect keys
   // off a nonce so a manual click re-triggers it even when nothing else changed.
@@ -135,25 +225,45 @@ function Payment() {
   // checkout, and verification polls GET /orders/{id}/status until Cashfree
   // reports success or the attempts run out. Cashfree's redirect then becomes
   // only a nice-to-have that lets the check start sooner.
+  //
+  // Guarding a shared machine: a pending order may only activate the account
+  // it was minted for. Two checks enforce that — the <prefix> embedded in the
+  // order id (1, below) and Cashfree's customer_email on the order (2). This
+  // is what previously let ONE settled payment flip EVERY Google account
+  // signed into the same browser, all of them landing with the same
+  // orderId/paymentId.
   useEffect(() => {
     if (!authReady || !user || loading || !path) return undefined;
     if (isPaid) return undefined;
 
+    const prefix = path.split("/").pop();
+
     // Prefer the redirect param, fall back to whatever we stored at checkout.
     let pending = null;
+    let fromUrl = false;
     try {
       pending = new URLSearchParams(window.location.search).get("order_id");
+      fromUrl = Boolean(pending);
     } catch {
       pending = null;
     }
-    if (!pending) {
-      try {
-        pending = window.localStorage.getItem(PENDING_ORDER_KEY);
-      } catch {
-        pending = null;
-      }
-    }
+    if (!pending) pending = readPendingOrder(prefix);
     if (!pending) return undefined;
+
+    if (!orderBelongsToAccount(pending, prefix)) {
+      // Someone else's settled order is reachable from this browser (old
+      // shared key, or a return_url opened under the wrong login). Never
+      // write it into this document; the paying account can still activate
+      // with it later.
+      if (fromUrl) stripOrderParam();
+      setPayState((s) => ({
+        ...s,
+        verifying: false,
+        error: `Order ${pending} belongs to account "${orderOwnerPrefix(pending) || "another user"}", not ${user.email || "this one"} — sign in with the paying account to activate it. Nothing was changed here.`,
+      }));
+      return undefined;
+    }
+
     if (!doc) return undefined; // users doc must exist for the paid activation
 
     let cancelled = false;
@@ -186,6 +296,26 @@ function Payment() {
           return;
         }
 
+        // Ownership, part two: customer_email is set when the order is
+        // created and can only be changed by Cashfree, so a paid order minted
+        // for another address must never activate this account (minted
+        // prefixes can collide once newOrderId strips "." and "+").
+        const orderEmail =
+          typeof fetched.customer_email === "string"
+            ? fetched.customer_email.trim().toLowerCase()
+            : "";
+        const accountEmail =
+          typeof user.email === "string" ? user.email.trim().toLowerCase() : "";
+        if (orderEmail && orderEmail !== accountEmail) {
+          if (fromUrl) stripOrderParam();
+          setPayState((s) => ({
+            ...s,
+            verifying: false,
+            error: `Cashfree says order ${pending} was paid for ${orderEmail}, not ${accountEmail || "this account"} — nothing was changed here. Sign in with ${orderEmail} to activate it.`,
+          }));
+          return;
+        }
+
         const result = await setDocument(
           userPath(user),
           {
@@ -199,6 +329,15 @@ function Payment() {
           },
           { merge: true },
         );
+        if (result.ok) {
+          // Retire the pending order BEFORE the cancelled check. The
+          // onSnapshot that flips isPaid races this effect's cleanup, and
+          // skipping this removal is how a settled order id used to linger in
+          // localStorage and activate the NEXT account that signed in here.
+          clearPendingOrder(prefix);
+          setHasPendingOrder(false);
+          stripOrderParam();
+        }
         if (cancelled) return;
         if (!result.ok) {
           // Surface the Firestore error code (usually "permission-denied") so a
@@ -211,19 +350,6 @@ function Payment() {
               ? `Cashfree confirmed payment ${pending}, but Firestore rejected the update (${code}). The rules in the Firebase console may be older than firestore.rules — republish it.`
               : `Cashfree confirmed payment ${pending}, but the Firestore update failed. The rules in the Firebase console may be older than firestore.rules — republish it.`,
           );
-        }
-        try {
-          window.localStorage.removeItem(PENDING_ORDER_KEY);
-        } catch {
-          /* ignore */
-        }
-        setHasPendingOrder(false);
-        try {
-          const clean = new URL(window.location.href);
-          clean.searchParams.delete("order_id");
-          window.history.replaceState({}, "", clean.toString());
-        } catch {
-          /* keep the param — harmless */
         }
         setPayState((s) => ({ ...s, verifying: false, error: null }));
       } catch (err) {
@@ -244,11 +370,11 @@ function Payment() {
     if (!user || !feeReady || payState.busy || isPaid) return;
     setPayState((s) => ({ ...s, busy: true, error: null }));
     try {
-      const orderIdNew = newOrderId(
+      const prefix =
         (typeof path === "string" && path.split("/").pop()) ||
-          user.email?.split("@")[0] ||
-          "user",
-      );
+        user.email?.split("@")[0] ||
+        "user";
+      const orderIdNew = newOrderId(prefix);
       const returnUrl = `${window.location.origin}${window.location.pathname}?order_id=${encodeURIComponent(orderIdNew)}`;
       const created = await createCashfreeOrder({
         orderId: orderIdNew,
@@ -265,16 +391,10 @@ function Payment() {
       if (!created?.payment_session_id) {
         throw new Error("Cashfree did not return a payment session.");
       }
-      // Persist before opening checkout: if the user closes the tab, or the
-      // return_url redirect loses the param, the next visit can still verify.
-      try {
-        window.localStorage.setItem(
-          PENDING_ORDER_KEY,
-          created.order_id || orderIdNew,
-        );
-      } catch {
-        /* storage blocked — verification still works via the redirect param */
-      }
+      // Persist before opening checkout, scoped to this account: if the user
+      // closes the tab, or the return_url redirect loses the param, the next
+      // visit can still verify — but only for THIS login.
+      writePendingOrder(prefix, created.order_id || orderIdNew);
       await openCashfreeCheckout({
         paymentSessionId: created.payment_session_id,
       });
@@ -389,12 +509,15 @@ function Payment() {
         {/*
           Cashfree flow (keys live on the Worker, never in this bundle):
             1. handlePay() creates an order (fee from pricing/maang_kit) and
-               stores the order id in localStorage.
+               stores the order id in this account's OWN localStorage key.
             2. Cashfree hosted checkout opens; user pays.
             3. We poll GET /orders/{id}/status until it reports success — this
                runs on page load whether or not the return_url redirect fired.
             4. Only then do we write isPaid/orderId/paymentId in one Firestore
-               update (allowed once by the rules).
+               update (allowed once by the rules) — and only after the order
+               is shown to belong to THIS account (minted prefix plus
+               Cashfree's customer_email match), so one payment can never
+               activate two accounts that share a browser.
           Webhooks: the worker also registers POST /webhook/cashfree, which Cashfree
           notifies when a payment settles — it writes isPaid via a Firebase service
           account (server/cashfree/README.md section 4), so activation happens with

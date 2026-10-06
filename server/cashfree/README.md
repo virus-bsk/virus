@@ -89,15 +89,40 @@ npx wrangler secret put CASHFREE_WEBHOOK_SECRET
 
 ### How it works
 
-Order ids are minted as `<email-prefix>_<timestamp>` (see `newOrderId` in
-`src/utils/cashfree.js`), so the webhook maps a settled payment back to the right
-`users/{email-prefix}` document with no extra bookkeeping. On `PAYMENT_SUCCESS`
-it PATCHes `isPaid: true`, `orderId`, and `paymentId`.
+Order ids are minted as `<email-prefix>_<timestamp>` (see
+`orderBelongsToAccount` in `src/utils/cashfree.js` — the single definition of
+that convention), so the browser can confirm a settled order was created for
+the signed-in account before it writes anything: `src/pages/Payment.jsx`
+requires BOTH the minted prefix AND Cashfree's `customer_email` on the order
+(the new fields on `GET /orders/{id}/status`) to match this account. Either
+mismatch refuses the write, and the pending order lives under a per-account
+localStorage key (`bskcoding.pendingCashfreeOrder.<email-prefix>`).
+
+A single shared pending-order key was the bug that let one payment activate
+every Google account signed into a browser: the page read whatever order was
+stored and wrote `isPaid` into the then-current user's document without
+checking ownership — different accounts ended up carrying the same
+`orderId`/`paymentId`. Check for that if it ever happens again: any
+`users/` document whose `orderId` does not start with its own document id
+(plus `_`) was activated from someone else's payment and should be reset
+(`isPaid: false`, `orderId: ""`, remove `paymentId`) in the Firebase console.
+
+On `PAYMENT_SUCCESS` the webhook re-fetches the order from Cashfree
+(`CASHFREE_MODE` must match the mode the order was created in) and maps it to
+`users/{email-prefix}` through `customer_details.customer_email` — not the
+order id, whose embedded prefix loses characters `newOrderId` strips (".",
+"+"). Order-id parsing is only the fallback when Cashfree's response carries
+no email. If the document is missing it is created whole (email, userName,
+date included), so the rules' email read-binding keeps working. If Cashfree
+cannot be reached at all, the worker answers 5xx so Cashfree retries — it
+never guesses.
 
 The endpoint sits **outside** the `PROXY_TOKEN` check — Cashfree cannot send
-your bearer token, it authenticates with an HMAC-SHA256 signature over the raw
-body (`x-webhook-signature`), verified in constant time. Without that check
-anyone could POST a fake "payment succeeded".
+your bearer token. Instead the route **fails closed**: unless
+`CASHFREE_WEBHOOK_SECRET` is set, deliveries are acknowledged-but-ignored
+(200, no activation), so anyone who finds the URL cannot POST a fake "payment
+succeeded". With the secret set, the HMAC-SHA256 signature over the raw body
+(`x-webhook-signature`) is verified in constant time; without it, 401.
 
 Test it locally:
 ```bash

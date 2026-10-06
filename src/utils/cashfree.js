@@ -9,11 +9,13 @@
 //
 // Direct browser mode was removed deliberately: it cannot work against
 // Cashfree's CORS policy, and it published the secret key to every visitor.
-const MODE = (import.meta.env.VITE_CASHFREE_MODE || "sandbox").toLowerCase();
-const PROXY_BASE = (import.meta.env.VITE_CASHFREE_API_BASE || "")
+// import.meta.env only exists under Vite; the optional chaining keeps this
+// module importable in plain Node (tests import newOrderId/orderBelongsToAccount).
+const MODE = (import.meta.env?.VITE_CASHFREE_MODE || "sandbox").toLowerCase();
+const PROXY_BASE = (import.meta.env?.VITE_CASHFREE_API_BASE || "")
   .trim()
   .replace(/\/+$/, "");
-const PROXY_TOKEN = (import.meta.env.VITE_CASHFREE_PROXY_TOKEN || "").trim();
+const PROXY_TOKEN = (import.meta.env?.VITE_CASHFREE_PROXY_TOKEN || "").trim();
 
 export const cashfreeMode = MODE;
 // Payments require the proxy. Without it we disable the Pay button up front
@@ -38,10 +40,39 @@ function headers() {
   return h;
 }
 
-// orderId must be unique per attempt: <prefix>_<timestamp>
+// Cashfree's Create Order API only accepts alphanumeric order ids plus "_"
+// and "-" (max 50 chars), while Firestore doc ids are the raw email prefix —
+// dots, "+", and whatnot. Everything that mints or checks an order id goes
+// through sanitizeOrderPrefix so both sides of that conversion always agree.
+export function sanitizeOrderPrefix(value) {
+  return String(value ?? "").replace(/[^a-zA-Z0-9_-]/g, "");
+}
+
+// orderId must be unique per attempt: <sanitized-prefix>_<timestamp>
 export function newOrderId(prefix) {
-  const clean = String(prefix || "user").replace(/[^a-zA-Z0-9_-]/g, "");
+  const clean = sanitizeOrderPrefix(prefix) || "user";
   return `${clean}_${Date.now()}`;
+}
+
+// Inverse of newOrderId: "yamini4241574_1791198253137" -> "yamini4241574".
+// Returns null when the id was not minted by newOrderId — the trailing
+// timestamp is at least 10 digits, so ad-hoc ids like "test_1" are rejected.
+export function orderOwnerPrefix(orderId) {
+  const match = /^(.+)_(\d{10,})$/.exec(String(orderId || ""));
+  return match ? match[1] : null;
+}
+
+// True when orderId was minted for docIdOrPrefix (a users/{docId} id or the
+// raw email prefix). Both sides are sanitized and case-folded because
+// newOrderId strips characters and caller casing may differ. This is the gate
+// that keeps ONE settled payment from activating MULTIPLE accounts that share
+// a browser: a pending order for user A must fail this check for user B.
+export function orderBelongsToAccount(orderId, docIdOrPrefix) {
+  const owner = orderOwnerPrefix(orderId);
+  if (owner == null) return false;
+  return (
+    owner.toLowerCase() === sanitizeOrderPrefix(docIdOrPrefix).toLowerCase()
+  );
 }
 
 export async function createCashfreeOrder({
