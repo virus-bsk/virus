@@ -42,6 +42,16 @@ export function userPath(user) {
   return `${USERS_COLLECTION}/${userDocId(user)}`;
 }
 
+// Normalize an Indian mobile number to its 10 digits. Accepts the common
+// typing forms ("+91 98765 43210", "09876543210", "98765-43210") and returns
+// "" when the result is not a valid mobile number (must start with 6-9).
+export function normalizeMobileNumber(raw) {
+  let digits = String(raw ?? "").replace(/\D/g, "");
+  if (digits.length === 12 && digits.startsWith("91")) digits = digits.slice(2);
+  else if (digits.length === 11 && digits.startsWith("0")) digits = digits.slice(1);
+  return /^[6-9]\d{9}$/.test(digits) ? digits : "";
+}
+
 // Prefer a name the user typed, then the Auth display name, then the email
 // prefix. Always trimmed and capped so a create can never violate the rules.
 export function resolveUserName(user, explicitName) {

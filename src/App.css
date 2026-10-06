@@ -4831,6 +4831,49 @@
   opacity: 0.55;
 }
 
+/* Mobile number field on /payment — collected before checkout, stored on
+   users/{email-prefix} and sent to Cashfree as customer_phone. */
+.payment-mobile-field {
+  margin-top: 18px;
+}
+
+.payment-mobile-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.payment-mobile-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #f8fafc;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 12px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.payment-mobile-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.payment-mobile-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.payment-mobile-invalid {
+  color: #fca5a5;
+}
+
 @media (max-width: 640px) {
   .payment-title {
     font-size: 1.7rem;

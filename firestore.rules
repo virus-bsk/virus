@@ -18,6 +18,10 @@ rules_version = '2';
 //                          may only create it as "" and never change it.
 //     paymentId string     SERVER-OWNED: Cashfree's own payment id, written in
 //                          the same single paid-activation write as isPaid/orderId.
+//     mobileNumber string  client-owned, optional: the payer's 10-digit mobile
+//                          number, collected on /payment and sent to Cashfree as
+//                          customer_phone. Must be exactly 10 digits starting
+//                          with 6-9. Never required for sign-in or paid checks.
 //     date      timestamp  creation time (serverTimestamp), server-owned
 //   pricing/{plan}         e.g. pricing/maang_kit — the fee shown on /payment,
 //                          read-only for clients
@@ -60,10 +64,10 @@ service cloud.firestore {
         && resource.data.email.lower() == authEmail().lower()));
 
       // First sign-in (or the first /profile save): the client may create ONLY
-      // its own document id, with exactly the five known fields and
-      // isPaid = false, orderId = "".
+      // its own document id, with the known profile fields and
+      // isPaid = false, orderId = "". mobileNumber is optional.
       allow create: if ownsDoc()
-        && request.resource.data.keys().hasOnly(['userName', 'email', 'isPaid', 'orderId', 'date'])
+        && request.resource.data.keys().hasOnly(['userName', 'email', 'isPaid', 'orderId', 'date', 'mobileNumber'])
         && request.resource.data.email is string
         && request.resource.data.email.lower() == authEmail().lower()
         && request.resource.data.userName is string
@@ -72,7 +76,11 @@ service cloud.firestore {
         && request.resource.data.isPaid == false
         && request.resource.data.orderId is string
         && request.resource.data.orderId == ""
-        && request.resource.data.date == request.time;
+        && request.resource.data.date == request.time
+        && (!('mobileNumber' in request.resource.data)
+          || (request.resource.data.mobileNumber is string
+            && request.resource.data.mobileNumber.size() == 10
+            && request.resource.data.mobileNumber.matches('^[6-9][0-9]{9}$')));
 
       // Later edits may touch profile fields freely. Sandbox-direct paid
       // activation: the owner may flip isPaid false->true together with setting
@@ -88,12 +96,20 @@ service cloud.firestore {
         && request.resource.data.userName.size() > 0
         && request.resource.data.userName.size() <= 60
         && (
-          // 1) plain profile edit: paid fields untouched
+          // 1) plain profile edit: paid fields untouched; mobileNumber (the
+          //    payer's 10-digit number, client-owned) may be added or changed
+          //    but must always look like a valid Indian mobile number. Only
+          //    validated when actually written, so a legacy value stored by
+          //    other means can never brick later edits.
           (
             request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['userName', 'email'])
+              .hasOnly(['userName', 'email', 'mobileNumber'])
             && request.resource.data.isPaid == resource.data.isPaid
             && request.resource.data.orderId == resource.data.orderId
+            && (!('mobileNumber' in request.resource.data.diff(resource.data).affectedKeys())
+              || (request.resource.data.mobileNumber is string
+                && request.resource.data.mobileNumber.size() == 10
+                && request.resource.data.mobileNumber.matches('^[6-9][0-9]{9}$')))
           )
           ||
           // 2) paid activation: false->true + orderId (+ paymentId) set,

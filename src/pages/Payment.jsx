@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   asDate,
+  serverTimestamp,
   setDocument,
   subscribeDocument,
 } from "../utils/firestore";
 import { db } from "../firebase";
 import useMembership from "../hooks/useMembership";
-import { userPath } from "../utils/userProfile";
+import { normalizeMobileNumber, userPath } from "../utils/userProfile";
 import {
   cashfreeConfigured,
   cashfreeMode,
@@ -50,6 +51,15 @@ function stripOrderParam() {
   } catch {
     /* keep the param — harmless */
   }
+}
+
+// Friendly error for the pre-checkout mobile-number write (wording style
+// matches pages/Profile.jsx's saveErrorMessage).
+function mobileStoreErrorMessage(error) {
+  if (error?.code === "permission-denied") {
+    return "Firestore denied saving your mobile number. Publish the updated firestore.rules so a signed-in user can write mobileNumber on their own users/{email-prefix} document.";
+  }
+  return error?.message || "Could not save your mobile number. Please try again.";
 }
 
 // Returns this account's pending order id, or null. The legacy SHARED key is
@@ -167,6 +177,20 @@ function Payment() {
     if (!path) return;
     setHasPendingOrder(Boolean(readPendingOrder(path.split("/").pop())));
   }, [path]);
+
+  // Mobile number the payer enters before checkout. Prefilled from
+  // users/{email-prefix} once the membership snapshot loads; never
+  // overwritten after the user starts typing.
+  const [mobileDraft, setMobileDraft] = useState("");
+  const [mobileTouched, setMobileTouched] = useState(false);
+  useEffect(() => {
+    if (mobileTouched) return;
+    const stored =
+      typeof doc?.mobileNumber === "string" ? doc.mobileNumber : "";
+    setMobileDraft(stored);
+  }, [doc, mobileTouched]);
+  const mobileNumber = normalizeMobileNumber(mobileDraft);
+  const mobileValid = mobileNumber !== "";
 
   // Re-run verification for the stored order id. The verification effect keys
   // off a nonce so a manual click re-triggers it even when nothing else changed.
@@ -368,8 +392,50 @@ function Payment() {
 
   async function handlePay() {
     if (!user || !feeReady || payState.busy || isPaid) return;
+    if (!mobileValid) {
+      setPayState((s) => ({
+        ...s,
+        error:
+          "Enter a valid 10-digit mobile number before paying (e.g. 9876543210).",
+      }));
+      return;
+    }
     setPayState((s) => ({ ...s, busy: true, error: null }));
     try {
+      // Persist the mobile number FIRST, as its own client-owned field on
+      // users/{email-prefix}. This runs before the Cashfree order exists so
+      // the number is on record even if checkout is abandoned; it is also
+      // what makes the next visit prefill the field. The write only touches
+      // mobileNumber (merge: true) so server-owned isPaid/orderId/date are
+      // never at risk — the rules allow exactly that. If the doc is missing
+      // entirely (deleted after login), the create rule needs the full known
+      // shape, so mirror the first-write payload from pages/Profile.jsx.
+      const creationPayload =
+        !loading && !doc
+          ? {
+              userName: String(
+                username || user.email?.split("@")[0] || "user",
+              ).slice(0, 60),
+              email: user.email || "",
+              isPaid: false,
+              orderId: "",
+              date: serverTimestamp(),
+            }
+          : null;
+      const storeResult = await setDocument(
+        userPath(user),
+        { ...(creationPayload ?? {}), mobileNumber },
+        { merge: true },
+      );
+      if (!storeResult.ok) {
+        setPayState((s) => ({
+          ...s,
+          busy: false,
+          error: mobileStoreErrorMessage(storeResult.error),
+        }));
+        return;
+      }
+
       const prefix =
         (typeof path === "string" && path.split("/").pop()) ||
         user.email?.split("@")[0] ||
@@ -382,6 +448,7 @@ function Payment() {
         currency,
         customerId: user.uid || orderIdNew,
         customerEmail: user.email || "",
+        customerPhone: mobileNumber,
         customerName:
           (typeof doc?.userName === "string" && doc.userName.trim()) ||
           user.displayName ||
@@ -455,6 +522,11 @@ function Payment() {
             {orderId ? (
               <p className="payment-note">
                 Order ID: <code>{orderId}</code>
+              </p>
+            ) : null}
+            {typeof doc?.mobileNumber === "string" && doc.mobileNumber ? (
+              <p className="payment-note">
+                Mobile: <code>{doc.mobileNumber}</code>
               </p>
             ) : null}
             {isPaid && (
@@ -531,6 +603,38 @@ function Payment() {
             (see <code>server/cashfree/README.md</code>) to enable payment.
           </p>
         )}
+        {!isPaid && user && (
+          <div className="payment-mobile-field">
+            <label className="payment-mobile-label" htmlFor="payment-mobile">
+              Mobile number
+            </label>
+            <input
+              id="payment-mobile"
+              className="payment-mobile-input"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel-national"
+              maxLength={16}
+              placeholder="98765 43210"
+              value={mobileDraft}
+              disabled={payState.busy}
+              onChange={(event) => {
+                setMobileTouched(true);
+                setMobileDraft(event.target.value);
+              }}
+            />
+            <p className="payment-note">
+              Required for the Cashfree payment record. Saved to your profile —
+              enter your 10-digit number (with or without +91).
+              {mobileTouched && !mobileValid && mobileDraft.trim() !== "" && (
+                <span className="payment-mobile-invalid">
+                  {" "}
+                  That doesn&apos;t look like a valid 10-digit mobile number.
+                </span>
+              )}
+            </p>
+          </div>
+        )}
         {payState.verifying && (
           <p className="payment-note">
             Verifying your payment with Cashfree…
@@ -545,12 +649,19 @@ function Payment() {
             className="payment-btn"
             onClick={handlePay}
             disabled={
-              !user || !feeReady || !cashfreeConfigured || payState.busy
+              !user ||
+              loading ||
+              !feeReady ||
+              !cashfreeConfigured ||
+              payState.busy ||
+              !mobileValid
             }
             title={
               !cashfreeConfigured
                 ? "Add Cashfree Sandbox keys to enable payment."
-                : `Pay ${fee ?? ""} with Cashfree (${cashfreeMode})`
+                : !mobileValid
+                  ? "Enter a valid 10-digit mobile number to continue."
+                  : `Pay ${fee ?? ""} with Cashfree (${cashfreeMode})`
             }
           >
             {payState.busy
@@ -573,11 +684,11 @@ function Payment() {
               : "I already paid — check my last order"}
           </button>
         )}
-        <p className="payment-note">
-          {isPaid
-            ? "Payment complete — access is active."
-            : `Test mode (${cashfreeMode}): you pay the fee from pricing/maang_kit, then this account flips to Paid with the Cashfree order id.`}
-        </p>
+        {isPaid && (
+          <p className="payment-note">
+            Payment complete — access is active.
+          </p>
+        )}
       </section>
 
       <section className="payment-card">

@@ -75,13 +75,17 @@ export function orderBelongsToAccount(orderId, docIdOrPrefix) {
   );
 }
 
+// customerPhone is the payer's REAL mobile number, collected on /payment
+// before checkout opens. No dummy default on purpose: a fake number in
+// Cashfree's records is worse than none — /payment blocks checkout until a
+// valid 10-digit number is entered and stored on the account doc.
 export async function createCashfreeOrder({
   orderId,
   amount,
   currency = "INR",
   customerId,
   customerEmail,
-  customerPhone = "9999999999",
+  customerPhone,
   customerName = "",
   returnUrl,
 }) {
@@ -95,7 +99,7 @@ export async function createCashfreeOrder({
       customer_details: {
         customer_id: customerId,
         customer_email: customerEmail || undefined,
-        customer_phone: customerPhone,
+        customer_phone: customerPhone || undefined,
         customer_name: customerName || undefined,
       },
       order_meta: {

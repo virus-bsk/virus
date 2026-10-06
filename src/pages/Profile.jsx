@@ -181,6 +181,15 @@ function Profile() {
             <span className="profile-detail-value">{user.email}</span>
           </div>
           <div className="profile-detail-item">
+            <span className="profile-detail-label">Mobile Number</span>
+            <span className="profile-detail-value">
+              {typeof profileDoc?.mobileNumber === "string" &&
+              profileDoc.mobileNumber
+                ? profileDoc.mobileNumber
+                : "Not provided yet"}
+            </span>
+          </div>
+          <div className="profile-detail-item">
             <span className="profile-detail-label">User Name</span>
             <span className="profile-detail-value">
               {nameValue || user.name || "—"}
