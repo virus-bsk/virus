@@ -389,6 +389,51 @@ function Payment() {
       cancelled = true;
     };
   }, [authReady, user, loading, path, doc, isPaid, verifyNonce]);
+  async function handleSaveMobile() {
+    if (!user || payState.busy) return;
+    if (!mobileValid) {
+      setPayState((s) => ({ ...s, error: "Enter a valid 10-digit mobile number before saving (e.g. 9876543210)." }));
+      return;
+    }
+    setPayState((s) => ({ ...s, busy: true, error: null }));
+    try {
+      const creationPayload =
+        !loading && !doc
+          ? {
+              userName: String(
+                username || user.email?.split("@")[0] || "user",
+              ).slice(0, 60),
+              email: user.email || "",
+              isPaid: false,
+              orderId: "",
+              date: serverTimestamp(),
+            }
+          : null;
+      const storeResult = await setDocument(
+        userPath(user),
+        { ...(creationPayload ?? {}), mobileNumber },
+        { merge: true },
+      );
+      if (!storeResult.ok) {
+        setPayState((s) => ({
+          ...s,
+          busy: false,
+          error: mobileStoreErrorMessage(storeResult.error),
+        }));
+        return;
+      }
+      // After saving, clear the draft so the field shows as empty/optional
+      // and the read-only note will show the saved number on refresh.
+      setMobileDraft("");
+      setPayState((s) => ({ ...s, busy: false, error: null }));
+    } catch (err) {
+      setPayState((s) => ({
+        ...s,
+        busy: false,
+        error: err?.message || "Could not save mobile number. Please try again.",
+      }));
+    }
+  }
 
   async function handlePay() {
     if (!user || !feeReady || payState.busy || isPaid) return;
@@ -633,6 +678,7 @@ function Payment() {
                   type="button"
                   className="payment-btn payment-mobile-btn"
                   disabled={!mobileValid}
+                  onClick={handleSaveMobile}
                 >
                   Add mobile number
                 </button>
