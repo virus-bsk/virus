@@ -623,8 +623,15 @@ function Payment() {
                 setMobileDraft(event.target.value);
               }}
             />
+            <button
+              type="button"
+              className="payment-btn payment-mobile-btn"
+              disabled={!mobileValid}
+            >
+              Add mobile number
+            </button>
             <p className="payment-note">
-              Required for the Cashfree payment record. Saved to your profile —
+              Required for the Cashfree payment record.
               enter your 10-digit number (with or without +91).
               {mobileTouched && !mobileValid && mobileDraft.trim() !== "" && (
                 <span className="payment-mobile-invalid">
