@@ -605,41 +605,49 @@ function Payment() {
         )}
         {!isPaid && user && (
           <div className="payment-mobile-field">
-            <label className="payment-mobile-label" htmlFor="payment-mobile">
-              Mobile number
-            </label>
-            <input
-              id="payment-mobile"
-              className="payment-mobile-input"
-              type="tel"
-              inputMode="numeric"
-              autoComplete="tel-national"
-              maxLength={16}
-              placeholder="98765 43210"
-              value={mobileDraft}
-              disabled={payState.busy}
-              onChange={(event) => {
-                setMobileTouched(true);
-                setMobileDraft(event.target.value);
-              }}
-            />
-            <button
-              type="button"
-              className="payment-btn payment-mobile-btn"
-              disabled={!mobileValid}
-            >
-              Add mobile number
-            </button>
-            <p className="payment-note">
-              Required for the Cashfree payment record.
-              enter your 10-digit number (with or without +91).
-              {mobileTouched && !mobileValid && mobileDraft.trim() !== "" && (
-                <span className="payment-mobile-invalid">
-                  {" "}
-                  That doesn&apos;t look like a valid 10-digit mobile number.
-                </span>
-              )}
-            </p>
+            {doc?.mobileNumber ? (
+              <p className="payment-note">
+                Mobile: <code>{doc.mobileNumber}</code>
+              </p>
+            ) : (
+              <>
+                <label className="payment-mobile-label" htmlFor="payment-mobile">
+                  Mobile number
+                </label>
+                <input
+                  id="payment-mobile"
+                  className="payment-mobile-input"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  maxLength={16}
+                  placeholder="98765 43210"
+                  value={mobileDraft}
+                  disabled={payState.busy}
+                  onChange={(event) => {
+                    setMobileTouched(true);
+                    setMobileDraft(event.target.value);
+                  }}
+                />
+                <button
+                  type="button"
+                  className="payment-btn payment-mobile-btn"
+                  disabled={!mobileValid}
+                >
+                  Add mobile number
+                </button>
+                <p className="payment-note">
+                  Required for the Cashfree payment record.
+                  enter your 10-digit number (with or without +91).
+                  {mobileTouched && !mobileValid && mobileDraft.trim() !== "" && (
+                    <span className="payment-mobile-invalid">
+                      {" "}
+                      That doesn&apos;t look like a valid 10-digit mobile number.
+                    </span>
+                  )}
+                </p>
+              </>
+            )}
           </div>
         )}
         {payState.verifying && (
