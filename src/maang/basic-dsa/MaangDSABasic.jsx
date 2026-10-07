@@ -701,40 +701,41 @@ function DsaSheetPage({
       {/* ===== HERO ===== */}
       <section className="mdsa-hero">
         <Link to="/maang" className="mdsa-back">
-          ← Back to MAANG Preparation
+          ← Back to Preparation
         </Link>
 
-        {/* Small stat boxes, top-right of the header */}
-        <section className="mdsa-stats">
-          <div className="mdsa-stat-card total">
+        {/* Horizontal stats line */}
+        <div className="mdsa-stats-line" role="list" aria-label="Course statistics">
+          <span className="mdsa-stat-item" role="listitem">
             <span className="mdsa-stat-num">{total}</span>
-            <span className="mdsa-stat-label">Total Problems</span>
-          </div>
-          <div className="mdsa-stat-card easy">
-            <span className="mdsa-stat-num">{easy}</span>
+            <span className="mdsa-stat-label">Total</span>
+          </span>
+          <span className="mdsa-stats-separator" aria-hidden="true">•</span>
+          <span className="mdsa-stat-item" role="listitem">
+            <span className="mdsa-stat-num mdsa-stat-easy">{easy}</span>
             <span className="mdsa-stat-label">Easy</span>
-          </div>
-          <div className="mdsa-stat-card medium">
-            <span className="mdsa-stat-num">{medium}</span>
+          </span>
+          <span className="mdsa-stats-separator" aria-hidden="true">•</span>
+          <span className="mdsa-stat-item" role="listitem">
+            <span className="mdsa-stat-num mdsa-stat-medium">{medium}</span>
             <span className="mdsa-stat-label">Medium</span>
-          </div>
-          <div className="mdsa-stat-card hard">
-            <span className="mdsa-stat-num">{hard}</span>
+          </span>
+          <span className="mdsa-stats-separator" aria-hidden="true">•</span>
+          <span className="mdsa-stat-item" role="listitem">
+            <span className="mdsa-stat-num mdsa-stat-hard">{hard}</span>
             <span className="mdsa-stat-label">Hard</span>
-          </div>
-        </section>
+          </span>
+        </div>
 
-        <div className="mdsa-hero-inner">
-          <div className="mdsa-hero-text">
-            <h1 className="mdsa-title">
-              {sheetTitle}{" "}
-              <span className="mdsa-title-accent">{titleAccent}</span>
-            </h1>
-            <p className="mdsa-subtitle">
-              {problems.length} essential DSA problems. Watch video solutions in
-              Telugu, solve on LeetCode / GeeksforGeeks.
-            </p>
-          </div>
+        <div className="mdsa-hero-content">
+          <h1 className="mdsa-title">
+            {sheetTitle}{" "}
+            <span className="mdsa-title-accent">{titleAccent}</span>
+          </h1>
+          <p className="mdsa-subtitle">
+            {problems.length} essential DSA problems. Watch video solutions in
+            Telugu, solve on LeetCode / GeeksforGeeks.
+          </p>
           <div className="mdsa-hero-video">
             <a
               className="mdsa-intro-video"

@@ -70,48 +70,45 @@
   z-index: 1;
 }
 
-/* Back button — dark glass */
+/* Back button — simple text/link style (not a pill button) */
 .mdsa-back {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 1.5rem;
-  padding: 7px 16px;
-  color: rgba(240, 244, 255, 0.8);
+  margin-bottom: 1.25rem;
+  padding: 0;
+  color: rgba(240, 244, 255, 0.75);
   text-decoration: none;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(8px);
-  transition: all 0.25s;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
 }
 .mdsa-back:hover {
-  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  transform: translateX(-3px);
-  border-color: rgba(0, 229, 255, 0.3);
+}
+.mdsa-back:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
 }
 
-.mdsa-hero-inner {
+/* ===== HERO CONTENT (vertical stack: title, description, watch intro) ===== */
+.mdsa-hero-content {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 2rem;
-}
-
-.mdsa-hero-text {
-  flex: 1;
-  min-width: 280px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  position: relative;
 }
 
 .mdsa-title {
   font-size: 3rem;
   font-weight: 900;
   letter-spacing: -1.5px;
-  margin-bottom: 0.75rem;
+  margin: 0;
   background: linear-gradient(
     135deg,
     #ffffff 0%,
@@ -140,12 +137,12 @@
   font-size: 1.05rem;
   color: rgba(255, 255, 255, 0.78);
   line-height: 1.7;
-  max-width: 700px;
   margin: 0;
 }
 
 .mdsa-hero-video {
   flex-shrink: 0;
+  margin-top: 0.5rem;
 }
 
 .mdsa-intro-video {
@@ -226,78 +223,59 @@
   }
 }
 
-/* ===== STATS — small boxes, top-right of the header ===== */
-.mdsa-stats {
-  position: absolute;
-  top: 1.15rem;
-  right: 1.5rem;
-  z-index: 5;
+/* ===== STATS LINE — single horizontal row ===== */
+.mdsa-stats-line {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
   gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin: 0 0 1.5rem 0;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
-.mdsa-stat-card {
+.mdsa-stats-separator {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 1.1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.mdsa-stat-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  background: rgba(15, 23, 42, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-top: 3px solid;
-  border-top-color: inherit;
-  border-radius: 10px;
-  padding: 0.3rem 0.7rem 0.5rem;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: all 0.2s ease;
-  animation: mdsa-fadeInUp 0.6s ease both;
-  position: relative;
-}
-.mdsa-stat-card::before {
-  content: none;
-}
-.mdsa-stat-card.easy {
-  border-top-color: #10b981;
-  color: #10b981;
-}
-.mdsa-stat-card.medium {
-  border-top-color: #f59e0b;
-  color: #f59e0b;
-}
-.mdsa-stat-card.hard {
-  border-top-color: #ef4444;
-  color: #ef4444;
-}
-.mdsa-stat-card.total {
-  border-top-color: var(--page-accent, #38bdf8);
-  color: var(--page-accent, #38bdf8);
-}
-
-.mdsa-stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 6px 16px color-mix(in srgb, currentColor 30%, transparent),
-    0 0 0 1px color-mix(in srgb, currentColor 25%, transparent);
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .mdsa-stat-num {
-  display: block;
-  font-size: 1.1rem;
+  display: inline-block;
+  min-width: 1.15rem;
+  font-size: 0.95rem;
   font-weight: 900;
-  color: currentColor;
-  letter-spacing: -0.3px;
-  line-height: 1.1;
-  margin-bottom: 0.1rem;
+  color: #ffffff;
+}
+
+.mdsa-stat-easy {
+  color: #10b981;
+}
+
+.mdsa-stat-medium {
+  color: #f59e0b;
+}
+
+.mdsa-stat-hard {
+  color: #ef4444;
 }
 
 .mdsa-stat-label {
-  font-size: 0.5rem;
-  color: rgba(255, 255, 255, 0.72);
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 @keyframes mdsa-fadeInUp {
@@ -1729,25 +1707,27 @@ html[data-theme="dark"] .mdsa-solve-btn[data-platform="youtube"] {
   }
 }
 
-/* On small screens the top-right stat boxes would overlap the title, so let
-   them flow normally and sit centered under the back button instead. */
+/* On small screens the stats line stacks and centers. */
 @media (max-width: 768px) {
-  .mdsa-stats {
-    position: static;
-    justify-content: center;
-    margin-top: 1rem;
+  .mdsa-stats-line {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 0.75rem;
+    margin: 0 0 1rem 0;
   }
 }
 
 @media (max-width: 600px) {
-  .mdsa-wp {
-    padding: 1.25rem 0.75rem 0.75rem;
+  .mdsa-hero {
+    padding: 2rem 1.25rem 1.75rem;
   }
-  .mdsa-wp-day-head {
-    flex-wrap: wrap;
-    row-gap: 0.4rem;
+  .mdsa-title {
+    font-size: 2rem;
   }
-  .mdsa-wp-tag {
-    margin-left: 0;
+  .mdsa-hero-video {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
   }
 }
