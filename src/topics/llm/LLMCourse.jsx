@@ -1,12 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import VideoPlayerModal from "../../components/VideoPlayerModal";
 import { llmCourseVideos } from "../../data/llm/llmCourseVideos";
+import { llmCourseContent } from "../../data/llm/llmCourseContent";
 import "./LLMCourse.css";
 
 function LLMCourse({ embedded = false }) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [activeLesson, setActiveLesson] = useState(null);
 
   // Build category list preserving the order of appearance
   const categories = useMemo(() => {
@@ -17,14 +16,24 @@ function LLMCourse({ embedded = false }) {
     return cats;
   }, []);
 
-  const openVideo = (video) => {
-    setSelectedVideo(video);
-    setModalOpen(true);
-  };
-  const closeVideo = () => {
-    setSelectedVideo(null);
-    setModalOpen(false);
-  };
+  const openLesson = (lesson) => setActiveLesson(lesson);
+  const closeLesson = () => setActiveLesson(null);
+
+  // Close the lesson reader on Escape
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === "Escape") setActiveLesson(null);
+  }, []);
+
+  useEffect(() => {
+    if (!activeLesson) return undefined;
+    document.addEventListener("keydown", handleKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [activeLesson, handleKeyDown]);
 
   return (
     <div className={`llm-course-page${embedded ? " llm-course-embedded" : ""}`}>
@@ -38,7 +47,7 @@ function LLMCourse({ embedded = false }) {
           {llmCourseVideos.length} lessons covering Transformers, attention, KV
           Cache, MoE, reasoning models, ChatGPT/Claude/Copilot/Cursor, and
           no-code AI tools (Bolt, Lovable, v0, n8n). Click any lesson to read
-          the explanation and watch the video.
+          the full written explanation — concepts, examples and key takeaways.
         </p>
       </section>}
 
@@ -63,27 +72,33 @@ function LLMCourse({ embedded = false }) {
                     key={idx}
                     type="button"
                     className="lesson-card"
-                    onClick={() => openVideo(video)}
+                    onClick={() => openLesson(video)}
                   >
                     <div className="lesson-card-top">
                       <span className="lesson-category-badge">{cat.split(" ")[0]}</span>
                       <span
-                        className="lesson-play-btn"
+                        className="lesson-read-btn"
                         aria-hidden="true"
-                        title="Open lesson"
+                        title="Read lesson"
                       >
                         <svg
                           viewBox="0 0 24 24"
                           width="12"
                           height="12"
-                          fill="currentColor"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                         >
-                          <path d="M8 5v14l11-7z" />
+                          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
                         </svg>
                       </span>
                     </div>
                     <h3 className="lesson-title">{video.title}</h3>
                     <p className="lesson-desc">{video.description}</p>
+                    <span className="lesson-open-label">Read lesson →</span>
                   </button>
                 ))}
               </div>
@@ -92,14 +107,91 @@ function LLMCourse({ embedded = false }) {
         })}
       </section>
 
-      {/* Global Video Player Modal */}
-      <VideoPlayerModal
-        isOpen={modalOpen}
-        onClose={closeVideo}
-        videoUrl={selectedVideo?.videoLink || ""}
-        title={selectedVideo?.title || "LLM Lesson"}
-        description={selectedVideo?.description || ""}
-      />
+      {/* ===== Written lesson reader modal ===== */}
+      {activeLesson && (
+        <div
+          className="llm-reader-overlay"
+          onClick={closeLesson}
+          role="dialog"
+          aria-modal="true"
+          aria-label={activeLesson.title}
+        >
+          <div className="llm-reader" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="llm-reader-close"
+              onClick={closeLesson}
+              aria-label="Close lesson"
+            >
+              ✕
+            </button>
+
+            <div className="llm-reader-header">
+              <span className="llm-reader-category">
+                {activeLesson.category}
+              </span>
+              <h2 className="llm-reader-title">{activeLesson.title}</h2>
+            </div>
+
+            <div className="llm-reader-body">
+              {(() => {
+                const content = llmCourseContent[activeLesson.title];
+                if (!content) {
+                  return (
+                    <p className="llm-reader-intro">{activeLesson.description}</p>
+                  );
+                }
+                return (
+                  <>
+                    <p className="llm-reader-intro">{content.intro}</p>
+
+                    {content.sections.map((section, i) => (
+                      <section
+                        key={section.heading}
+                        className="llm-reader-section"
+                      >
+                        <div className="llm-reader-section-head">
+                          <span className="llm-reader-section-num">
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
+                          <h3 className="llm-reader-section-title">
+                            {section.heading}
+                          </h3>
+                        </div>
+                        {section.body && (
+                          <p className="llm-reader-section-body">
+                            {section.body}
+                          </p>
+                        )}
+                        {section.bullets && (
+                          <ul className="llm-reader-list">
+                            {section.bullets.map((b) => (
+                              <li key={b}>{b}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </section>
+                    ))}
+
+                    {content.takeaways?.length > 0 && (
+                      <section className="llm-reader-takeaways">
+                        <h3 className="llm-reader-takeaways-title">
+                          🎯 Key Takeaways
+                        </h3>
+                        <ul className="llm-reader-list">
+                          {content.takeaways.map((t) => (
+                            <li key={t}>{t}</li>
+                          ))}
+                        </ul>
+                      </section>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
