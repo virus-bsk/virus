@@ -10,6 +10,17 @@ const MODULE1_SECTIONS = [
   "Advanced Techniques",
 ];
 
+const MODULE2_COURSES = {
+  "Python Foundations": {
+    filterCategories: ["python", "files-json", "oop-errors", "async", "env-git"],
+    searchId: "fde-python-search-foundations",
+  },
+  "APIs & SDKs": {
+    filterCategories: ["apis"],
+    searchId: "fde-python-search-apis",
+  },
+};
+
 function ForwardDeploymentEngineerModule() {
   const { moduleId } = useParams();
   const index = fdeModules.findIndex((m) => String(m.id) === moduleId);
@@ -72,8 +83,9 @@ function ForwardDeploymentEngineerModule() {
         {mod.sections.map((section, i) => (
           <section
             key={section.heading}
-            className={`fde-module-section${
-              mod.id === 1 && MODULE1_SECTIONS.includes(section.heading)
+                        className={`fde-module-section${
+              (mod.id === 1 && MODULE1_SECTIONS.includes(section.heading)) ||
+              (mod.id === 2 && MODULE2_COURSES[section.heading])
                 ? " fde-module-section-wide"
                 : ""
             }`}
