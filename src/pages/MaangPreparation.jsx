@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { skills } from "../data/skills";
-import MaangLetterGrid from "../components/MaangLetterGrid";
 import ColoredMaangText from "../components/ColoredMaangText";
 import { googleSeriesIntro } from "../maang/basic-dsa/dsaBasicProblems";
 import youtubeLogo from "../assets/youtube-logo.svg";
@@ -75,10 +74,6 @@ function MaangPreparation() {
             </span>
             <span className="maang-video-arrow" aria-hidden="true">→</span>
           </a>
-        </div>
-
-        <div className="maang-letter-wrap maang-page-grid">
-          <MaangLetterGrid charColors={charColors} />
         </div>
       </section>
 

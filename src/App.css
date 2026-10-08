@@ -4318,14 +4318,15 @@
 
 /* ===== MAANG PREPARATION PAGE ===== */
 .maang-page {
-  padding: 24px 16px;
+  padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .maang-page-hero {
+  position: relative;
   text-align: center;
-  padding: 56px 24px 40px;
+  padding: 64px 24px 40px;
   margin-bottom: 40px;
   background:
     radial-gradient(ellipse at 50% 0%, var(--dark-teal) 0%, transparent 70%),
@@ -4586,7 +4587,7 @@
   }
 
   .maang-page-hero {
-    padding: 40px 16px 32px;
+    padding: 72px 16px 32px;
   }
 
   .maang-page-title {
@@ -4931,22 +4932,27 @@
    Styled after .mdsa-intro-video, but with maang- prefixes because
    MaangDSABasic.css only loads with those page chunks. ===== */
 .maang-intro-video-wrap {
-  margin-top: 18px;
+  /* Small, pinned to the top-right of the MAANG home hero. */
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  margin-top: 0;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
+  z-index: 2;
 }
 
 .maang-intro-video {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 18px 10px 10px;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 16px;
+  border-radius: 12px;
   color: #f0f4ff;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   text-decoration: none;
   transition: all 0.25s ease;
   backdrop-filter: blur(8px);
@@ -4967,9 +4973,9 @@
 }
 
 .maang-intro-logo {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
 }
@@ -4983,24 +4989,42 @@
 
 .maang-video-label {
   font-weight: 800;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   color: #ffffff;
 }
 
 .maang-video-sub {
   font-weight: 500;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   color: rgba(240, 244, 255, 0.6);
 }
 
 .maang-video-arrow {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   color: rgba(240, 244, 255, 0.5);
   transition: transform 0.25s ease, color 0.25s ease;
-  margin-left: 4px;
+  margin-left: 2px;
 }
 
 .maang-intro-video:hover .maang-video-arrow {
   transform: translateX(4px);
   color: #ff4d4d;
+}
+
+@media (max-width: 768px) {
+  .maang-intro-video-wrap {
+    top: 10px;
+    right: 10px;
+  }
+
+  .maang-intro-video {
+    gap: 6px;
+    padding: 5px 10px 5px 5px;
+  }
+
+  .maang-intro-logo {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+  }
 }

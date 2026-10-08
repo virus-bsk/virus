@@ -1827,3 +1827,23 @@ button.mdsa-video-btn:focus-visible {
   }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   LAYOUT — uniform left/right side space on every MAANG page.
+   Hero, filters, weekly plan and sections are already capped at
+   1200px and centred; these two rules give the problem grids the
+   same 24px horizontal breathing room so cards never touch the
+   screen edges on any viewport width. Grouped grids keep
+   padding:0 via the higher-specificity
+   .mdsa-category-group .mdsa-topics-grid rule and take their
+   side space from .mdsa-category-groups instead.
+   ══════════════════════════════════════════════════════════════ */
+.mdsa-topics-grid {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.mdsa-category-groups {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
