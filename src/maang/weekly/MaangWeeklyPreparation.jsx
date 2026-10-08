@@ -1,8 +1,5 @@
 import { DsaSheetPage } from "../basic-dsa/MaangDSABasic";
-import {
-  dsaBasicProblems as basicProblems,
-  googleSeriesIntro,
-} from "../basic-dsa/dsaBasicProblems";
+import { dsaBasicProblems as basicProblems } from "../basic-dsa/dsaBasicProblems";
 import { dsaProblems as advancedProblems } from "../advanced-dsa/dsaAdvancedProblems";
 import { dsaProblems as dpProblems } from "../dp/dsaDpProblems";
 import { dsaProblems as graphProblems } from "../graph/dsaGraphProblems";
@@ -47,7 +44,6 @@ function MaangWeeklyPreparation() {
       sheetTitle="Weekly Preparation"
       titleAccent="Complete DSA Track"
       problems={ALL_PROBLEMS}
-      introLink={googleSeriesIntro.videoLink}
       showWeeklyPlan={true}
       pageTheme="weekly"
     />

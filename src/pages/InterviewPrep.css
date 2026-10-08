@@ -1252,4 +1252,379 @@
   }
 }
 
+/* ============================================================
+   Polish layer — attractive header, topic cards, block bars
+   and interactive question cards. Appended last so it wins
+   ties against the earlier theme rules in the cascade.
+   ============================================================ */
+
+/* ---------- Page header ---------- */
+.interview-prep-route .ip-page-header {
+  position: relative;
+  overflow: hidden;
+  border-color: #2b3c55;
+  background:
+    radial-gradient(130% 170% at 95% -35%, rgba(59, 130, 246, 0.24), transparent 55%),
+    radial-gradient(100% 150% at 0% 140%, rgba(16, 185, 129, 0.1), transparent 55%),
+    #101827;
+  box-shadow: 0 14px 34px rgba(2, 6, 23, 0.35);
+}
+
+.interview-prep-route .ip-page-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 6px;
+  color: #7dd3fc;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.interview-prep-route .ip-page-eyebrow::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.18);
+}
+
+.interview-prep-route .ip-page-title {
+  background: linear-gradient(92deg, #f8fafc 8%, #bfdbfe 60%, #93c5fd 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.ip-page-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 13px;
+}
+
+.ip-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 1px solid #2b394f;
+  border-radius: 999px;
+  background: rgba(13, 21, 38, 0.85);
+  color: #a8b5c7;
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.ip-stat b {
+  color: #f1f5f9;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.ip-stat-key {
+  border-color: rgba(96, 165, 250, 0.45);
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.ip-stat-key b {
+  color: #bfdbfe;
+}
+
+.ip-stat-alt {
+  border-color: rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.ip-stat-alt b {
+  color: #fde68a;
+}
+
+.ip-stat-ok {
+  border-color: rgba(52, 211, 153, 0.45);
+  background: rgba(52, 211, 153, 0.1);
+}
+
+.ip-stat-ok b {
+  color: #6ee7b7;
+}
+
+/* ---------- Jump-to-topic chips ---------- */
+.interview-prep-route .ip-step-chip:hover,
+.interview-prep-route .ip-step-chip:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(2, 6, 23, 0.35);
+}
+
+/* ---------- Topic cards ---------- */
+.interview-prep-route .ip-topic::before {
+  display: block;
+  height: 4px;
+  margin: -20px -20px 16px;
+  background: linear-gradient(
+    90deg,
+    var(--step-color, #3b82f6) 0%,
+    color-mix(in srgb, var(--step-color, #3b82f6) 45%, #22d3ee) 45%,
+    transparent 100%
+  );
+}
+
+.interview-prep-route .ip-topic-step {
+  border-color: color-mix(in srgb, var(--step-color, #3b82f6) 65%, transparent);
+  background: color-mix(in srgb, var(--step-color, #3b82f6) 16%, #172d4b);
+  color: color-mix(in srgb, var(--step-color, #3b82f6) 60%, #fff);
+}
+
+.interview-prep-route .ip-topic-icon {
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--step-color, #3b82f6) 16%, #18283d);
+}
+
+.interview-prep-route .ip-topic-count {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ip-count-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+}
+
+.ip-count-chip::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ip-count-chip-key {
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  background: rgba(59, 130, 246, 0.12);
+  color: #93c5fd;
+}
+
+.ip-count-chip-alt {
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.1);
+  color: #fcd34d;
+}
+
+/* ---------- Block titles (bar style + count badge) ---------- */
+.interview-prep-route .ip-block-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 24px;
+  padding: 9px 12px;
+  border: 1px solid #26364b;
+  border-left-width: 3px;
+  border-left-color: #3b82f6;
+  border-radius: 8px;
+  background: #131e30;
+}
+
+.interview-prep-route .ip-block-title-scenario {
+  border-left-color: #f59e0b;
+}
+
+.ip-block-count {
+  margin-left: auto;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.ip-block-count-key {
+  border: 1px solid rgba(96, 165, 250, 0.45);
+  background: rgba(59, 130, 246, 0.14);
+  color: #bfdbfe;
+}
+
+.ip-block-count-alt {
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(148, 163, 184, 0.12);
+  color: #e2e8f0;
+}
+
+/* ---------- Question cards ---------- */
+.interview-prep-route .ip-question {
+  --q-accent: var(--step-color, #60a5fa);
+  overflow: hidden;
+  border-radius: 11px;
+  border-color: #2c3d54;
+  background: linear-gradient(180deg, #162335 0%, #131d2e 100%);
+}
+
+.interview-prep-route .ip-question::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: var(--q-accent);
+  opacity: 0;
+  transform: scaleY(0.45);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.interview-prep-route .ip-question:hover::after,
+.interview-prep-route .ip-question:focus-visible::after {
+  opacity: 1;
+  transform: none;
+}
+
+.interview-prep-route .ip-question-scenario {
+  --q-accent: #fbbf24;
+}
+
+.interview-prep-route .ip-question:hover,
+.interview-prep-route .ip-question:focus-visible {
+  border-color: color-mix(in srgb, var(--q-accent) 65%, transparent);
+  background: linear-gradient(180deg, #1a2940 0%, #152236 100%);
+  transform: translateY(-3px);
+  box-shadow:
+    0 12px 24px rgba(2, 6, 23, 0.4),
+    0 0 0 1px color-mix(in srgb, var(--q-accent) 22%, transparent);
+}
+
+.interview-prep-route .ip-question-scenario:hover,
+.interview-prep-route .ip-question-scenario:focus-visible {
+  background: linear-gradient(180deg, #241f13 0%, #1b1a15 100%);
+}
+
+.interview-prep-route .ip-question .ip-qnum {
+  border-color: color-mix(in srgb, var(--q-accent) 50%, #3b4a63);
+  background: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--q-accent) 34%, #16233a),
+    color-mix(in srgb, var(--q-accent) 14%, #16233a)
+  );
+  color: color-mix(in srgb, var(--q-accent) 55%, #ffffff);
+  transition:
+    box-shadow 0.18s,
+    border-color 0.18s,
+    color 0.18s;
+}
+
+.interview-prep-route .ip-question:hover .ip-qnum,
+.interview-prep-route .ip-question:focus-visible .ip-qnum {
+  border-color: var(--q-accent);
+  color: #ffffff;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--q-accent) 20%, transparent);
+}
+
+.interview-prep-route .ip-qtext {
+  color: #e8effb;
+  font-weight: 600;
+}
+
+.interview-prep-route .ip-qhint {
+  align-self: center;
+  padding: 3px 9px;
+  border: 1px solid color-mix(in srgb, var(--q-accent) 40%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--q-accent) 12%, transparent);
+  color: color-mix(in srgb, var(--q-accent) 55%, #ffffff);
+  font-weight: 700;
+  opacity: 0;
+  transform: translateX(6px);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+
+.interview-prep-route .ip-question:hover .ip-qhint,
+.interview-prep-route .ip-question:focus-visible .ip-qhint {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- Divider between topics ---------- */
+.interview-prep-route .ip-topic-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 26px;
+  padding-top: 0;
+  color: #475569;
+  font-size: 0.65rem;
+}
+
+.interview-prep-route .ip-topic-divider::before,
+.interview-prep-route .ip-topic-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #2b394f);
+}
+
+.interview-prep-route .ip-topic-divider::after {
+  background: linear-gradient(90deg, #2b394f, transparent);
+}
+
+/* ---------- Popup polish ---------- */
+.ip-popup-topic {
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 11%, transparent);
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 768px) {
+  .ip-page-stats {
+    gap: 6px;
+  }
+
+  .interview-prep-route .ip-topic::before {
+    margin: -16px -12px 14px;
+  }
+
+  .interview-prep-route .ip-block-title {
+    flex-wrap: wrap;
+  }
+
+  .interview-prep-route .ip-question {
+    min-height: 0;
+  }
+}
+
+/* ---------- Uniform question-card sizing (same size everywhere) ---------- */
+.interview-prep-route .ip-grid {
+  /* Equalize every implicit row to the tallest row of the grid,
+     so cards never differ in height from row to row. */
+  grid-auto-rows: 1fr;
+}
+
+.interview-prep-route .ip-question {
+  /* Fill the assigned grid area exactly (global border-box applies). */
+  height: 100%;
+  /* Vertically center content when the row is taller than the text. */
+  align-items: center;
+}
+
+.interview-prep-route .ip-qtext {
+  /* Cap text at 4 lines so one long question cannot stretch every card;
+     full question text stays in the popup and the native tooltip. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+}
+
 

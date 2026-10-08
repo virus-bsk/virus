@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { skills } from "../data/skills";
 import MaangLetterGrid from "../components/MaangLetterGrid";
 import ColoredMaangText from "../components/ColoredMaangText";
+import { googleSeriesIntro } from "../maang/basic-dsa/dsaBasicProblems";
+import youtubeLogo from "../assets/youtube-logo.svg";
 
 /**
  * MaangPreparation
@@ -49,6 +51,31 @@ function MaangPreparation() {
           </span>
         </h1>
         <p className="maang-page-subtitle">{description}</p>
+
+        {/* Watch Intro — the ONLY place this pill lives now: the internal
+            DSA sheet pages (Basic/Advanced/DP/Graphs/Weekly) no longer
+            render it. The global YouTubeLinkHandler intercepts the click
+            and plays the video inside the app. */}
+        <div className="maang-intro-video-wrap">
+          <a
+            className="maang-intro-video"
+            href={googleSeriesIntro.videoLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Watch Google Crack Coding Series Intro"
+          >
+            <img
+              className="maang-intro-logo"
+              src={youtubeLogo}
+              alt="YouTube"
+            />
+            <span className="maang-video-text">
+              <span className="maang-video-label">Watch Intro</span>
+              <span className="maang-video-sub">Start here · 2 min</span>
+            </span>
+            <span className="maang-video-arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
 
         <div className="maang-letter-wrap maang-page-grid">
           <MaangLetterGrid charColors={charColors} />

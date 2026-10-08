@@ -1,6 +1,5 @@
 import { DsaSheetPage } from "../basic-dsa/MaangDSABasic";
 import { dsaProblems } from "./dsaGraphProblems";
-import { googleSeriesIntro } from "../basic-dsa/dsaBasicProblems";
 
 /**
  * MaangDSAGraph — Graphs sheet of the MAANG track.
@@ -12,7 +11,6 @@ function MaangDSAGraph() {
       sheetTitle="Graph Mastery"
       titleAccent="Graphs"
       problems={dsaProblems}
-      introLink={googleSeriesIntro.videoLink}
       pageTheme="graph"
     />
   );

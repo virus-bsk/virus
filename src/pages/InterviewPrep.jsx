@@ -131,13 +131,33 @@ function InterviewPrep() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, activeList.length, closePopup]);
+  const totalImportant = interviewPrepTopics.reduce((n, t) => n + t.important.length, 0);
+  const totalScenarios = interviewPrepTopics.reduce((n, t) => n + t.scenarios.length, 0);
+
   return (
     <div className="ip-page">
       <header className="ip-page-header">
         <div className="ip-page-heading">
           <span className="ip-page-eyebrow">Interview preparation</span>
           <h1 className="ip-page-title">Java Backend Interview Topics</h1>
-          <p className="ip-page-subtitle">Click any question to open a clear, interview-ready answer.</p>
+          <p className="ip-page-subtitle">
+            Click any question to open a clear, interview-ready answer — description,
+            real-time example and code.
+          </p>
+          <div className="ip-page-stats">
+            <span className="ip-stat">
+              <b>{interviewPrepTopics.length}</b> topics
+            </span>
+            <span className="ip-stat ip-stat-key">
+              <b>{totalImportant}</b> important questions
+            </span>
+            <span className="ip-stat ip-stat-alt">
+              <b>{totalScenarios}</b> scenario questions
+            </span>
+            <span className="ip-stat ip-stat-ok">
+              <b>{totalImportant + totalScenarios}</b> answers ready
+            </span>
+          </div>
         </div>
         <Link className="ip-back-link" to="/maang">
           <span aria-hidden="true">←</span> Back to MAANG Preparation
@@ -172,14 +192,25 @@ function InterviewPrep() {
                 <div>
                   <h2 className="ip-topic-title">{topic.title}</h2>
                   <p className="ip-topic-count">
-                    {topic.important.length} important · {topic.scenarios.length} scenario-based
+                    <span className="ip-count-chip ip-count-chip-key">
+                      {topic.important.length} important
+                    </span>
+                    <span className="ip-count-chip ip-count-chip-alt">
+                      {topic.scenarios.length} scenario-based
+                    </span>
                   </p>
                 </div>
               </div>
             </header>
 
             {/* 20 important concept questions */}
-            <h3 className="ip-block-title">📘 20 Important Questions (concept-wise)</h3>
+            <h3 className="ip-block-title">
+              <span aria-hidden="true">📘</span>
+              20 Important Questions (concept-wise)
+              <span className="ip-block-count ip-block-count-key">
+                {topic.important.length} Qs
+              </span>
+            </h3>
             <ol className="ip-grid ip-grid-important">
               {topic.important.map((q, i) => (
                 <li
@@ -198,14 +229,18 @@ function InterviewPrep() {
                 >
                   <span className="ip-qnum">{i + 1}</span>
                   <span className="ip-qtext">{q}</span>
-                  <span className="ip-qhint">👁 view answer</span>
+                  <span className="ip-qhint">👁 view answer ›</span>
                 </li>
               ))}
             </ol>
 
             {/* 10 scenario-based questions */}
             <h3 className="ip-block-title ip-block-title-scenario">
-              🧠 10 Scenario-Based Questions (real-time)
+              <span aria-hidden="true">🧠</span>
+              10 Scenario-Based Questions (real-time)
+              <span className="ip-block-count ip-block-count-alt">
+                {topic.scenarios.length} Qs
+              </span>
             </h3>
             <ol className="ip-grid ip-grid-scenario">
               {topic.scenarios.map((q, i) => (
@@ -225,7 +260,7 @@ function InterviewPrep() {
                 >
                   <span className="ip-qnum">{i + 1}</span>
                   <span className="ip-qtext">{q}</span>
-                  <span className="ip-qhint">👁 view answer</span>
+                  <span className="ip-qhint">👁 view answer ›</span>
                 </li>
               ))}
             </ol>

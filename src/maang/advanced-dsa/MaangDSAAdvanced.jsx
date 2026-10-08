@@ -1,6 +1,5 @@
 import { DsaSheetPage } from "../basic-dsa/MaangDSABasic";
 import { dsaProblems } from "./dsaAdvancedProblems";
-import { googleSeriesIntro } from "../basic-dsa/dsaBasicProblems";
 
 /**
  * MaangDSAAdvanced — Part 2 of the MAANG sheet: Data Structures.
@@ -12,7 +11,6 @@ function MaangDSAAdvanced() {
       sheetTitle="Advanced DSA"
       titleAccent="Part 2"
       problems={dsaProblems}
-      introLink={googleSeriesIntro.videoLink}
       pageTheme="advanced"
     />
   );

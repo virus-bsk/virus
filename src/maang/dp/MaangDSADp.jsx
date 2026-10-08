@@ -1,6 +1,5 @@
 import { DsaSheetPage } from "../basic-dsa/MaangDSABasic";
 import { dsaProblems } from "./dsaDpProblems";
-import { googleSeriesIntro } from "../basic-dsa/dsaBasicProblems";
 
 /**
  * MaangDSADp — Dynamic Programming sheet of the MAANG track.
@@ -13,7 +12,6 @@ function MaangDSADp() {
       sheetTitle="Dynamic Programming"
       titleAccent="DP Patterns"
       problems={dsaProblems}
-      introLink={googleSeriesIntro.videoLink}
       pageTheme="dp"
     />
   );

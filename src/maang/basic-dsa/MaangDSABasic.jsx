@@ -8,10 +8,7 @@
 } from "react";
 import { Link } from "react-router-dom";
 import VideoPlayerModal from "../../components/VideoPlayerModal";
-import {
-  dsaBasicProblems as BASIC_PROBLEMS,
-  googleSeriesIntro,
-} from "./dsaBasicProblems";
+import { dsaBasicProblems as BASIC_PROBLEMS } from "./dsaBasicProblems";
 import {
   buildWeeklyPlan,
   resolveSwipeTarget,
@@ -43,15 +40,31 @@ const prefersReducedMotion = () =>
   typeof window.matchMedia === "function" &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// Stable identity for a problem card's selected/glow state. The weekly
+// bank stamps every problem with a uid; the plain library banks only
+// carry an id — either one is unique within a page.
+const keyOf = (problem) => String(problem.uid ?? problem.id);
+
 /**
  * Shared problem card — used by the Problem Library grid.
  *
+ * Clicking the CARD never opens the video — it only glows the card
+ * (the "selected" state). The YouTube button in the footer is the one
+ * control that opens the in-app video modal.
+ *
  * Props:
- *   problem : the DSA problem object
- *   onOpen  : opens the video modal for this problem
- *   chip    : optional small label shown in the card top row
+ *   problem  : the DSA problem object
+ *   onOpen   : opens the video modal for this problem (YouTube button)
+ *   selected : true while this card is the glowing/selected one
+ *   onSelect : card tap → toggle this card's glow (no video)
+ *   chip     : optional small label shown in the card top row
  */
-const ProblemCard = memo(function ProblemCard({ problem, onOpen }) {
+const ProblemCard = memo(function ProblemCard({
+  problem,
+  onOpen,
+  selected = false,
+  onSelect,
+}) {
   const hasVideo = !!problem.videoLink;
   const description =
     problem.description ||
@@ -80,7 +93,7 @@ const ProblemCard = memo(function ProblemCard({ problem, onOpen }) {
 
   return (
     <div
-      className="mdsa-problem-card"
+      className={`mdsa-problem-card${selected ? " selected" : ""}`}
       style={{
         "--topic-color": topicColors[problem.topic] || "#60a5fa",
         "--platform-bg": platformColors.bg,
@@ -88,12 +101,13 @@ const ProblemCard = memo(function ProblemCard({ problem, onOpen }) {
       }}
       role="button"
       tabIndex={0}
+      aria-pressed={selected}
       aria-label={`${problem.title} - ${problem.difficulty} ${problem.topic}`}
-      onClick={() => onOpen(problem)}
+      onClick={() => onSelect?.(problem)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          onOpen(problem);
+          onSelect?.(problem);
         }
       }}
     >
@@ -112,19 +126,38 @@ const ProblemCard = memo(function ProblemCard({ problem, onOpen }) {
       </div>
 
       <div className="mdsa-problem-footer">
-        <div
-          className={`mdsa-video-btn ${hasVideo ? "available" : "soon"}`}
-          title={hasVideo ? "Watch video solution" : "Video coming soon"}
-        >
-          <img
-            className="mdsa-video-logo"
-            src={youtubeLogo}
-            alt="YouTube"
-          />
-          <span className="mdsa-solve-text">
-            {hasVideo ? "YouTube" : "Soon"}
+        {hasVideo ? (
+          <button
+            type="button"
+            className="mdsa-video-btn available"
+            title="Watch video solution"
+            aria-label={`Play YouTube video solution for ${problem.title}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpen(problem);
+            }}
+          >
+            <img
+              className="mdsa-video-logo"
+              src={youtubeLogo}
+              alt="YouTube"
+            />
+            <span className="mdsa-solve-text">YouTube</span>
+          </button>
+        ) : (
+          <span
+            className="mdsa-video-btn soon"
+            title="Video coming soon"
+            aria-disabled="true"
+          >
+            <img
+              className="mdsa-video-logo"
+              src={youtubeLogo}
+              alt="YouTube"
+            />
+            <span className="mdsa-solve-text">Soon</span>
           </span>
-        </div>
+        )}
         <a
           href={problem.link}
           target="_blank"
@@ -160,6 +193,9 @@ const ProblemCard = memo(function ProblemCard({ problem, onOpen }) {
  *   problems    : the problem bank (used to re-roll the assessments)
  *   reveal      : { sat, sun } reveal state for this week (keyed by weekIdx)
  *   onOpenVideo : opens the video modal for a problem
+ *   selectedKey : key of the card currently glowing (null = none)
+ *   onSelect    : card tap → toggle that glow; the video opens only from
+ *                 the card's own YouTube button
  *   onReveal    : (weekIdx, dayKey) → fresh random assessment questions
  *   isCurrent   : true for the week actually on screen (shows the "Today" chip)
  */
@@ -168,6 +204,8 @@ const WeekPane = memo(function WeekPane({
   problems,
   reveal,
   onOpenVideo,
+  selectedKey,
+  onSelect,
   onReveal,
   isCurrent,
 }) {
@@ -245,6 +283,8 @@ const WeekPane = memo(function WeekPane({
                       key={p.uid}
                       problem={p}
                       onOpen={onOpenVideo}
+                      selected={selectedKey === keyOf(p)}
+                      onSelect={onSelect}
                       chip={
                         p.sourceSheet === "Basic DSA"
                           ? "Basic"
@@ -313,7 +353,6 @@ function DsaSheetPage({
   sheetTitle = "Basic DSA",
   titleAccent = "A → Z",
   problems = BASIC_PROBLEMS,
-  introLink = googleSeriesIntro.videoLink,
   showWeeklyPlan = false,
   pageTheme = "basic",
 }) {
@@ -399,6 +438,15 @@ function DsaSheetPage({
   const closeVideo = useCallback(() => {
     setSelectedProblem(null);
     setModalOpen(false);
+  }, []);
+
+  // Which card is glowing. A tap on a card ONLY toggles this glow — the
+  // video opens exclusively from the card's YouTube button — so a stray
+  // click on the grid can never launch a video.
+  const [selectedKey, setSelectedKey] = useState(null);
+  const selectCard = useCallback((problem) => {
+    const key = keyOf(problem);
+    setSelectedKey((prev) => (prev === key ? null : key));
   }, []);
 
   // Weekly preparation schedule (Mon–Fri learn · Sat/Sun assessments).
@@ -736,26 +784,6 @@ function DsaSheetPage({
             {problems.length} essential DSA problems. Watch video solutions in
             Telugu, solve on LeetCode / GeeksforGeeks.
           </p>
-          <div className="mdsa-hero-video">
-            <a
-              className="mdsa-intro-video"
-              href={introLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Watch Google Crack Coding Series Intro"
-            >
-              <img
-                className="mdsa-intro-logo"
-                src={youtubeLogo}
-                alt="YouTube"
-              />
-              <span className="mdsa-video-text">
-                <span className="mdsa-video-label">Watch Intro</span>
-                <span className="mdsa-video-sub">Start here · 2 min</span>
-              </span>
-              <span className="mdsa-video-arrow" aria-hidden="true">→</span>
-            </a>
-          </div>
         </div>
       </section>
 
@@ -821,6 +849,8 @@ function DsaSheetPage({
                   problems={problems}
                   reveal={assessmentReveal[plan.weekIdx] || HIDDEN_WEEK}
                   onOpenVideo={openVideo}
+                  selectedKey={selectedKey}
+                  onSelect={selectCard}
                   onReveal={rollAssessment}
                   isCurrent={offset === weekOffset}
                 />
@@ -933,7 +963,13 @@ function DsaSheetPage({
                     style={{ "--topic-color": grp.color }}
                   >
                     {grp.problems.map((p) => (
-                      <ProblemCard key={p.id} problem={p} onOpen={openVideo} />
+                      <ProblemCard
+                        key={p.id}
+                        problem={p}
+                        onOpen={openVideo}
+                        selected={selectedKey === keyOf(p)}
+                        onSelect={selectCard}
+                      />
                     ))}
                   </div>
                 </section>
@@ -948,7 +984,13 @@ function DsaSheetPage({
               }}
             >
               {filtered.map((p) => (
-                <ProblemCard key={p.id} problem={p} onOpen={openVideo} />
+                <ProblemCard
+                  key={p.id}
+                  problem={p}
+                  onOpen={openVideo}
+                  selected={selectedKey === keyOf(p)}
+                  onSelect={selectCard}
+                />
               ))}
             </section>
           )}
@@ -975,7 +1017,6 @@ function MaangDSABasic() {
       sheetTitle="Basic DSA"
       titleAccent="Part 1"
       problems={BASIC_PROBLEMS}
-      introLink={googleSeriesIntro.videoLink}
       pageTheme="basic"
     />
   );
