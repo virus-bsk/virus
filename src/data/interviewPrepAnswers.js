@@ -1,1322 +1,953 @@
-﻿/**
+/**
  * interviewPrepAnswers
  * --------------------
  * Answers for the clickable questions in src/pages/InterviewPrep.jsx.
- * Keys match interviewPrepTopics[].id; each key has `important` and
+ * Keys match interviewPrepTopics[].id; each has `important` and
  * `scenarios` arrays aligned by index with the question arrays.
  *
- * Every answer is interview-oriented and beginner-friendly:
- *   what      → simple definition
- *   how       → internal working (with code/diagram when it helps)
- *   why       → why we use it
- *   scenario  → where it is used in real projects (optional)
- *   tradeoff  → advantages / limitations (optional)
- *   code      → short code or SQL snippet, only when needed (optional)
+ * Every answer uses a short, human-friendly format:
+ *  1. Description — plain-English definition (what the question asks)
+ *  2. Real-time Example — practical example explained like a conversation
+ *  3. Code — short, focused snippet only when it helps ("" when not needed)
+ *
  * Keep answers short and clear — a reader who does NOT know the
- * concept should still understand it after reading.
+ * concept should understand it after reading.
  */
 export const interviewPrepAnswers = {
   sql: {
     important: [
       {
-        what: "A SELECT query does NOT run top-to-bottom. The DB runs clauses in a fixed order.",
-        how: "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT. FROM picks the table, WHERE filters rows, GROUP BY groups them, HAVING filters groups, SELECT finally creates columns, then sorting and limit.",
-        why: "Interviewers ask this to check if you know why some things fail — e.g. you cannot use a SELECT alias inside WHERE, because SELECT runs AFTER WHERE.",
-        tradeoff: "Knowing this order helps you write faster queries instead of guessing.",
-        code: "SELECT dept, COUNT(*) AS total   -- alias 'total'\nFROM emp\nWHERE salary > 1000              -- runs 1st\nGROUP BY dept                    -- runs 2nd\nHAVING COUNT(*) > 2              -- runs 3rd\nORDER BY total;                  -- alias OK here (SELECT already done)",
+        description: "A SQL query is NOT processed top-to-bottom. SQL clauses have a logical execution order, which is why a SELECT alias usually cannot be used in WHERE.",
+        example: "Think of a restaurant. First you check what ingredients are available (FROM), then remove the ones you don't want (WHERE), then group the remaining ingredients (GROUP BY), and only at the end decide what to put on the plate (SELECT). SQL works the same way.",
+        code: "SELECT dept, COUNT(*) AS total\nFROM emp\nWHERE salary > 1000\nGROUP BY dept\nHAVING COUNT(*) > 2\nORDER BY total;\n\n-- Why alias can't be used in WHERE:\n-- WHERE runs BEFORE SELECT, so 'total' alias doesn't exist yet\n-- HAVING runs AFTER SELECT, so alias is OK"
       },
       {
-        what: "WHERE filters individual rows BEFORE grouping. HAVING filters groups AFTER GROUP BY / aggregation.",
-        how: "WHERE removes rows first, then GROUP BY creates groups, then HAVING removes whole groups using aggregate results like COUNT/SUM.",
-        why: "You cannot put aggregate conditions (e.g. COUNT(*) > 5) in WHERE, because at that point aggregation has not happened yet.",
-        tradeoff: "Always filter with WHERE first (less data to group) and use HAVING only for aggregate conditions — better performance.",
-        code: "SELECT dept, COUNT(*)\nFROM emp\nWHERE salary > 50000      -- row filter (before grouping)\nGROUP BY dept\nHAVING COUNT(*) > 5;      -- group filter (after grouping)",
+        description: "WHERE filters individual rows BEFORE grouping. HAVING filters groups AFTER aggregation.",
+        example: "Think of a sales manager. First, they remove all employees who didn't meet their quota (WHERE). Then they group the remaining employees by team (GROUP BY). Finally, they remove any team that has fewer than 3 high earners (HAVING).",
+        code: "SELECT dept, COUNT(*)\nFROM emp\nWHERE salary > 50000\nGROUP BY dept\nHAVING COUNT(*) > 5;"
       },
       {
-        what: "JOIN combines rows of 2+ tables using a related column.",
-        how: "INNER JOIN = only matching rows. LEFT JOIN = all rows of left table + matches (NULL where no match). FULL JOIN = all rows from both. RIGHT JOIN = mirror of LEFT.",
-        why: "Real data is split across tables (users, orders). JOIN re-builds the combined view without duplicating data.",
-        scenario: "Show every customer even if they never ordered → LEFT JOIN orders, then filter NULL.",
-        code: "SELECT c.name, o.amount\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id;\n\n-- INNER: only customers WITH orders\n-- LEFT : all customers, order columns = NULL when none",
+        description: "JOIN combines rows from 2+ tables using a related column.",
+        example: "You have a customers table and an orders table. A JOIN merges them so you can see each customer's orders. INNER JOIN returns only customers who placed orders. LEFT JOIN returns every customer — order columns will be NULL for those who never ordered.",
+        code: "SELECT c.name, o.amount\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id;\n\n-- INNER: only customers WITH orders\n-- LEFT : all customers, order columns = NULL when none"
       },
       {
-        what: "PRIMARY KEY = unique + NOT NULL identifier of a row (only 1 per table). UNIQUE = allows one NULL, prevents duplicate values. FOREIGN KEY = references a key of another table and enforces valid references.",
-        how: "PK/unique create an index automatically → fast lookups. FK runs a check on INSERT/UPDATE/DELETE and blocks invalid data (e.g. deleting a parent that has children).",
-        why: "PK uniquely identifies a row, UNIQUE protects column values (e.g. email), FK keeps relationships consistent between tables.",
-        tradeoff: "FK checks add a small write cost, but they save you from dirty data.",
-        code: "CREATE TABLE orders (\n  id BIGINT PRIMARY KEY,\n  customer_id BIGINT REFERENCES customers(id) -- FK\n);\nCREATE TABLE users (email VARCHAR(100) UNIQUE);",
+        description: "PRIMARY KEY = unique + NOT NULL identifier of a row. UNIQUE = prevents duplicates but allows one NULL. FOREIGN KEY = references a key of another table and enforces valid references.",
+        example: "A student table and a marks table. PRIMARY KEY (student_id) uniquely identifies each student. FOREIGN KEY (student_id) in marks ensures a student must exist before you can record their marks, and deleting a student fails if they have marks.",
+        code: "CREATE TABLE students (\n  student_id INT PRIMARY KEY,\n  email VARCHAR(100) UNIQUE\n);\nCREATE TABLE marks (\n  student_id INT REFERENCES students(student_id)\n);"
       },
       {
-        what: "CLUSTERED index = the actual table DATA is sorted and stored in that index order (only 1 per table, usually the PK). NON-CLUSTERED index = a separate small structure that stores index columns + a pointer back to the row.",
-        how: "Clustered lookup goes straight to the sorted data (1 step). Non-clustered lookup first finds the pointer in the index, then jumps to the row (2 steps) — unless it is a covering index (all needed columns already inside the index).",
-        why: "Choosing the right clustering key makes range queries (BETWEEN, ORDER BY, date ranges) very fast.",
-        tradeoff: "Non-clustered indexes make reads faster but take extra space and slow down writes a little (every insert must update all indexes).",
+        description: "CLUSTERED index = the actual table data is stored in index order (only 1 per table). NON-CLUSTERED index = a separate structure that points back to the data.",
+        example: "A phone book (clustered) is sorted by last name — the data itself is in that order. A book index (non-clustered) tells you which page has a topic, but you still need to go to that page to read the content.",
+        code: "CREATE INDEX idx_lastname ON students(last_name); -- non-clustered\n-- Only 1 clustered index per table — usually the primary key"
       },
       {
-        what: "B-tree is a balanced tree data structure used by most indexes. It keeps data sorted in levels and every leaf is at the same depth.",
-        how: "Search starts at root → goes to child based on value range → reaches leaf which holds sorted values + row pointer. Tree is always balanced, so every lookup takes the same few steps (O(log n)) instead of scanning millions of rows.",
-        why: "It turns a full table scan into a few disk reads — this is how an index speeds up WHERE salary BETWEEN 50000 AND 80000.",
-        tradeoff: "B-tree is great for equality and range, but less useful for columns with very few distinct values (e.g. gender) or for '%abc' LIKE searches.",
-        code: "Without index: scan 10,000,000 rows\nWith index  : root → leaf = ~3-4 reads",
+        description: "B-tree is a balanced tree structure used by most database indexes to search efficiently.",
+        example: "Think of looking up a word in a dictionary. A B-tree lets you jump directly to the right page instead of scanning every page. That's what indexes do — they let the database skip large portions of the table.",
+        code: "-- Without index: full table scan\nSELECT * FROM users WHERE email = 'test@example.com';\n\n-- With index: B-tree lookup → O(log n)\nSELECT * FROM users WHERE email = 'test@example.com';"
       },
       {
-        what: "ACID = 4 guarantees of a reliable transaction: Atomicity, Consistency, Isolation, Durability.",
-        how: "Atomicity = all statements commit or none (undo log). Consistency = DB rules (constraints) stay valid before & after. Isolation = concurrent transactions don't see each other's uncommitted work (locking/MVCC). Durability = once committed, data survives a crash (write-ahead log flushed to disk).",
-        why: "Bank transfer: debit + credit must both happen or none (Atomicity), and money must not vanish after a power cut (Durability).",
-        tradeoff: "Stronger isolation (Serializable) = more correct but slower, because of more locking.",
-        code: "Atomicity   : debit 100 + credit 100 → both or neither\nConsistency : total balance never goes negative\nIsolation   : two transfers don't read half-updated balance\nDurability  : committed even if server crashes right after",
+        description: "ACID properties guarantee reliable transaction processing.",
+        example: "Transferring ₹500 from Account A to Account B: A (Atomicity) — both succeed or both fail. C (Consistency) — final balances must be valid. I (Isolation) — intermediate states are invisible to other transactions. D (Durability) — once committed, the balance is permanent even if the server crashes.",
+        code: "-- START TRANSACTION\nUPDATE accounts SET balance = balance - 500 WHERE id = 1;\nUPDATE accounts SET balance = balance + 500 WHERE id = 2;\n-- COMMIT (or ROLLBACK on error)"
       },
       {
-        what: "Normalization = design tables to remove duplicate data. 1NF: each cell holds ONE value (no comma lists). 2NF: no column depends on only PART of a composite key. 3NF: no column depends on another non-key column (transitive dependency).",
-        how: "Example: student course teacher stored together — teacher repeated for every row (redundant). Split into student, enrollment, teacher tables linked by IDs.",
-        why: "Removes update anomalies — change a teacher's name once in one place instead of 1000 rows.",
-        tradeoff: "Too much normalization = many JOINs = slower reads. Real systems often de-normalize slightly for reporting/performance.",
-        code: "1NF: \"Math,Science\" → two rows / two columns\n2NF: (student,course) key → teacher must NOT depend on student only\n3NF: city → zip → governor must not sit in same table as order",
+        description: "Normalization organizes tables to reduce duplication and data anomalies.",
+        example: "Before normalization, an orders table might repeat the customer's address on every order. After normalization, you split it into customers and orders tables and link them — improving storage efficiency and data integrity.",
+        code: "-- Before: 1 table with redundant address\n-- After:   customers table + orders table linked by customer_id"
       },
       {
-        what: "SUBQUERY = a query inside another query. DERIVED TABLE = subquery in the FROM clause (acts like a temporary table). CTE = a named temporary result defined with WITH, that later statements can reuse.",
-        how: "All three produce a temporary result set. CTE uses WITH keyword, is more readable, can be referenced multiple times and supports RECURSIVE for tree data.",
-        why: "CTEs make complex queries (running totals, hierarchies) much easier to read and debug than deep nested subqueries.",
-        tradeoff: "Older optimizers sometimes materialize CTEs (slower) — modern PostgreSQL/MySQL 8 optimize them like views. Readability usually wins.",
-        code: "WITH high_earners AS (\n  SELECT id, salary FROM emp WHERE salary > 90000\n)\nSELECT * FROM high_earners ORDER BY salary DESC;",
+        description: "A subquery is a query inside another query. A CTE (Common Table Expression) is a named, reusable temporary result set. A derived table is a subquery inside a FROM clause (may require an alias).",
+        example: "A subquery is like nested boxes — you unpack outer to reach inner. A CTE is like naming a box once, using it multiple times, and improving readability when the same subquery appears repeatedly.",
+        code: "-- CTE example\nWITH dept_avg AS (\n  SELECT dept, AVG(salary) AS avg_sal\n  FROM emp GROUP BY dept\n)\nSELECT e.name, e.salary, d.avg_sal\nFROM emp e JOIN dept_avg d ON e.dept = d.dept;"
       },
       {
-        what: "Window functions calculate across a set of rows RELATED to the current row, without collapsing them into one output row (unlike GROUP BY).",
-        how: "ROW_NUMBER() = unique serial number, RANK() = same rank for ties then skips (1,1,3), DENSE_RANK() = same rank for ties, no gap (1,1,2). All used with OVER (PARTITION BY ... ORDER BY ...).",
-        why: "They solve 'top N per group', 'running total', 'deduplicate' problems in pure SQL.",
-        scenario: "Find 2nd highest salary, top 3 earners per department, remove duplicate rows — all done with window functions.",
-        code: "SELECT name, dept, salary,\n  ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) rn\nFROM emp;\n-- rn = 1 → top earner of each department",
+        description: "Window functions perform calculations across a set of table rows related to the current row. They add a calculated column to each row without removing any rows.",
+        example: "You want to rank employees by salary within each department. Instead of joining the table to itself, a window function (ROW_NUMBER(), RANK(), DENSE_RANK()) lets you compute ranks without removing rows — each row stays with its rank.",
+        code: "SELECT name, dept, salary,\n  RANK() OVER (PARTITION BY dept ORDER BY salary DESC) AS rank\nFROM emp;"
       },
       {
-        what: "UNION combines results of 2 queries and REMOVES duplicate rows. UNION ALL just stacks them (keeps duplicates).",
-        how: "UNION must do an extra sort/hash step to detect and remove duplicates. UNION ALL skips that work entirely.",
-        why: "Use UNION ALL when you know data is unique (or duplicates are fine) — it is always faster.",
-        tradeoff: "UNION ALL can return duplicates; UNION costs more CPU/memory for dedup.",
-        code: "SELECT city FROM india\nUNION ALL          -- fast, keeps duplicates\nSELECT city FROM usa;",
+        description: "UNION combines result sets and removes duplicates. UNION ALL keeps duplicates and is faster.",
+        example: "UNION = combining two lists and removing repeated people. UNION ALL = combining two lists even if the same person appears twice. UNION ALL is much faster because it skips the duplicate-removal step.",
+        code: "SELECT name FROM customers\nUNION ALL\nSELECT name FROM prospects;"
       },
       {
-        what: "DELETE removes rows (DML), TRUNCATE removes all rows fast (DDL), DROP removes the whole table structure (DDL).",
-        how: "DELETE is row-by-row, logs each row, can have WHERE, fires triggers, and can be rolled back. TRUNCATE deallocates data pages in one step (minimal logging), resets identity counter, no WHERE. DROP removes table + structure + indexes from the database.",
-        why: "Choosing wrong one surprises people: you cannot TRUNCATE a table referenced by a FK, and DELETE of millions of rows is slow.",
-        tradeoff: "DELETE = slow but selective/auditable. TRUNCATE = fast but all-or-nothing. DROP = gone forever.",
-        code: "DELETE FROM emp WHERE dept='HR';   -- some rows, logged\nTRUNCATE TABLE emp;                -- all rows, fast, resets ID\nDROP TABLE emp;                     -- table itself removed",
+        description: "DELETE removes rows one at a time (logs each entry). TRUNCATE removes all rows quickly (resets the table). DROP deletes the entire table.",
+        example: "DELETE = erasing individual notebook pages one by one (each page is tracked). TRUNCATE = ripping out the entire notebook at once (fast but not logged per row). DROP = throwing away the entire notebook.",
+        code: "DELETE FROM emp WHERE dept = 'Sales';\nTRUNCATE TABLE emp;   -- removes ALL rows, resets auto-increment\nDROP TABLE emp;       -- removes the whole table"
       },
       {
-        what: "In GROUP BY, all NULL values form ONE group together.",
-        how: "GROUP BY treats NULL as an equal value for grouping purposes. But aggregate functions like SUM/AVG ignore NULLs, while COUNT(*) counts rows (including NULL groups).",
-        why: "Interview trick question: 'GROUP BY status has 4 groups' even if many rows have NULL status — NULL is one of them.",
-        scenario: "Dashboard grouping by optional 'category' — NULLs appear as their own '(blank)' bar.",
-        code: "SELECT category, COUNT(*) FROM products GROUP BY category;\n-- rows with NULL category → one row with category = NULL",
+        description: "GROUP BY groups rows by one or more columns and returns one row per group. NULLs are treated as a separate group.",
+        example: "You have 100 employee records. GROUP BY dept creates one group per department. You can then apply COUNT(), SUM(), AVG() to each group. NULLs (employees with no department) are grouped together as a separate group.",
+        code: "SELECT dept, COUNT(*), AVG(salary)\nFROM emp\nGROUP BY dept;"
       },
       {
-        what: "EXPLAIN shows the query PLAN — the steps the optimizer will use (index scan, full scan, join order, estimated rows).",
-        how: "Run EXPLAIN (or EXPLAIN ANALYZE in PostgreSQL) before the query. Look for: Index Scan (good) vs Seq Scan on big table (usually bad), join order, rows estimate vs actual, extra sorts.",
-        why: "It is the #1 tool to answer 'why is my query slow?' without guessing.",
-        scenario: "Slow report query → EXPLAIN shows sequential scan on 10M-row orders table → add index on (customer_id, created_at) → becomes Index Scan.",
-        tradeoff: "Optimizer estimates can be wrong if statistics are stale — run ANALYZE/UPDATE STATISTICS.",
-        code: "EXPLAIN ANALYZE\nSELECT * FROM orders WHERE customer_id = 42;\n-- → Index Scan using idx_orders_customer  (good)\n-- → Seq Scan on orders  (bad on 10M rows)",
+        description: "EXPLAIN / EXPLAIN ANALYZE shows the query execution plan — how the database will run your query, including which indexes and joins it will use.",
+        example: "It's like a map showing which roads the query takes. EXPLAIN ANALYZE actually runs it and shows real timing. You look for Seq Scan (full table scan = bad), nested loops that might be slow for large tables, or missing indexes that should be added.",
+        code: "EXPLAIN ANALYZE SELECT * FROM orders WHERE customer_id = 123;"
       },
       {
-        what: "SQL injection = attacker types SQL into your input box so it becomes part of the query and changes its meaning. Parameterized queries (prepared statements) keep code and values separate so values are never executed as SQL.",
-        how: "Vulnerable: \"SELECT * FROM users WHERE name='\" + input + \"'\" — input ' OR '1'='1 returns all rows. Safe: prepared statement sends query template and values separately; DB treats value strictly as data.",
-        why: "It is OWASP #1 — one string-concatenated query can leak the whole database.",
-        tradeoff: "Parameterized queries are also faster (query plan is reused) — there is no reason not to use them.",
-        code: "-- BAD\n\"SELECT * FROM users WHERE name='\" + name + \"'\"\n-- GOOD (prepared statement)\n\"SELECT * FROM users WHERE name = ?\" , name)",
+        description: "SQL injection is when an attacker inserts malicious SQL code into a query through user input. Parameterized queries (prepared statements) prevent this by separating code from data.",
+        example: "If a user types ' OR 1=1 -- in a login form, the raw query becomes: SELECT * FROM users WHERE username = '' OR 1=1 --. Parameterized queries treat input as data only, so the malicious code is never executed.",
+        code: "-- Vulnerable (DO NOT use)\nString sql = \"SELECT * FROM users WHERE username = '\" + username + \"'\";\n\n// Safe (parameterized query)\nPreparedStatement stmt = conn.prepareStatement(\n  \"SELECT * FROM users WHERE username = ?\");\nstmt.setString(1, username);"
       },
       {
-        what: "SELF JOIN = a table joined with itself (alias needed). RECURSIVE CTE = a WITH query that refers to itself to walk tree/hierarchy data.",
-        how: "Self join needs aliases: FROM employee e JOIN employee m ON e.manager_id = m.id. Recursive CTE = anchor query (top row) + UNION ALL + recursive member (children) until no more rows.",
-        why: "Org charts, category trees, comment replies — data that points to itself cannot be read with a normal join.",
-        scenario: "Find 'all employees under a manager' or 'all sub-categories of Electronics'.",
-        code: "WITH RECURSIVE tree AS (\n  SELECT id, name FROM categories WHERE parent_id IS NULL  -- anchor\n  UNION ALL\n  SELECT c.id, c.name FROM categories c JOIN tree t ON c.parent_id = t.id\n)\nSELECT * FROM tree;",
+        description: "A self-join joins a table to itself. A recursive CTE references the CTE itself to traverse hierarchies like organizational charts.",
+        example: "Self-join: join the employees table to itself on manager_id to find each employee's manager. Recursive CTE: start at the CEO (no manager) and repeatedly join with their reports to list the entire org chart from top to bottom.",
+        code: "-- Self join\nSELECT e.name AS employee, m.name AS manager\nFROM employees e\nJOIN employees m ON e.manager_id = m.employee_id;\n\n-- Recursive CTE\nWITH RECURSIVE org AS (\n  SELECT employee_id, name, manager_id, 0 AS level\n  FROM employees WHERE manager_id IS NULL\n  UNION ALL\n  SELECT e.employee_id, e.name, e.manager_id, o.level + 1\n  FROM employees e JOIN org o ON e.manager_id = o.employee_id\n)\nSELECT * FROM org;"
       },
       {
-        what: "Isolation levels control how transactions see each other's uncommitted/pending changes: Read Uncommitted → Read Committed → Repeatable Read → Serializable (strictest).",
-        how: "Read Uncommitted = can see others' uncommitted data (dirty read). Read Committed = only committed (default in Oracle/PostgreSQL; but a row can change between your two reads — non-repeatable read). Repeatable Read = your earlier reads stay same (but new rows can appear — phantom). Serializable = full lock emulation, as if run one after another.",
-        why: "Pick the weakest level that keeps your data correct — stronger level = more locking = less concurrency.",
-        tradeoff: "Serializable is safest but can cause lock waits/timeouts under heavy load.",
-        code: "Dirty read        : you read money that other tx may ROLLBACK\nNon-repeatable    : same SELECT twice → different salary\nPhantom           : same SELECT twice → new rows appeared\nSerializable      : none of the three can happen",
+        description: "Transaction isolation levels control how concurrent transactions interact and what data they can see, preventing problems like dirty reads, non-repeatable reads, and phantom reads.",
+        example: "Isolation levels prevent problems like: dirty reads (seeing uncommitted data), non-repeatable reads (same query returns different results), and phantom reads (new rows appear between reads). Read Committed is the default. Serializable is the strictest.",
+        code: "-- Set transaction isolation level\nSET TRANSACTION ISOLATION LEVEL SERIALIZABLE;\n\n-- PostgreSQL\nBEGIN ISOLATION LEVEL REPEATABLE READ;"
       },
       {
-        what: "An index can be ignored by the optimizer when it wouldn't help enough.",
-        how: "Common reasons: function on indexed column (WHERE UPPER(name)=...), leading wildcard (LIKE '%abc'), very low selectivity (gender column), implicit type mismatch ('42' vs 42), OR conditions on different columns, or the query needs most rows anyway (optimizer chooses full scan).",
-        why: "Interviewers love this: 'I created an index but it's not used — why?'",
-        tradeoff: "Fix: index the expression (functional index), rewrite '%abc' to full-text search, fix type mismatch, or create composite index matching the WHERE pattern.",
-        code: "WHERE UPPER(name) = 'JOHN'   -- index on name NOT used\nWHERE name = 'JOHN'          -- index used\nWHERE name LIKE '%hn'        -- leading wildcard → not used",
+        description: "An index will NOT be used when you apply functions to a column or use a leading wildcard.",
+        example: "Searching for name LIKE '%son' forces the database to scan every row because it cannot use an index. But name LIKE 'John%' can use an index because it starts with a fixed string.",
+        code: "-- Index NOT used\nSELECT * FROM users WHERE UPPER(name) = 'JOHN';\n\n-- Index USED\nSELECT * FROM users WHERE name LIKE 'John%';"
       },
       {
-        what: "DISTINCT removes duplicate rows from the SELECT result. GROUP BY collapses rows into groups so you can use aggregates (COUNT/SUM).",
-        how: "SELECT DISTINCT a, b is almost identical to SELECT a, b ... GROUP BY a, b. But GROUP BY also lets you add aggregates: COUNT(*), SUM(amount).",
-        why: "Use DISTINCT for simple dedup, GROUP BY when you need aggregation per group.",
-        tradeoff: "Both need sorting/hashing of all rows — if possible, filter rows first with WHERE.",
-        code: "SELECT DISTINCT dept FROM emp;\nSELECT dept, AVG(salary) FROM emp GROUP BY dept;  -- DISTINCT can't do this",
+        description: "GROUP BY groups rows by one or more columns. DISTINCT removes duplicate rows from the entire result set.",
+        example: "GROUP BY is for aggregation — you group rows by a column and apply functions like COUNT() or SUM(). DISTINCT is for removing duplicates — you just want unique rows back without any aggregation.",
+        code: "-- GROUP BY (grouped aggregation)\nSELECT dept, COUNT(*) FROM emp GROUP BY dept;\n\n-- DISTINCT (unique rows only)\nSELECT DISTINCT dept FROM emp;"
       },
       {
-        what: "ON DELETE/UPDATE action of a FOREIGN KEY decides what happens to child rows when the parent row changes.",
-        how: "CASCADE = delete/update children automatically. SET NULL = children's FK becomes NULL. RESTRICT/NO ACTION = block the parent change if children exist (default in many DBs).",
-        why: "Without it, deleting a customer with orders would leave orphan orders.",
-        tradeoff: "CASCADE is convenient but dangerous for big tables (one delete can remove thousands of children silently).",
-        code: "ALTER TABLE orders\n  ADD CONSTRAINT fk_cust\n  FOREIGN KEY (customer_id) REFERENCES customers(id)\n  ON DELETE CASCADE;   -- deleting customer deletes their orders\n  -- ON DELETE SET NULL keeps orders, clears the link",
+        description: "ON DELETE CASCADE automatically deletes child rows when a parent row is deleted. ON DELETE SET NULL sets the foreign key column to NULL instead.",
+        example: "A customers table and an orders table. ON DELETE CASCADE means deleting a customer automatically deletes all their orders. ON DELETE SET NULL means the orders keep the record but with customer_id set to NULL (if the column allows NULL).",
+        code: "-- CASCADE: delete customer → auto-delete their orders\nALTER TABLE orders ADD CONSTRAINT fk_customer\n  FOREIGN KEY (customer_id) REFERENCES customers(id)\n  ON DELETE CASCADE;\n\n-- SET NULL: delete customer → set customer_id to NULL\nALTER TABLE orders ADD CONSTRAINT fk_customer\n  FOREIGN KEY (customer_id) REFERENCES customers(id)\n  ON DELETE SET NULL;"
       },
     ],
     scenarios: [
       {
-        what: "Find the 2nd highest salary — interviewers want to see multiple approaches.",
-        how: "1) LIMIT/OFFSET simple query. 2) Subquery: MAX of salaries less than the max. 3) DENSE_RANK() window function (works for Nth, not only 2nd).",
-        why: "Shows you know basic pagination, subqueries and window functions.",
-        code: "-- 1)\nSELECT DISTINCT salary FROM emp ORDER BY salary DESC LIMIT 1 OFFSET 1;\n-- 2)\nSELECT MAX(salary) FROM emp WHERE salary < (SELECT MAX(salary) FROM emp);\n-- 3)\nSELECT salary FROM (\n  SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) rk FROM emp\n) t WHERE rk = 2;",
+        description: "Find the second highest salary — write it 3 different ways (LIMIT, DENSE_RANK, subquery).",
+        example: "You are a coach who wants to award a runner-up prize. The highest earner gets the first prize. The second highest gets the second prize. Without DISTINCT, if the top salary appears twice, a naive query would return the same person twice — you need to handle duplicates correctly.",
+        code: "-- Method 1: LIMIT + OFFSET\nSELECT DISTINCT salary FROM emp ORDER BY salary DESC LIMIT 1 OFFSET 1;\n\n-- Method 2: DENSE_RANK\nSELECT salary FROM (\n  SELECT DISTINCT salary,\n    DENSE_RANK() OVER (ORDER BY salary DESC) rn\n  FROM emp\n) t WHERE rn = 2;\n\n-- Method 3: subquery\nSELECT MAX(salary) FROM emp WHERE salary < (SELECT MAX(salary) FROM emp);"
       },
       {
-        what: "Employees with NO matching order — classic 'find rows without a match' question.",
-        how: "LEFT JOIN orders and keep rows where order id IS NULL, or use NOT EXISTS / NOT IN. NOT EXISTS is usually the most efficient and NULL-safe.",
-        why: "NOT IN fails silently when the subquery contains NULLs — prefer NOT EXISTS.",
-        tradeoff: "NOT EXISTS → anti-join, optimizer handles it well on big tables.",
-        code: "SELECT e.name FROM emp e\nLEFT JOIN orders o ON o.emp_id = e.id\nWHERE o.id IS NULL;\n\n-- or\nSELECT name FROM emp e\nWHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.emp_id = e.id);",
+        description: "Find employees who have never placed an order.",
+        example: "You are a CRM manager. Some customers have never placed an order. You need to find all of them. INNER JOIN would exclude them; LEFT JOIN would show them with NULL order columns; NOT EXISTS or LEFT JOIN + IS NULL would surface them.",
+        code: "-- Using LEFT JOIN + IS NULL\nSELECT c.name\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.id IS NULL;\n\n-- Using NOT EXISTS\nSELECT name FROM customers c\nWHERE NOT EXISTS (\n  SELECT 1 FROM orders o WHERE o.customer_id = c.id\n);"
       },
       {
-        what: "Delete duplicate rows but keep one copy of each.",
-        how: "Number rows inside each duplicate group with ROW_NUMBER() ordered by id; keep rn = 1, delete rn > 1 (CTE or subquery).",
-        why: "Manual one-by-one deletes are slow and error-prone; this is a single statement.",
-        scenario: "Clean a table after a buggy data load duplicated records.",
-        code: "WITH d AS (\n  SELECT id, ROW_NUMBER() OVER (PARTITION BY email ORDER BY id) rn\n  FROM users\n)\nDELETE FROM users WHERE id IN (SELECT id FROM d WHERE rn > 1);",
+        description: "Find and delete duplicate rows keeping one record.",
+        example: "You are cleaning a customer list that has duplicate entries. You want to keep one copy and delete the rest. Using a subquery with ROW_NUMBER() to identify duplicates and then deleting the extras.",
+        code: "-- Find duplicates\nDELETE FROM customers\nWHERE id NOT IN (\n  SELECT MIN(id) FROM customers\n  GROUP BY email, phone\n);\n\n-- Or using window function\nDELETE FROM customers\nWHERE ctid NOT IN (\n  SELECT ctid FROM (\n    SELECT ctid, ROW_NUMBER() OVER (PARTITION BY email, phone ORDER BY id) rn\n    FROM customers\n  ) t WHERE rn = 1\n);"
       },
       {
-        what: "Slow query on 10 million rows — walk through a systematic tuning process.",
-        how: "1) Run EXPLAIN — look for Seq Scan / wrong join order. 2) Add/fix index on WHERE + ORDER BY columns. 3) Select only needed columns (no SELECT *). 4) Reduce rows early (WHERE before joining). 5) Check stats are fresh. 6) If still slow, consider partitioning or caching.",
-        why: "Interviewers want to see a method, not a guess.",
-        tradeoff: "Every index speeds reads but slows writes — add indexes only for hot query patterns.",
-        code: "EXPLAIN ANALYZE SELECT ...;\nCREATE INDEX idx_orders_cust_date ON orders(customer_id, created_at);",
+        description: "A query on 10M rows is slow — step-by-step how do you tune it?",
+        example: "You are a consultant brought in when a dashboard is slow. You check the query plan (is it scanning the whole table?), then add indexes on WHERE and JOIN columns, rewrite the query to reduce work, cache results if appropriate, and finally consider partitioning if the table is still too large.",
+        code: "-- Step 1: EXPLAIN ANALYZE\nEXPLAIN ANALYZE SELECT * FROM orders WHERE customer_id = 123;\n\n-- Step 2: Add index\nCREATE INDEX idx_orders_customer ON orders(customer_id);\n\n-- Step 3: Reduce columns\nSELECT id, total FROM orders WHERE customer_id = 123;"
       },
       {
-        what: "Compare each month's revenue with the previous month in one query.",
-        how: "Use LAG(amount) OVER (ORDER BY month) to get previous month's value, then compute (current - previous) / previous * 100.",
-        why: "Window functions avoid slow self-joins for this kind of report.",
-        code: "SELECT month, revenue,\n  ROUND( (revenue - LAG(revenue) OVER (ORDER BY month))\n        / LAG(revenue) OVER (ORDER BY month) * 100, 1 ) AS pct_growth\nFROM monthly_revenue;",
+        description: "Month-over-month revenue growth with a single query.",
+        example: "You are looking at a finance dashboard. You need to show this month's revenue and what percentage of the previous month's revenue it is. Using LAG() window function lets you compare without a self-join.",
+        code: "SELECT month, revenue,\n  ROUND( (revenue - LAG(revenue) OVER (ORDER BY month)) /\n        LAG(revenue) OVER (ORDER BY month) * 100, 1 ) AS pct_growth\nFROM monthly_revenue;"
       },
       {
-        what: "Top 3 earners inside EVERY department (N per group).",
-        how: "ROW_NUMBER() with PARTITION BY department ORDER BY salary DESC, then keep rn <= 3.",
-        why: "LIMIT alone cannot do 'top N per group' — that's exactly what window functions are for.",
-        code: "SELECT * FROM (\n  SELECT name, dept, salary,\n    ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) rn\n  FROM emp\n) t WHERE rn <= 3;",
+        description: "ROW_NUMBER() with PARTITION BY numbers rows inside each group, so you can keep only the top N rows per department.",
+        example: "HR wants the 3 highest-paid employees in each department for a bonus list. Rank employees within each department by salary descending, then keep ranks 1 to 3. Use DENSE_RANK() instead when tied salaries should share the same rank.",
+        code: "SELECT * FROM (\n  SELECT name, dept, salary,\n    ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) rn\n  FROM emp\n) t\nWHERE rn <= 3;"
       },
       {
-        what: "Running (cumulative) total ordered by date.",
-        how: "SUM() as a window function with ORDER BY and ROWS UNBOUNDED PRECEDING — sums from the first row to the current row.",
-        why: "Alternative (correlated subquery) is O(n²); window SUM is one scan.",
-        code: "SELECT day, amount,\n  SUM(amount) OVER (ORDER BY day ROWS UNBOUNDED PRECEDING) AS running_total\nFROM sales;",
+        description: "A running total is the sum of all rows up to the current row in a defined order — computed with a window function over an ordered frame, no self-join or loop needed.",
+        example: "In a bank passbook every entry shows the balance after that transaction. SUM() OVER (ORDER BY day) gives cumulative revenue day by day — finance dashboards use exactly this for 'total till date'.",
+        code: "SELECT day, amount,\n  SUM(amount) OVER (\n    ORDER BY day\n    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n  ) AS running_total\nFROM transactions;"
       },
       {
-        what: "Insert data into a table that has foreign keys — order and constraints matter.",
-        how: "Insert parent rows first, then children. Or load with FK checks deferred / disable-check-load-revalidate for bulk migration. Batch inserts and wrap in one transaction so failures roll back cleanly.",
-        why: "Otherwise the first child insert fails with 'foreign key constraint violated'.",
-        tradeoff: "Disabling checks is fast but risky — always re-validate at the end.",
-        code: "BEGIN;\nINSERT INTO customers ...;   -- parents first\nINSERT INTO orders ...;      -- then children\nCOMMIT;",
+        description: "Load data in dependency order (parents before children), keep FK validation on but load in chunks, and verify counts and orphans before switching traffic over.",
+        example: "Migrating customers, orders and order_items from a legacy DB into a schema that already has foreign keys. Insert customers first, then orders, then item_items — one transaction per chunk — then run an orphan check (LEFT JOIN ... IS NULL) and compare row counts with the source before going live.",
+        code: "-- parents first, then children, in batches\nINSERT INTO customers SELECT * FROM legacy.customers;\nINSERT INTO orders    SELECT * FROM legacy.orders;\nINSERT INTO order_items SELECT * FROM legacy.order_items;\n\n-- validation: must return 0 rows\nSELECT o.id FROM orders o\nLEFT JOIN customers c ON c.id = o.customer_id\nWHERE c.id IS NULL;"
       },
       {
-        what: "Paginating millions of rows: OFFSET vs keyset (seek) pagination.",
-        how: "OFFSET skips N rows — the DB still reads and throws away all of them, so page 50000 is slow. Keyset uses the last row's sort values as a cursor: WHERE (created_at, id) < (?, ?) ORDER BY ... LIMIT 20.",
-        why: "Infinite scroll / 'load more' on big tables must use keyset — offset gets slower with every page.",
-        tradeoff: "Keyset can't jump to arbitrary page numbers (only next/previous).",
-        code: "-- page 1\nSELECT * FROM posts ORDER BY created_at DESC, id DESC LIMIT 20;\n-- page 2 (cursor = last row of page 1)\nSELECT * FROM posts\nWHERE (created_at, id) < ('2024-05-01 10:00', 1042)\nORDER BY created_at DESC, id DESC LIMIT 20;",
+        description: "OFFSET skips and counts rows on every page — O(n) and slower as pages grow. Keyset (seek) pagination filters from the last seen sort key — O(log n) with the right index, and never skips rows when data shifts.",
+        example: "Instagram-style infinite scroll on millions of posts: OFFSET 999900 still walks 999,900 rows just to serve 20 — page 5000 is unusable. Keyset jumps straight to the position after the last (created_at, id) using the index, so every page costs the same.",
+        code: "-- OFFSET: slow on deep pages\nSELECT * FROM posts ORDER BY created_at DESC LIMIT 20 OFFSET 100000;\n\n-- Keyset / seek: constant cost, stable pagination\nSELECT * FROM posts\nWHERE (created_at, id) < (:last_ts, :last_id)\nORDER BY created_at DESC, id DESC\nLIMIT 20;"
       },
       {
-        what: "Design a composite (multi-column) index that matches WHERE a=? AND b=? ORDER BY c.",
-        how: "Index column order: equality columns first, then ordering column → INDEX (a, b, c). This lets the DB both filter and return rows already sorted, avoiding a filesort.",
-        why: "Wrong order (c, a, b) makes the index mostly useless for this query.",
-        tradeoff: "One composite index can serve many queries (prefix rule: leftmost columns), but too-wide indexes slow writes.",
-        code: "CREATE INDEX idx_a_b_c ON orders (a, b, c);\n-- WHERE a = 1 AND b = 2 ORDER BY c  → index range scan, no sort",
+        description: "Index column order matters: equality columns first, then the ORDER BY column. For WHERE a=? AND b=? ORDER BY c the ideal index is (a, b, c) — it serves both filters and avoids a separate sort step.",
+        example: "A product listing API filters by brand and in-stock, sorted by price. Index (brand, in_stock, price) lets the DB seek the two equality columns and read rows already in price order — EXPLAIN shows one Index Scan and no Sort node.",
+        code: "CREATE INDEX idx_prod_brand_stock_price\n  ON products (brand, in_stock, price);\n\nEXPLAIN ANALYZE\nSELECT * FROM products\nWHERE brand = 'Nike' AND in_stock = true\nORDER BY price ASC;\n-- expect: Index Scan, no \"Sort\" node"
       },
     ],
   },
   java: {
     important: [
       {
-        what: "Four pillars of OOP: Encapsulation, Abstraction, Inheritance, Polymorphism.",
-        how: "Encapsulation = hide fields (private) and expose via getters/setters. Abstraction = show only 'what it does', hide 'how' (abstract class / interface). Inheritance = child reuses parent code (extends). Polymorphism = same method name behaves differently for different objects.",
-        why: "Makes code reusable, secure and easy to change without touching everything.",
-        tradeoff: "Deep inheritance chains become hard to understand — prefer composition over inheritance when possible.",
-        code: "class Account { private double bal; }           // encapsulation\nabstract class Shape { abstract double area(); }  // abstraction\nclass Circle extends Shape { ... }                // inheritance\nShape s = new Circle(); s.area();                  // polymorphism",
+        description: "Encapsulation (hide state behind accessors), Inheritance (reuse and extend a base class), Polymorphism (one reference type, many implementations), Abstraction (expose what, hide how).",
+        example: "A checkout module talks to an abstract PaymentService with charge(). CreditCardService and WalletService implement it differently — checkout never cares which one it got. Fields stay private (encapsulation), WalletService extends PaymentService (inheritance), charge() runs the subclass code (polymorphism).",
+        code: "abstract class Payment { abstract void charge(int amt); }\nclass Card extends Payment {\n  private int balance;                          // encapsulation\n  @Override void charge(int amt) { balance -= amt; }\n}\nPayment p = new Card();\np.charge(100);                                  // abstraction: code sees only Payment"
       },
       {
-        what: "== compares REFERENCES (same object?), .equals() compares CONTENT (values same?), hashCode() returns a number used by hash-based collections.",
-        how: "Two different String objects with same text: a == b is false but a.equals(b) is true. HashMap first uses hashCode() to pick a bucket, then uses equals() to find the exact key inside that bucket.",
-        why: "If you override equals() you MUST also override hashCode() — otherwise equal objects land in different buckets and HashMap lookups fail.",
-        tradeoff: "Bad hashCode = many collisions = slow map (long chain in one bucket).",
-        code: "class User {\n  boolean equals(Object o) { return id == ((User)o).id; }\n  int hashCode() { return Objects.hash(id); }\n}",
+        description: "== compares object references (memory address), .equals() compares content (override it), and hashCode() must return the same value for equal objects so hash-based collections can find them.",
+        example: "new String(\"Hi\") == new String(\"Hi\") is false — two different objects in memory, but .equals() is true. In a HashMap, if you override equals() but forget hashCode(), two equal keys hash to different buckets and the lookup silently returns null — one of the most common Java bugs.",
+        code: "String a = new String(\"Hi\"), b = new String(\"Hi\");\na == b        // false - different objects\na.equals(b)   // true  - same content\n// rule for HashMap keys: a.equals(b)  =>  a.hashCode() == b.hashCode()"
       },
       {
-        what: "String is IMMUTABLE (never changes), StringBuilder is mutable and fast, StringBuffer is mutable but synchronized (thread-safe).",
-        how: "In a loop, s = s + x creates a new String object every iteration → lots of garbage. StringBuilder keeps one internal char[] and appends in place. StringBuffer does the same but locks on every method.",
-        why: "Use String for constants, StringBuilder for normal building (fastest), StringBuffer only when multiple threads share one builder.",
-        tradeoff: "StringBuffer is slower than StringBuilder because of synchronized overhead.",
-        code: "String s = \"\";\nfor (int i=0; i<10000; i++) s += \"a\";      // slow, 10000 objects\nStringBuilder sb = new StringBuilder();\nfor (int i=0; i<10000; i++) sb.append(\"a\"); // fast, 1 object",
+        description: "String is immutable — every change creates a new object. StringBuilder is mutable and fast (no synchronization). StringBuffer is mutable and synchronized — thread-safe but slower.",
+        example: "Building a 10,000-line CSV with s = s + line inside a loop creates 10,000 throwaway objects and burns CPU. StringBuilder.append reuses one buffer — typically 100x faster. StringBuffer only makes sense when multiple threads share the same builder.",
+        code: "String s = \"\";                 for (...) s += line;          // new object each time\nStringBuilder sb = new StringBuilder(); for (...) sb.append(line);  // fast, single buffer\nStringBuffer tb = new StringBuffer();  tb.append(line);             // thread-safe variant"
       },
       {
-        what: "final = constant / cannot be overridden. finally = block that always runs after try/catch (cleanup). finalize() = old GC callback, deprecated since Java 9 — do not use.",
-        how: "final variable → assign once, never changes. final method → subclass cannot override it. finally runs even if return happens in try — perfect for closing resources (today we use try-with-resources).",
-        why: "final gives safety (immutable values), finally guarantees cleanup.",
-        tradeoff: "finalize() timing is unpredictable (JVM decides) → use AutoCloseable/try-with-resources instead.",
-        code: "try { open(file); } finally { close(file); }  // always closes\nfinal int MAX = 100;  // MAX = 200; → compile error",
+        description: "final = keyword: constant variable, method that cannot be overridden, class that cannot be extended. finally = block that always runs after try/catch (cleanup). finalize() = legacy GC hook, deprecated since Java 9.",
+        example: "Closing a JDBC connection in finally guarantees it closes even when the exception propagates — code after try would be skipped. Today you use try-with-resources instead, because finalize() timing depends on the GC and is not guaranteed to ever run.",
+        code: "final int LIMIT = 10;                 // cannot reassign\ntry { risky(); } finally { conn.close(); }   // always runs\n// protected void finalize() { ... }  - deprecated, do not rely on it"
       },
       {
-        what: "Abstract class = can have fields, constructors, regular + abstract methods; a class can extend only ONE. Interface = mostly abstract + default/static methods; a class can implement MANY.",
-        how: "Abstract class gives shared state and partial implementation to related classes (is-a family). Interface defines a capability unrelated classes can have (can-do), enabling multiple inheritance of type.",
-        why: "Choose interface for multiple implementations / loose coupling; abstract class when you need shared code and state.",
-        tradeoff: "Java 8 default methods let interfaces have some code, but interfaces still cannot hold per-instance state.",
-        code: "interface Payable { default void pay() { ... } }\nabstract class Vehicle { protected int wheels; abstract void start(); }\nclass Car extends Vehicle implements Payable { ... }",
+        description: "Abstract class: state, constructors, any access modifier — you extend only one. Interface: a pure contract, with default/static methods since Java 8 — you can implement many.",
+        example: "Shared config and state for a family of services → abstract BaseService. Just a capability like Comparable or Payable → interface. Default methods let an interface ship code (like Iterable.forEach) without breaking every existing implementation.",
+        code: "abstract class Base { protected String name; abstract void run(); void log() {...} }\ninterface Payable { double calc(int amt); default void print() {...} }\nclass Job extends Base implements Payable { /* 1 class, many interfaces */ }"
       },
       {
-        what: "Overloading = same method NAME, different parameters, in the SAME class (compile time). Overriding = child redefines parent's exact method signature (runtime).",
-        how: "Overloading: print(int) vs print(String) — compiler picks by argument types. Overriding: @Override void sound() in subclass — JVM picks the actual object type at runtime (dynamic dispatch).",
-        why: "Overloading = flexible API; overriding = specialize parent behavior.",
-        tradeoff: "Rules: overriding cannot reduce access, return type may be covariant; static methods hide, not override.",
-        code: "void log(String m) { ... }\nvoid log(String m, int lvl) { ... }   // overloading\nclass Dog extends Animal {\n  @Override void sound() { System.out.println(\"bark\"); }  // overriding\n}",
+        description: "Overloading = same method name, different parameter list, resolved at COMPILE time. Overriding = subclass redefines the parent's identical signature, resolved at RUNTIME through dynamic dispatch.",
+        example: "print(int) and print(String) are two overloads — javac picks based on the argument you pass. But when Shape s = new Child(); s.draw(); runs, Child.draw() executes even though the variable type is Shape — the runtime object decides.",
+        code: "class A { void go(int x) {...} void go(String s) {...} }  // overloading (compile time)\nclass B extends A { @Override void go(int x) {...} }        // overriding (runtime)\nA a = new B();\na.go(1);   // calls B.go - virtual dispatch"
       },
       {
-        what: "Checked exceptions MUST be handled or declared (compiler forces you): IOException, SQLException. Unchecked (RuntimeException) happen at runtime: NullPointerException, ArrayIndexOutOfBounds.",
-        how: "Checked → either try/catch or throws in method signature. Unchecked → compiler forces nothing; usually caused by coding bugs or missing input checks.",
-        why: "Catch only what you can recover from (file not found → show message). Don't catch Exception everywhere — it hides bugs.",
-        tradeoff: "Over-catching checked exceptions makes code noisy; ignoring unchecked ones crashes at runtime.",
-        code: "try { read(file); }\ncatch (FileNotFoundException e) { show(\"file missing\"); }  // recoverable\nthrow new IllegalArgumentException(\"bad age: \" + age);       // unchecked",
+        description: "Checked exceptions (IOException, SQLException) must be caught or declared with throws — the compiler enforces it. Unchecked exceptions (NullPointerException, IllegalArgumentException) are programming errors and are never forced on you.",
+        example: "Reading a file means handling FileNotFoundException — a real-world failure the compiler makes you plan for. Passing a null argument into a method is a bug: fix the code, don't wrap it in try/catch. Business failures (order rejected) should be a custom unchecked exception carrying an error code.",
+        code: "try { Files.readString(path); }          // checked - must catch or throw\n  catch (IOException e) { log.error(\"read failed\", e); }\n\nthrow new IllegalArgumentException(\"qty must be > 0\");  // unchecked"
       },
       {
-        what: "Java memory basics: HEAP stores objects & arrays (shared by all threads). STACK stores method frames — local variables, parameters, call chain (one stack per thread). METASPACE stores class metadata.",
-        how: "When you write new Object(), it goes to heap. Each thread gets its own stack; when a method is called a frame is pushed with its locals; when it returns the frame is popped (instant free). Stack never holds big shared objects.",
-        why: "Explains both common errors: StackOverflowError = too deep recursion; OutOfMemoryError = heap full (leak or too much data).",
-        tradeoff: "Stack access is faster than heap, but stack memory is small and auto-freed.",
-        code: "main() stack frame\n └ calc() frame → local vars, refs (pointers)\nHeap: [User@1] [Order@2]  ← shared, GC cleans unused",
+        description: "The stack holds method frames — locals and references — is thread-private and auto-freed on return. The heap holds all objects and arrays, is shared between threads, and is managed by the GC. Metaspace stores class metadata.",
+        example: "Calling placeOrder() pushes a frame containing the order id and a reference to the Cart. The Cart object itself lives on the heap. When the method returns, the frame disappears; the Cart stays until nothing references it, then GC collects it.",
+        code: "void placeOrder() {\n  int id = 10;                  // primitive -> stack\n  Cart c = new Cart();          // reference -> stack, Cart object -> heap\n}                               // frame popped; Cart eligible for GC if unreferenced"
       },
       {
-        what: "Garbage Collection (GC) automatically frees objects that are no longer reachable, so you don't delete memory manually.",
-        how: "JVM divides heap: Young Gen (new objects → minor GC, fast, most objects die young) and Old Gen (survivors → major/full GC, slower). Object survives minor GCs → promoted to old gen. Reachable from stack/statics = alive; otherwise garbage. Modern collectors: G1 (default), ZGC for low pause.",
-        why: "You cannot force useful GC; you prevent memory leaks by removing references (clear collections, close resources, avoid static caches without eviction).",
-        tradeoff: "GC pauses can cause latency spikes — that's why collector choice and heap sizing matter in production.",
-        code: "Object o = new Object();  // reachable → alive\no = null;                  // unreachable → eligible for GC",
+        description: "GC frees unreachable objects. New objects live in the Young generation — Minor GC moves survivors to the Old generation; Full GC cleans the Old generation. G1 (default) collects regions incrementally against a pause goal; ZGC targets sub-millisecond pauses.",
+        example: "Every request creates thousands of short-lived DTOs — they die in Eden almost immediately, so Minor GC is cheap. Cached sessions survive and get promoted to Old Gen. A memory leak means objects stay reachable forever (a static map nobody clears) → Old Gen fills → Full GC thrashes → OutOfMemoryError.",
+        code: "// java -Xmx512m -Xlog:gc* app.jar\njmap -histo:live <pid>     // top classes by instance count -> spot the leak\n// -XX:+UseG1GC (default) | -XX:+UseZGC for low-latency"
       },
       {
-        what: "Collections framework = hierarchy of containers: LIST (ordered, duplicates OK), SET (no duplicates), MAP (key → value, keys unique).",
-        how: "List: ArrayList (array, fast read), LinkedList (nodes, fast insert at ends). Set: HashSet (hash), LinkedHashSet (insertion order), TreeSet (sorted). Map: HashMap (fast), LinkedHashMap (order), TreeMap (sorted), ConcurrentHashMap (thread-safe).",
-        why: "Choosing the right container decides your program's speed.",
-        tradeoff: "TreeSet/TreeMap keep data sorted but operations are O(log n) vs O(1) for HashSet/HashMap.",
-        code: "List<String> list = new ArrayList<>();     // duplicates OK, order kept\nSet<String> set = new HashSet<>();          // unique only\nMap<String,Integer> map = new HashMap<>();  // key-value",
+        description: "List = ordered, allows duplicates (ArrayList, LinkedList). Set = unique elements (HashSet, LinkedHashSet, TreeSet). Map = key→value pairs with unique keys (HashMap, LinkedHashMap, TreeMap).",
+        example: "A shopping list with repeat items → List. Unique visitor emails → Set. Product id → Product for O(1) lookup on every page render → Map. Need results sorted by name → TreeSet / TreeMap.",
+        code: "List<String> list = new ArrayList<>();          // ordered, allows duplicates\nSet<String> set = new HashSet<>();              // unique only\nMap<String, Product> map = new HashMap<>();     // O(1) get by key"
       },
       {
-        what: "HashMap = array of 'buckets' + linked list/tree inside each bucket for collisions.",
-        how: "put(key): 1) hash the key, 2) bucket index = hash & (n-1), 3) empty bucket → insert; same key → replace; collision → chain (linked list), chain > 8 converts to balanced TREE (Java 8). When size > capacity × load factor (0.75) → resize (double) and rehash.",
-        why: "Average O(1) get/put — the most asked Java internals question.",
-        tradeoff: "Bad hashCode → everything in one bucket → O(n) like a list.",
-        code: "bucket[0]: null\nbucket[1]: (k1,v1) → (k2,v2) → (k3,v3)   // chain after collisions\nresize when size > 16 * 0.75 = 12",
+        description: "HashMap is an array of buckets. hash(key) picks a bucket; collisions form a linked list that becomes a red-black tree at 8 entries. Default capacity 16, load factor 0.75 — it doubles and rehashes at 12 entries.",
+        example: "Looking up 100k products by id is near O(1) because the hash jumps straight to the bucket. A key with a bad hash (or equals without hashCode) piles everything into one chain and lookups degrade to O(n) — which is why both methods must be implemented correctly for custom keys.",
+        code: "h = key.hashCode() ^ (key.hashCode() >>> 16);  // spread high bits\nindex = (capacity - 1) & h;                     // bucket index\n// bin: linked list -> treeify at 8; resize when size > capacity * 0.75"
       },
       {
-        what: "ArrayList = dynamic array; LinkedList = doubly-linked list of nodes.",
-        how: "ArrayList: contiguous memory → get(i) is O(1); insert/delete in middle = O(n) (elements shift). LinkedList: get(i) = O(n) (must walk nodes); insert/delete at known node = O(1) (just relink pointers).",
-        why: "In real code ArrayList wins almost always — cache locality makes it fast; LinkedList's node objects add overhead.",
-        tradeoff: "LinkedList only helps if you iterate a lot AND insert/remove at the cursor position.",
-        code: "list.get(5000)  → ArrayList: 1 step, LinkedList: 5001 steps\nlist.add(0, x)  → both need shifting/walking, O(n)",
+        description: "ArrayList is a dynamic array: O(1) get by index, O(n) insert/delete in the middle. LinkedList is doubly linked: O(1) add/remove once you hold the node, but O(n) to reach index i — and it wastes memory on node pointers.",
+        example: "Random reads like get(5000) or append-heavy logs → ArrayList (and it's cache-friendly). Frequent add/remove at head/tail through an iterator → Deque. In practice ArrayList wins for almost every real workload; even the JDK recommends ArrayDeque over LinkedList for stacks/queues.",
+        code: "list.get(5000);   // ArrayList O(1) | LinkedList O(n)\nlist.add(0, x);   // ArrayList shifts O(n); LinkedList O(1) after cursor\nDeque<String> dq = new ArrayDeque<>();   // stack/queue - not LinkedList"
       },
       {
-        what: "synchronized = exclusive lock (only one thread runs the block/method). volatile = visibility only (all threads see the latest value). Lock (ReentrantLock) = programmatic lock with tryLock/timeout.",
-        how: "synchronized gives mutual exclusion + memory visibility: writes flushed on release → next thread sees them. volatile reads/writes go to main memory, but compound ops (i++) are still NOT atomic. Lock API adds tryLock(timeout), fairness, interruptible locking.",
-        why: "volatile fixes flags/config (boolean ready). For counters use AtomicLong or synchronized/Lock.",
-        tradeoff: "Locks cost performance — keep the critical section as small as possible.",
-        code: "volatile boolean running = true;             // visibility only\nsynchronized (lock) { counter++; }           // atomic\nif (lock.tryLock(100, MILLISECONDS)) { ... } // give up waiting",
+        description: "volatile gives visibility only (reads/writes hit main memory, no caching). synchronized gives mutual exclusion plus visibility. Lock (ReentrantLock) adds tryLock, timeouts, fairness and interruptible waits.",
+        example: "A refresh thread flips a config flag → volatile boolean so all worker threads see it immediately. Updating a shared balance needs synchronized/Atomic to stop lost updates. A payment thread using tryLock(2, SECONDS) can give up instead of hanging forever — impossible with synchronized.",
+        code: "volatile boolean running = true;            // visibility only\nsynchronized (lock) { balance -= amt; }      // exclusion + visibility\nif (lock.tryLock(2, TimeUnit.SECONDS)) {\n  try { ... } finally { lock.unlock(); }\n}"
       },
       {
-        what: "Deadlock = two threads each wait for the other's lock forever. Livelock = threads keep reacting, making no progress. Starvation = a thread never gets the lock because others always take it.",
-        how: "Classic deadlock: Thread A locks X then Y; Thread B locks Y then X — both stuck. Detected with jstack / ThreadMXBean.findDeadlockedThreads().",
-        why: "Prevention: acquire locks in ONE global order, use tryLock with timeout, don't hold locks during slow I/O.",
-        tradeoff: "tryLock adds code complexity but breaks circular waits — the standard fix.",
-        code: "T1: lock(A); ... lock(B);\nT2: lock(B); ... lock(A);   → deadlock\nFIX: both threads lock(A) first, then lock(B)",
+        description: "Deadlock: two threads each hold one lock and wait for the other — both block forever. Livelock: threads keep reacting to each other and never make progress. Starvation: a thread never wins the resource because others always take it first.",
+        example: "A transfer service: thread A locks account1 then asks for account2, while thread B locks account2 then asks for account1 — during a double transfer both hang forever. Fix: always acquire locks in a fixed order (sort account ids) or use tryLock with a timeout.",
+        code: "// deadlock: T1 holds X waits Y, T2 holds Y waits X\n// fix 1: consistent lock ordering\nif (a.getId() > b.getId()) { lock(b); lock(a); } else { lock(a); lock(b); }\n// fix 2: give up instead of blocking forever\nlock.tryLock(100, TimeUnit.MILLISECONDS);"
       },
       {
-        what: "Lambda = a small anonymous function you can pass around: (args) -> expression. Functional interface = interface with exactly ONE abstract method (that's the target type of the lambda).",
-        how: "Common ones: Predicate<T> (test → boolean), Function<T,R> (apply → R), Consumer<T> (accept → void), Supplier<T> (get → value). Compiler infers types from the interface.",
-        why: "Lambdas remove boilerplate anonymous classes and enable clean Streams/callbacks.",
-        tradeoff: "Long multi-line lambdas hurt readability — extract a named method instead.",
-        code: "Predicate<String> isEmpty = s -> s.isEmpty();\nlist.removeIf(isEmpty);\nlist.sort((a, b) -> a.getName().compareTo(b.getName()));",
+        description: "A lambda is an anonymous function bound to a functional interface (exactly one abstract method): Predicate<T> filters, Function<T,R> maps, Supplier<T> produces, Consumer<T> consumes.",
+        example: "list.stream().filter(p -> p.getPrice() < 100) — the lambda is a Predicate<Product>. Behavior becomes data you can pass around, instead of writing a five-line anonymous inner class for every callback.",
+        code: "Predicate<Product> cheap = p -> p.getPrice() < 100;\nFunction<Product, String> name = Product::getName;\nConsumer<String> log = System.out::println;\nlist.stream().filter(cheap).map(name).forEach(log);"
       },
       {
-        what: "Streams = lazy pipeline for processing collections in a declarative way (filter/map/reduce) without mutating the source.",
-        how: "Intermediate ops (filter, map, sorted) build the pipeline but run NOTHING. Terminal op (collect, count, forEach) triggers execution in one pass. Stream does not store data — it flows through operators (like an assembly line).",
-        why: "One line replaces multi-line loops, is readable, and can run parallel with .parallelStream().",
-        tradeoff: "Streams don't modify the original list; debugging is harder (no breakpoint inside pipeline) — keep pipelines short.",
-        code: "List<String> active = users.stream()\n    .filter(u -> u.isActive())\n    .map(User::getName)\n    .sorted()\n    .collect(Collectors.toList());",
+        description: "A stream is a lazy pipeline: intermediate ops (filter, map, sorted) build the chain, a terminal op (collect, forEach) triggers execution. Elements flow one at a time — no intermediate collection is built.",
+        example: "Active premium users sorted by name: filter → map → sorted → collect. Nothing runs until collect(), and each element passes through the whole pipeline before the next one is read. Parallel streams split the work across cores for CPU-heavy jobs on large data.",
+        code: "List<String> names = users.stream()\n  .filter(u -> u.isActive())       // intermediate (lazy)\n  .map(User::getName)              // intermediate\n  .sorted()                        // intermediate\n  .collect(Collectors.toList());   // terminal - triggers execution"
       },
       {
-        what: "Optional<T> is a container that may hold a value or be empty — forces you to think about 'no value' instead of returning null.",
-        how: "Create: Optional.of(x) (x must not be null), Optional.ofNullable(x) (may be null), Optional.empty(). Use: .map/.filter to chain, .orElse(v) / .orElseGet(fn) for default, .ifPresent(fn) to act only if present. .get() alone is NOT safe — avoid it.",
-        why: "Eliminates NullPointerExceptions at call sites and makes method signatures honest: 'this can be empty'.",
-        tradeoff: "Don't put Optional in fields or use it as method parameter — overuse adds noise.",
-        code: "String city = userService.findById(id)\n    .map(User::getAddress)\n    .map(Address::getCity)\n    .orElse(\"Unknown\");",
+        description: "Optional<T> wraps a value that may be absent and forces callers to deal with the empty case explicitly — map, filter, orElse, orElseThrow instead of raw null checks.",
+        example: "repo.findById(id) returning Optional<User> means the caller cannot forget the null check and crash three layers later with NPE. get() on an empty Optional throws immediately at the mistake — fail fast at the right place.",
+        code: "Optional<User> u = repo.findById(id);\nString name = u.map(User::getName).orElse(\"guest\");\nUser strict = u.orElseThrow(() -> new NotFoundException(id));\n// avoid: opt.get() without isPresent(), Optional as a field or setter param"
       },
       {
-        what: "Immutable object = cannot be changed after creation. To make a class immutable: final class, final fields, no setters, constructor copies mutable inputs.",
-        how: "All fields private final, set once in constructor; if a field is a collection, return an unmodifiable copy (List.copyOf / Collections.unmodifiableList). Java record does this automatically.",
-        why: "Thread-safe by design (no locks needed), safe to share and to use as HashMap key.",
-        tradeoff: "Every 'change' creates a new object — fine for small value objects, costly if abused in tight loops.",
-        code: "record Point(int x, int y) {}   // immutable class in 1 line\nPoint p = new Point(3, 4);      // p.withX(5) would return a NEW Point",
+        description: "An immutable class has final fields set by the constructor and no setters — its state can never change after creation. A record (Java 16+) generates the constructor, getters, equals, hashCode and toString for you.",
+        example: "Money and LocalDate are immutable, so you can share them across threads without locks. Records are the default choice for DTOs: an OrderLine(price, qty) passed between services can't be corrupted by another thread, and equals() works in tests for free.",
+        code: "record Money(BigDecimal amount, String currency) {}\n\nMoney m = new Money(new BigDecimal(\"10.00\"), \"EUR\");\nm.amount();                 // accessor, no setter - immutable by design"
       },
       {
-        what: "ClassLoader loads .class files into the JVM. JVM areas: heap (objects), stack (per-thread frames), metaspace (class definitions), PC register. JIT compiler compiles hot bytecode to native machine code.",
-        how: "Delegation model: Application loader asks Parent first (parent-first) → Bootstrap loads java.* → Platform → Application classes. JIT watches frequently executed methods ('hot spots') and compiles them to native code for ~10-100x speed.",
-        why: "Explains ClassNotFoundException vs NoClassDefFoundError and why startup-heavy apps use CDS/AOT.",
-        tradeoff: "Metaspace (replaced PermGen in Java 8) can still leak if classes are loaded dynamically without unloading.",
-        code: "Bootstrap (java.*) → Platform → Application (your code)\nsource .class → bytecode → [JIT] → native code (hot methods)",
+        description: "The JVM loads bytecode through a hierarchy of classloaders (bootstrap → platform → application), verifies it, then interprets/JIT-compiles it. Memory: heap, per-thread stack, metaspace for class metadata.",
+        example: "java.* classes come from the bootstrap loader, your classes from the application loader — each loader has its own namespace, so the same FQN loaded twice by different loaders is NOT the same type. That's how Tomcat isolates webapps, and why an 'impossible' ClassCastException can still happen.",
+        code: "java -verbose:class app.jar     // watch classes load at startup\n// parent delegation: child asks parent first\n// same FQN + different classloader => a instanceof B is false"
       },
       {
-        what: "CompletableFuture = a promise for a value that will arrive later; you can chain and combine async tasks without blocking threads.",
-        how: "supplyAsync(() -> ...) runs in a pool; thenApply = transform result, thenCompose = chain dependent call, thenCombine/allOf = run independent tasks together, exceptionally/handle = recover from errors, orTimeout = fail after time.",
-        why: "Lets one thread orchestrate many parallel calls — much lighter than one thread per task.",
-        tradeoff: "Without timeouts, a slow dependency hangs your whole chain — always set orTimeout/get(timeout).",
-        code: "CompletableFuture<User> u = CompletableFuture.supplyAsync(() -> fetchUser(id))\n    .orTimeout(2, TimeUnit.SECONDS)\n    .exceptionally(ex -> User.guest());",
+        description: "CompletableFuture represents a value arriving later. thenApply/thenCompose chain steps, thenCombine runs two in parallel, allOf waits for all, orTimeout/exceptionally handle failure — on a chosen executor, without blocking caller threads.",
+        example: "A dashboard needs user, orders and recommendations in parallel: start three futures and join with allOf — total latency = the slowest call instead of the sum. If recommendations times out, orTimeout + exceptionally returns defaults so the page still renders.",
+        code: "CompletableFuture<User> u = supplyAsync(() -> api.user(id), pool);\nCompletableFuture<List<Order>> o = supplyAsync(() -> api.orders(id), pool);\nu.thenCombine(o, (uu, oo) -> new Dashboard(uu, oo))\n .orTimeout(2, TimeUnit.SECONDS)\n .exceptionally(ex -> Dashboard.empty());"
       },
     ],
     scenarios: [
       {
-        what: "Find duplicate elements in a list using Streams, in one line.",
-        how: "Collect into a frequency Map, then keep entries with count > 1 (or group and filter).",
-        why: "groupingBy + counting is the standard 'one-liner' interview answer.",
-        code: "List<String> dups = list.stream()\n    .filter(i -> Collections.frequency(list, i) > 1)\n    .collect(Collectors.toSet()).stream().toList();\n// or\nlist.stream().collect(Collectors.groupingBy(x->x, counting()))\n     .entrySet().stream().filter(e->e.getValue()>1).map(Map.Entry::getKey);",
+        description: "Group by the element and count occurrences, keep entries whose count > 1 — or add to a Set and catch the add() returning false.",
+        example: "A login audit lists the same user ids repeatedly. One stream gives every duplicate plus how often it appeared — no loops, no nested maps in the calling code.",
+        code: "List<String> dups = list.stream()\n  .collect(Collectors.groupingBy(x -> x, Collectors.counting()))\n  .entrySet().stream()\n  .filter(e -> e.getValue() > 1)\n  .map(Map.Entry::getKey)\n  .collect(Collectors.toList());"
       },
       {
-        what: "Thread-safe counter: compare synchronized block, AtomicLong, and LongAdder.",
-        how: "synchronized: locks the whole counter (safe, slow under contention). AtomicLong: lock-free CAS loop — thread retries if another updated first. LongAdder: splits into many striped cells and sums at the end — best when MANY threads update frequently.",
-        why: "Shows you understand lock-free concurrency and contention.",
-        tradeoff: "AtomicLong also gives current value instantly; LongAdder is faster to increment but sum() is approximate under concurrency.",
-        code: "private final AtomicLong count = new AtomicLong();\ncount.incrementAndGet();   // lock-free\n// highest contention: LongAdder",
+        description: "synchronized serializes every increment under one lock. AtomicLong uses lock-free CAS on a single field. LongAdder splits contention across cells and sums them on read — best for write-heavy counters.",
+        example: "A request-metrics counter in a busy service: synchronized makes threads ping-pong the cache line, AtomicLong is better but everyone still CASes the same object. Above ~10k increments/s, LongAdder wins — read with sum() when you need the total.",
+        code: "synchronized (lock) { c++; }                     // exclusive lock\nAtomicLong a = new AtomicLong(); a.incrementAndGet();  // CAS, no lock\nLongAdder adder = new LongAdder(); adder.increment();  // high contention\nlong total = adder.sum();"
       },
       {
-        what: "Simple in-memory cache with TTL using ConcurrentHashMap + scheduled cleanup.",
-        how: "Store wrapper objects (value + expireAt). get() checks expiry and returns null if stale. A scheduled task removes expired entries periodically.",
-        why: "Interviewers check if you know ConcurrentHashMap is thread-safe and how to avoid stale data.",
-        code: "record Entry(V value, long expireAt) {}\nV get(K k) { Entry e = map.get(k);\n  if (e == null || System.currentTimeMillis() > e.expireAt()) { map.remove(k); return null; }\n  return e.value(); }",
+        description: "Store value plus expiry timestamp in a ConcurrentHashMap; on get() treat expired entries as missing and remove them, and schedule a sweep so never-read keys still get cleaned up.",
+        example: "Caching FX rates for 60 seconds: get() returns null for a stale entry so the caller reloads; a scheduled executor removes expired entries every minute, keeping memory bounded even for currencies nobody requests again.",
+        code: "record Entry(String value, long expiresAt) {}\nMap<String, Entry> cache = new ConcurrentHashMap<>();\n\nString get(String k) {\n  Entry e = cache.get(k);\n  if (e == null) return null;\n  if (e.expiresAt() < System.currentTimeMillis()) { cache.remove(k); return null; }\n  return e.value();\n}\n// cleanup: cache.entrySet().removeIf(en -> en.getValue().expiresAt() < now)"
       },
       {
-        what: "Producer-consumer deadlock: detect with thread dump, fix by ordering locks / using built-in blocking structures.",
-        how: "jstack <pid> (or VisualVM) shows threads in BLOCKED/waiting state and WHICH locks each holds/waits for → circular wait visible. Fix: single lock for both conditions (wait/notify on it), or use ArrayBlockingQueue/BlockingQueue which handles waiting safely.",
-        why: "Hand-rolled wait/notify bugs are the #1 cause here — say you'd prefer BlockingQueue in real code.",
-        tradeoff: "One lock = simpler and deadlock-free; two locks = less contention but requires strict lock ordering.",
-        code: "BlockingQueue<Task> q = new ArrayBlockingQueue<>(100);\nq.put(task);   // blocks when full (backpressure)\nTask t = q.take(); // blocks when empty",
+        description: "The classic deadlock is waiting while holding the lock (or two threads with inverted wait sets). Fix: a single monitor with wait/signal — wait() releases the lock — or simply use BlockingQueue, which implements this correctly.",
+        example: "Two threads each hold the queue lock while waiting for the other to free space — neither can ever signal. ArrayBlockingQueue.put()/take() await on conditions and release the lock while waiting, breaking the cycle. Always re-check the condition in a while-loop (spurious wakeups).",
+        code: "// broken: waiting while holding the lock / inverted wait sets\n// fix: one condition, await releases the monitor\nsynchronized (q) {\n  while (q.isEmpty()) q.wait();     // releases lock while waiting\n  Item it = q.removeFirst();\n}\n// production: BlockingQueue<Item> q = new ArrayBlockingQueue<>(10);"
       },
       {
-        what: "Process a 2 GB file without OutOfMemoryError.",
-        how: "Never load whole file: stream it line-by-line (BufferedReader.readLine / Files.lines), or use RandomAccessFile/FileChannel to read fixed chunks. For aggregation keep only counters/summary in memory, not the lines.",
-        why: "Default heap may be 512 MB — a 2 GB String in heap = OOM guaranteed.",
-        tradeoff: "Line-by-line is slower than bulk read but uses constant memory — worth it for huge files.",
-        code: "try (Stream<String> lines = Files.lines(path)) {\n  lines.filter(l -> l.contains(\"ERROR\")).count();\n}",
+        description: "Never load the whole file: stream it line by line with BufferedReader / Files.lines() (a lazy Spliterator over the channel), keeping only aggregates in memory. For binary, use FileChannel with MappedByteBuffer.",
+        example: "Summing a 2GB CSV of orders: Files.lines(path).skip(1).mapToLong(...) processes one line at a time — heap stays flat at a few MB even in a 512MB container. Files.readAllLines() would copy everything into a List and immediately OOM.",
+        code: "try (Stream<String> lines = Files.lines(path)) {\n  long total = lines.skip(1)\n    .mapToLong(l -> Long.parseLong(l.split(\",\")[4]))\n    .sum();\n}\n// line loop: BufferedReader.readLine(); binary: FileChannel + MappedByteBuffer"
       },
       {
-        what: "Thread pool sizing: IO-heavy vs CPU-heavy tasks.",
-        how: "CPU-heavy: threads = number of cores (Runtime.availableProcessors()) — more just causes context switching. IO-heavy (DB/API calls, thread mostly waiting): threads = cores × (1 + wait-time/compute-time), often cores × 2 or a fixed 50-100. Never use Executors.newFixedThreadPool(n) blindly; use ThreadPoolExecutor with bounded queue + named threads.",
-        why: "Wrong size = either idle CPU or overwhelmed downstream service.",
-        tradeoff: "Bounded queue + rejection policy protects you from OOM when tasks arrive faster than they finish.",
-        code: "new ThreadPoolExecutor(50, 100, 30, SECONDS,\n    new ArrayBlockingQueue<>(1000), callerRunsPolicy);",
+        description: "CPU-bound pools size around core count to avoid context-switch waste; IO-bound pools go much higher (cores × (1 + wait/compute)) because most threads are blocked, not computing. Bound the queue and add a rejection policy.",
+        example: "An order service doing ~50ms of HTTP calls per request on 8 cores: 8 × (1 + 45/5) ≈ 80 threads keeps cores busy while others wait on the network. A pricing engine crunching numbers stays at 8 threads — 80 compute threads would only thrash the scheduler. An unbounded queue with a small pool silently queues requests and blows up latency.",
+        code: "int cpu = Runtime.getRuntime().availableProcessors();\nint ioPool  = cpu * (1 + waitTime / cpuTime);   // e.g. 8 * (1 + 45/5) = 80\nint cpuPool = cpu;                              // cores (+1 for timing luck)\nnew ThreadPoolExecutor(0, ioPool, 60, SECONDS,\n  new LinkedBlockingQueue<>(1000),\n  new ThreadPoolExecutor.CallerRunsPolicy());    // bounded queue + backpressure"
       },
       {
-        what: "Top-K most frequent words in a large text file.",
-        how: "Stream file line by line → split words → count in HashMap → put counts into a min-heap (PriorityQueue) of size K → heap top = Kth highest → extract = top K.",
-        why: "Sorting the whole map is O(n log n) and needs all counts; heap keeps only K items — O(n log K).",
-        tradeoff: "If the file is huge and doesn't fit, count with a map anyway (distinct words are far fewer than total words) or use two-pass/external tools.",
-        code: "import java.io.BufferedReader;\nimport java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\nimport java.util.*;\nimport java.util.stream.Stream;\n\nstatic Map<String, Integer> topKWords(Path file, int k) throws IOException {\n  if (k <= 0) throw new IllegalArgumentException(\"k must be greater than 0\");\n  Map<String, Integer> counts = new HashMap<>();\n\n  try (BufferedReader reader = Files.newBufferedReader(file)) {\n    String line;\n    while ((line = reader.readLine()) != null) {\n      for (String word : line.toLowerCase(Locale.ROOT).split(\"\\\\s+\")) {\n        if (!word.isBlank()) counts.merge(word, 1, Integer::sum);\n      }\n    }\n  }\n\n  // Min-heap keeps only the k most frequent entries.\n  PriorityQueue<Map.Entry<String, Integer>> heap =\n      new PriorityQueue<>(Map.Entry.comparingByValue());\n\n  for (Map.Entry<String, Integer> entry : counts.entrySet()) {\n    heap.offer(entry);\n    if (heap.size() > k) heap.poll(); // remove least frequent word\n  }\n\n  return new LinkedHashMap<>(heap.stream()\n      .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())\n      .collect(java.util.stream.Collectors.toMap(\n          Map.Entry::getKey, Map.Entry::getValue,\n          (a, b) -> b, LinkedHashMap::new)));\n}\n\n// Usage:\n// Path file = Path.of(\"notes.txt\");\n// System.out.println(topKWords(file, 3));",
-
+        description: "Count frequencies in a HashMap (stream groupingBy), then keep the K largest by count — a min-heap of size K gives O(n log K); sorting every entry is simpler but O(n log n).",
+        example: "Log analysis: the 10 most frequent error codes in a 500MB file. Stream lines, count in a map, sort entries by count descending and limit(10) — with millions of distinct words, a size-K PriorityQueue keeps only the top 10 in memory.",
+        code: "Map<String, Long> freq = words.stream()\n  .collect(Collectors.groupingBy(w -> w, Collectors.counting()));\n\nList<String> top10 = freq.entrySet().stream()\n  .sorted(Map.Entry.<String, Long>comparingByValue().reversed())\n  .limit(10)\n  .map(Map.Entry::getKey)\n  .toList();"
       },
       {
-        what: "Detect a cycle in a linked list / graph — implement iteratively (Floyd's algorithm).",
-        how: "Two pointers: slow moves 1 step, fast moves 2. If a cycle exists they meet inside it. To find where it starts: reset one pointer to head, both move 1 step — they meet at cycle start. Graph: keep a visited Set or use colors (white/gray/black).",
-        why: "O(1) memory for lists (no extra set), and shows you avoid recursion (stack overflow on long lists).",
-        code: "while (slow != null && fast != null) {\n  slow = slow.next; fast = fast.next.next;\n  if (slow == fast) return true;   // cycle\n}",
+        description: "Floyd's tortoise and hare: slow moves 1 step, fast moves 2 — they meet if a cycle exists (O(1) memory). For graphs, DFS with white/gray/black coloring detects a back edge, or Union-Find detects an edge connecting two already-connected vertices.",
+        example: "A corrupted file system where block A's next pointer loops back to block B hangs a naive walk. Floyd's algorithm finds the cycle in a single pass with two pointers — no HashSet of visited nodes, no stack overflow.",
+        code: "boolean hasCycle(Node head) {\n  Node slow = head, fast = head;\n  while (fast != null && fast.next != null) {\n    slow = slow.next;\n    fast = fast.next.next;\n    if (slow == fast) return true;\n  }\n  return false;\n}"
       },
       {
-        what: "API returns lots of nulls — refactor safely with Optional.",
-        how: "Wrap risky lookups with Optional.ofNullable, chain with .map, provide default with .orElse/.orElseGet, handle failure with .ifPresent. Never return raw null from your own methods — return Optional.empty().",
-        why: "Turns nested null checks (a?.b?.c style) into a readable chain and removes NPE risk.",
-        tradeoff: "Boundaries only: convert to plain value at the edge with orElse — don't spread Optional through your whole codebase.",
-        code: "String zip = Optional.ofNullable(resp)\n    .map(R::getUser).map(U::getAddress).map(A::getZip)\n    .orElse(\"00000\");",
+        description: "Wrap every nullable boundary in Optional at the source, chain with map/filter, and resolve once at the edge with orElse or orElseThrow — replacing nested null checks with a readable pipeline.",
+        example: "getUser().getAddress().getCity() NPEs the moment any link is null. Refactored: the chain returns Optional<String> and the controller ends with orElseThrow(NotFoundException) — the failure surfaces at the right layer with a clear message.",
+        code: "String city = Optional.ofNullable(user)\n  .map(User::getAddress)        // Optional<Address>\n  .map(Address::getCity)        // Optional<String>\n  .filter(c -> !c.isBlank())\n  .orElseThrow(() -> new NotFoundException(\"city missing\"));"
       },
       {
-        what: "Run 3 independent API calls in parallel and join, with timeout and failure handling.",
-        how: "Start each with CompletableFuture.supplyAsync on a bounded executor, combine with allOf(...).join(), collect results; use orTimeout + exceptionally for fallback. Because calls are independent, they run concurrently — total time = slowest call, not the sum.",
-        why: "Sequential calls = 3×RTT; parallel = 1×RTT — classic latency optimization.",
-        tradeoff: "AllOf fails fast on first error unless you handle each future's exceptionally — for partial success wrap each individually.",
-        code: "CompletableFuture<Integer> a = supplyAsync(() -> callA()).orTimeout(2, SECONDS);\nCompletableFuture<Integer> b = supplyAsync(() -> callB());\nCompletableFuture<Integer> c = supplyAsync(() -> callC());\nallOf(a, b, c).join();\nint ra = a.join(), rb = b.join(), rc = c.join();",
+        description: "Start each call with supplyAsync on a shared executor, join them with allOf (or thenCombine), and guard latency with orTimeout / completeOnTimeout; absorb failures with handle() so one slow backend can't stall the page.",
+        example: "A dashboard fetches user, orders and recommendations concurrently — total time is the slowest call, not the sum. Recommendations exceeding 1s completes with an empty list, so the page renders in ~1.2s instead of blocking on a broken backend.",
+        code: "Executor ex = Executors.newFixedThreadPool(3);\nCompletableFuture<User> u = supplyAsync(() -> api.user(id), ex);\nCompletableFuture<List<Order>> o = supplyAsync(() -> api.orders(id), ex);\nCompletableFuture<List<Rec>> r = supplyAsync(() -> api.recs(id), ex)\n  .orTimeout(1, TimeUnit.SECONDS)\n  .exceptionally(e -> List.of());\nallOf(u, o, r).thenRun(() -> render(u.join(), o.join(), r.join()));"
       },
     ],
   },
   "spring-boot": {
     important: [
       {
-        what: "Spring Boot = opinionated wrapper over Spring that removes boilerplate setup so you can start a production app with one command.",
-        how: "It auto-configures beans based on the JARs on your classpath, starts an embedded web server (Tomcat by default) with `./mvnw spring-boot:run`, and externalizes config in application.properties/yml. No XML, no manual deployment — it builds an executable JAR.",
-        why: "Reduces setup time from days to minutes; every company uses it for microservices.",
-        tradeoff: "Auto-configuration can feel like magic — you must know how to debug/disable it (@ConditionalOnMissingBean, debug=true).",
-        code: "@SpringBootApplication\npublic class App { public static void main(String[] a) { SpringApplication.run(App.class, a); } }",
+        description: "Spring Boot is an opinionated layer over the Spring Framework that removes boilerplate: auto-configuration, embedded server, starter dependencies and production-ready actuator — you ship one runnable jar.",
+        example: "An API that used to need a day of XML/servlet wiring in classic Spring is now a @RestController plus one dependency: mvn spring-boot:run gives you a running service with logging, health checks and metrics out of the box.",
+        code: "@SpringBootApplication\npublic class App {\n  public static void main(String[] args) { SpringApplication.run(App.class, args); }\n}\n// spring-boot-starter-web -> embedded Tomcat + Spring MVC + JSON"
       },
       {
-        what: "Spring Framework = core (DI, AOP, transactions, MVC). Spring Boot = framework + conventions: auto-configuration, starters, embedded server, production defaults.",
-        how: "Plain Spring needs lots of XML/Java config (dispatcher servlet, view resolver, dependencies). Boot scans your classpath: if spring-boot-starter-web present → configures MVC + Tomcat automatically.",
-        why: "Answer simply: 'Boot makes Spring ready to run with sensible defaults'.",
-        tradeoff: "Boot's magic can hide complexity — for a custom setup you still need underlying Spring knowledge.",
+        description: "Spring is the full IoC container and ecosystem (you configure it). Spring Boot is defaults + auto-configuration on top of Spring — it configures Spring for you, but is not a replacement; every default can be overridden.",
+        example: "With Spring you register DispatcherServlet, message converters and view resolvers yourself. Boot sees spring-webmvc on the classpath and wires them for you — you start at 80% of a working service and customize the rest.",
+        code: "// Spring: explicit wiring\n@Bean DispatcherServlet dispatcherServlet() { ... }\n\n// Boot: picked from the classpath\n// @EnableAutoConfiguration -> WebMvcAutoConfiguration applies automatically"
       },
       {
-        what: "Auto-configuration = Spring Boot decides which beans to create for you, based on which classes are on the classpath and which properties you set.",
-        how: "@SpringBootApplication → @EnableAutoConfiguration imports a list from META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports. Each auto-config class has @ConditionalOnClass / @ConditionalOnMissingBean conditions. Example: if H2 is on classpath and you didn't define a DataSource → Boot creates an embedded one.",
-        why: "It explains 'why did Spring create this bean? — I never wrote it'. Turn on with debug=true to see 'CONDITIONS EVALUATION REPORT'.",
-        tradeoff: "Conditions can surprise you; when Boot's bean conflicts with yours, define your own bean — @ConditionalOnMissingBean backs off.",
-        code: "logging.level.org.springframework.boot.autoconfigure=DEBUG\n-- or run with --debug → prints matched/unmatched conditions",
+        description: "On startup, Boot filters candidate auto-configurations from AutoConfiguration.imports, applies @Conditional rules (class present, bean missing, properties set) and registers only the ones that match your app.",
+        example: "Add spring-boot-starter-data-jpa → DataSourceAutoConfiguration finds Hibernate on the classpath, reads spring.datasource.url and creates the pool. Remove the MySQL driver and it backs off via @ConditionalOnClass. --debug prints 'matched/not matched' for every condition — that's the first thing to check when auto-config 'doesn't work'.",
+        code: "@AutoConfiguration\n@ConditionalOnClass(JdbcTemplate.class)\n@ConditionalOnMissingBean(JdbcTemplate.class)\npublic class JdbcTemplateAutoConfiguration {\n  @Bean JdbcTemplate jdbcTemplate(DataSource ds) { return new JdbcTemplate(ds); }\n}\n// registered in META-INF/.../AutoConfiguration.imports"
       },
       {
-        what: "@SpringBootApplication = @SpringBootConfiguration + @EnableAutoConfiguration + @ComponentScan combined.",
-        how: "@ComponentScan scans packages under the main class's package for @Component/@Service/@Repository/@Controller. @EnableAutoConfiguration triggers auto-config. @SpringBootConfiguration marks the class as a source of bean definitions (also used by @SpringBootTest).",
-        why: "One annotation does the 3 jobs you'd write manually in classic Spring.",
-        tradeoff: "If your main class sits ABOVE other packages, component scan may pick up unwanted beans — put it in the root package only.",
-        code: "@SpringBootApplication(scanBasePackages = \"com.bsk.app\")\npublic class Application { ... }",
+        description: "@SpringBootApplication combines @Configuration (the class can hold beans), @ComponentScan (finds beans under its package) and @EnableAutoConfiguration (applies auto-configs) — three annotations, one line.",
+        example: "Placing App.java at the root of com.example means every @Service below it is scanned. If your entry class sits in a sub-package, beans outside it vanish — the classic 'required a bean of type' startup error. Fix with scanBasePackages or moving the class up.",
+        code: "@SpringBootApplication\n// == @Configuration + @EnableAutoConfiguration + @ComponentScan\n// = new @ComponentScan(basePackages = \"com.example\") + @Configuration"
       },
       {
-        what: "Starter = a curated dependency bundle (just a POM/Gradle snippet) that pulls compatible jars for a capability.",
-        how: "spring-boot-starter-web → Spring MVC + Tomcat + Jackson + validation. spring-boot-starter-data-jpa → Spring Data + Hibernate + HikariCP. Version numbers managed centrally by Boot's parent → no dependency conflicts.",
-        why: "Instead of managing 10 jars yourself, one line brings a tested, aligned set.",
-        tradeoff: "Starters bring transitive dependencies you may not want — check with mvn dependency:tree when conflicts appear.",
-        code: "<dependency>\n  <groupId>org.springframework.boot</groupId>\n  <artifactId>spring-boot-starter-web</artifactId>\n</dependency>",
+        description: "Starters are curated dependency bundles: one artifact pulls a compatible, version-locked set of transitive dependencies for a use case (web, data-jpa, security, test).",
+        example: "Building a JWT-secured REST API: spring-boot-starter-web + starter-security + starter-test bring Spring MVC, Security, JUnit 5 and Mockito — all versions aligned by the Boot BOM, so no jar hell between Hibernate, Jackson and Tomcat.",
+        code: "<dependency><groupId>org.springframework.boot</groupId>\n  <artifactId>spring-boot-starter-web</artifactId></dependency>\n<dependency>...spring-boot-starter-data-jpa</dependency>\n<dependency>...spring-boot-starter-security</dependency>"
       },
       {
-        what: "Dependency injection (DI) = an object does NOT create its dependencies; Spring creates them and injects (constructor, setter, or field).",
-        how: "At startup, the IoC container reads your component classes, instantiates them, resolves constructor parameters by type from the bean registry, and wires everything. Constructor injection is recommended (immutable, easy to test).",
-        why: "Loose coupling: OrderService doesn't know HOW PaymentGateway is built — swap with a mock in tests.",
-        tradeoff: "Field injection (@Autowired on fields) is convenient but hides dependencies and can't be set in plain unit tests — prefer constructor.",
-        code: "@Service\nclass OrderService {\n  private final PaymentGateway gateway;\n  OrderService(PaymentGateway gateway) { this.gateway = gateway; } // constructor injection\n}",
+        description: "Inversion of Control: objects don't construct their dependencies — the container does and injects them. Constructor injection is the standard: final fields, no reflection hacks, trivially mockable in tests.",
+        example: "OrderService needs PaymentClient. Instead of new PaymentClient() inside the service (untestable, hard-wired), the constructor receives it — the unit test passes a mock, and Spring guarantees the dependency exists before the service is used.",
+        code: "@Service\nclass OrderService {\n  private final PaymentClient pay;\n  OrderService(PaymentClient pay) { this.pay = pay; }   // constructor injection\n}\n// test: new OrderService(mockPayClient)"
       },
       {
-        what: "@Component = generic bean. @Service = business logic layer. @Repository = data-access layer (also translates DB exceptions to Spring's DataAccessException). @Controller = handles web requests (MVC views).",
-        how: "All four go into the component scan and become beans. The different names mainly add semantics + special behavior: @Repository gets DB exception translation, @RestController (a @Controller) returns JSON directly instead of a view.",
-        why: "Helps team readability and enables layer-specific features (AOP pointcuts often target @Service/@Repository).",
-        tradeoff: "Functionally at runtime they're mostly the same — the distinction is convention + a few special features.",
-        code: "@Component  → generic\n@Service    → business logic\n@Repository → DAO (+ exception translation)\n@Controller → HTTP views; @RestController → @Controller + @ResponseBody (JSON)",
+        description: "@Component is the generic stereotype; @Service, @Repository, @Controller are specialized components that state intent — and carry behavior (e.g. @Repository translates persistence exceptions into Spring's DataAccessException hierarchy).",
+        example: "You rarely write bare @Component for application classes: @Service for business logic, @Repository for DAOs (its exception translation is real), @Controller for view handlers. AOP features like @Async and @Transactional target these stereotypes when they proxy beans.",
+        code: "@Component                // generic bean, picked up by component scan\n@Service class Pricing {...}         // business logic\n@Repository class OrderDao {...}     // DB exceptions translated\n@Controller class PageController {...} // returns view names"
       },
       {
-        what: "@Component is picked up by component scanning. @Bean is used inside a @Configuration class to manually create a bean — needed when the class is a 3rd-party class you can't annotate.",
-        how: "@Component = Spring instantiates YOUR class via scan. @Bean = YOU write `return new ThirdPartyClass()` in a configuration method; Spring registers that object as a bean and manages its lifecycle.",
-        why: "Use @Component for your own classes; @Bean for external libraries (e.g. RestTemplate, ObjectMapper with custom settings) or when you need factory logic.",
-        tradeoff: "@Component is less code; @Bean gives full control over construction parameters.",
-        code: "@Configuration\nclass AppConfig {\n  @Bean RestTemplate restTemplate() { return new RestTemplate(); }\n}",
+        description: "@Component is class-level: Spring instantiates the annotated class itself during scanning. @Bean is method-level: you construct and configure the instance — required for third-party classes you cannot annotate.",
+        example: "You can't add @Component to ObjectMapper or a vendor SDK's client — you write a @Bean method that news it up with the exact modules and timeouts you want, giving one single source of truth for how that object is built.",
+        code: "@Component\nclass OrderService {...}          // Spring scans and constructs it\n\n@Configuration\nclass AppConfig {\n  @Bean ObjectMapper mapper() {\n    return new ObjectMapper().registerModule(new JavaTimeModule());\n  }\n}"
       },
       {
-        what: "Bean scopes decide how many instances Spring creates: singleton (default, ONE instance for whole app), prototype (NEW instance every injection), plus web scopes: request, session.",
-        how: "Singleton is shared — all injections point to the same object (thread-care needed for mutable state). Prototype: Spring creates it at injection point but does NOT manage its cleanup. request/session live per HTTP request/session.",
-        why: "Explains why a stateful @Component shared by threads causes race bugs — services must be stateless.",
-        tradeoff: "Prototype avoids shared-state bugs but you must close/destroy it yourself.",
-        code: "@Scope(\"prototype\") @Component   // default is singleton",
+        description: "Default scope is singleton (one instance per container). prototype creates a new instance per lookup; request/session scope exist in web apps; application is one per ServletContext; websocket per WS session.",
+        example: "Stateless services are singleton — cheap and shared. A bean carrying per-request state must be prototype (or better: no state at all). The trap: a singleton holding a prototype dependency freezes it — inject ObjectProvider<Wizard> or use scoped proxies to get a fresh instance per use.",
+        code: "@Service                       // singleton (default) - one instance\n@Scope(\"prototype\")\n@Component class Wizard {}      // new instance on every getBean()\n\n// singleton needs fresh prototypes? inject ObjectProvider<Wizard>"
       },
       {
-        what: "Bean lifecycle: instantiation → populate properties (DI) → aware callbacks → BeanPostProcessor before-init → @PostConstruct → ready → @PreDestroy → destroyed.",
-        how: "1) Spring new's the object. 2) Injects dependencies. 3) Aware callbacks (ApplicationContextAware). 4) BeanPostProcessor.preProcess (creates proxies for @Async/@Transactional). 5) @PostConstruct init. 6) At shutdown @PreDestroy (close pools, stop consumers).",
-        why: "Understanding why @PostConstruct runs AFTER injection explains init-order bugs.",
-        tradeoff: "If dependencies come via setter, @PostConstruct may see nulls — prefer constructor injection.",
-        code: "@PostConstruct void init() { ... }   // after DI, before serving\n@PreDestroy void cleanup() { ... }   // at shutdown",
+        description: "Lifecycle: instantiate → populate properties (DI) → aware callbacks → BeanPostProcessor (before) → @PostConstruct / InitializingBean.afterPropertiesSet → ready → @PreDestroy on shutdown.",
+        example: "A connection pool opens its sockets in @PostConstruct, after all config is injected and before the app serves a single request — startup validation belongs there so a bad config fails fast at boot, not at the first user click. @PreDestroy closes resources during graceful shutdown.",
+        code: "@Service\nclass CacheWarmer {\n  @PostConstruct void init()  { /* after DI: validate config, warm cache */ }\n  @PreDestroy  void shutdown() { /* before exit: close resources */ }\n}"
       },
       {
-        what: "Profiles let you run different configuration for dev / test / prod (DB URLs, log levels, feature flags).",
-        how: "Set spring.profiles.active=dev (or env var SPRING_PROFILES_ACTIVE=prod). Use @Profile(\"dev\") on a bean to create it only in that profile. Files: application-dev.properties / application-prod.properties override base values. Multiple profiles can be active.",
-        why: "Same code runs everywhere — only config changes per environment. Critical for CI/CD and containers.",
-        tradeoff: "Too many profiles = config maze; keep to dev/test/prod (+ optional local).",
-        code: "spring.profiles.active=${SPRING_PROFILE:dev}   # default dev\n@Bean @Profile(\"prod\") DataSource prodDs() { ... }",
+        description: "Profiles activate environment-specific beans and config: @Profile(\"dev\") on beans, spring.profiles.active=dev at runtime, plus application-{profile}.yml overrides on top of the default file.",
+        example: "dev uses H2 plus a stub payment gateway, prod uses MySQL and the real one — same jar deployed everywhere. Tests run with @Profile(\"test\"). Never branch on if (env.equals(\"prod\")) in business code — let the container wire the right beans per profile.",
+        code: "@Service @Profile(\"prod\") class StripePay implements Pay {...}\n@Service @Profile(\"dev\")  class StubPay   implements Pay {...}\n# application-prod.yml\nspring.profiles.active: prod"
       },
       {
-        what: "Both store config as key=value. .properties = flat, no hierarchy, easy to diff. .yml (YAML) = indentation-based hierarchy, lists/maps cleaner.",
-        how: "Same underlying config system (PropertySource), same precedence (env vars > command line > profile files). YAML nests keys by indentation.",
-        why: "YAML wins for deep structures (datasource pools, custom lists); properties are simpler for flat keys.",
-        tradeoff: "YAML is whitespace-sensitive — one wrong space and the app fails to start (or worse, silently misreads).",
-        code: "server:\n  port: 8080\nspring:\n  datasource:\n    url: jdbc:postgresql://localhost/app\n    username: app",
+        description: "Both hold the same key-value configuration; properties is flat and line-based, YAML is hierarchical and indentation-based (nicer for nested maps/lists). YAML is whitespace-sensitive — a wrong indent silently drops the setting.",
+        example: "Spring picks up whichever you put in resources/ (both together: application.properties + application.yml also work, properties wins on same key). Teams often use YAML for complex datasource/pool config because nested structure stays readable.",
+        code: "# application.properties\nserver.port=8080\nspring.datasource.url=jdbc:postgresql://db/app\n\n# application.yml - same data\nserver:\n  port: 8080\nspring:\n  datasource:\n    url: jdbc:postgresql://db/app"
       },
       {
-        what: "@ConfigurationProperties binds a whole group of config keys into one type-safe Java class (with validation via @Validated).",
-        how: "Annotate class with @ConfigurationProperties(prefix=\"app.mail\") + getters/setters (or @Component / @EnableConfigurationProperties). All app.mail.* keys map to fields. A record with @ConstructorBinding gives an immutable config object.",
-        why: "Much better than 20 @Value fields: one object, validation, IDE completion, easy to pass around.",
-        tradeoff: "Binding errors fail at startup only if you enable @Validated — otherwise silent nulls.",
-        code: "@ConfigurationProperties(prefix = \"app.mail\")\nrecord MailProps(String host, int port, boolean tls) {}\n// app.mail.host=smtp.bskcoding.com",
+        description: "@ConfigurationProperties binds a group of keys to a type-safe class (record or POJO), with validation annotations and IDE completion — instead of scattering @Value(\"${...}\") through the code.",
+        example: "Upload limits, bucket name and region belong to one UploadProperties injected wherever needed. Adding a config key = one field + one yml line, and @Validated fails startup on a missing/invalid value instead of exploding at 3am in production.",
+        code: "@ConfigurationProperties(prefix = \"upload\")\n@Validated\npublic record UploadProps(@NotBlank String bucket, @Min(1) int maxMb) {}\n\n// @ConfigurationPropertiesScan or @EnableConfigurationProperties(UploadProps.class)"
       },
       {
-        what: "@ControllerAdvice (@RestControllerAdvice) = global exception handler: one class catches exceptions from any controller and returns a standard JSON error.",
-        how: "Throw your own BusinessException from services; @ExceptionHandler(BusinessException.class) catches it and returns 404/400 with a clean body. Add a generic handler for Exception → 500 with traceId (never leak stack traces to clients).",
-        why: "Controllers stay clean and the frontend always gets the same error shape {status, message, time}.",
-        tradeoff: "The catch-all handler must log every error with correlation id — never swallow silently.",
-        code: "@RestControllerAdvice\nclass GlobalExceptionHandler {\n  @ExceptionHandler(BusinessException.class)\n  ResponseEntity<Err> handle(BusinessException e) {\n    return ResponseEntity.status(404).body(new Err(e.getMessage(), Instant.now()));\n  }\n}",
+        description: "A controller throws → DispatcherServlet asks HandlerExceptionResolvers → @ExceptionHandler (local) or @ControllerAdvice (global) maps it to a status and body. @RestControllerAdvice = @ControllerAdvice + @ResponseBody.",
+        example: "One GlobalExceptionHandler translates NotFoundException → 404, ValidationException → 400 with field errors, anything unexpected → 500 plus a correlation id. Controllers stay free of try/catch boilerplate and every error has a consistent contract.",
+        code: "@RestControllerAdvice\nclass GlobalExceptionHandler {\n  @ExceptionHandler(NotFoundException.class)\n  ResponseEntity<ProblemDetail> nf(NotFoundException e) {\n    return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage())...;\n  }\n  @ExceptionHandler(Exception.class)\n  ResponseEntity<ProblemDetail> boom(Exception e) { ... 500 ... }\n}"
       },
       {
-        what: "@RestController = @Controller + @ResponseBody: every method returns data (JSON) directly. @Controller returns a VIEW name (HTML/JSP/Thymeleaf) rendered by a view resolver.",
-        how: "@Controller methods return \"user-page\" string → ViewResolver finds user-page.html. @RestController: Jackson automatically serializes the returned object into JSON response body — no view needed.",
-        why: "REST APIs (microservices) use @RestController; server-rendered websites use @Controller.",
-        tradeoff: "Mixing both in one app is possible but confusing — keep APIs and MVC in separate packages.",
-        code: "@RestController\n@GetMapping(\"/users/{id}\")\nUser get(@PathVariable long id) { return svc.find(id); }  // JSON body",
+        description: "@Controller resolves a view name through ViewResolver (server-rendered pages). @RestController = @Controller + @ResponseBody — return values are serialized straight into the response body (JSON/XML), no view step.",
+        example: "A Thymeleaf page returns \"orders/list\" and the view layer renders orders/list.html. A REST endpoint returns the Order object itself and Jackson writes JSON — same mapping annotations, different output path.",
+        code: "@Controller\nclass PageController {\n  @GetMapping(\"/home\") String home() { return \"home\"; }   // view name\n}\n@RestController\nclass ApiController {\n  @GetMapping(\"/api/orders/{id}\") Order one(...) { return order; }   // JSON body\n}"
       },
       {
-        what: "@RequestMapping = generic mapping (path + method). Specialized: @GetMapping, @PostMapping, @PutMapping, @DeleteMapping, @PatchMapping — shorthands for the HTTP verb.",
-        how: "DispatcherServlet receives the request, matches URL + HTTP method to your handler, binds data to @PathVariable/@RequestParam/@RequestBody, runs the method, writes the return value (JSON via Jackson).",
-        why: "Annotations tell Spring which URL + verb triggers which method — the core of every REST endpoint.",
-        tradeoff: "Version your API in path (/api/v1/...) — renaming paths later breaks clients.",
-        code: "@PostMapping(\"/api/v1/orders\")\nResponseEntity<OrderDto> create(@RequestBody @Valid CreateOrderReq req) { ... }",
+        description: "@RequestMapping maps a handler to paths/methods/params; @GetMapping, @PostMapping, @PutMapping, @DeleteMapping, @PatchMapping are shortcuts that pin the HTTP method for you.",
+        example: "@RequestMapping(\"/api/orders\") on the class plus @GetMapping(\"/{id}\") on a method = GET /api/orders/42. The same annotation carries consumes (Content-Type), produces (Accept) and params for content negotiation and conditional matching.",
+        code: "@RestController\n@RequestMapping(\"/api/orders\")\nclass OrderApi {\n  @GetMapping(\"/{id}\") Order one(@PathVariable long id) { ... }\n  @PostMapping(consumes = \"application/json\")\n  ResponseEntity<Order> create(@Valid @RequestBody OrderDto dto) { ... }\n}"
       },
       {
-        what: "@PathVariable = value inside the URL path ({id}). @RequestParam = query string (?page=2). @RequestBody = parsed JSON/body object.",
-        how: "Path → /users/42 → @PathVariable long id. Query → /users?active=true → @RequestParam boolean active (required by default, can set required=false). Body → JSON → converted to DTO by Jackson (@RequestBody).",
-        why: "Choosing wrong annotation = 400 errors — a very common beginner bug.",
-        tradeoff: "Never bind @RequestBody to your JPA entity directly — use request DTOs (mass-assignment protection).",
-        code: "@GetMapping(\"/users/{id}/orders\")\nList<OrderDto> get(@PathVariable long id, @RequestParam(defaultValue=\"0\") int page);",
+        description: "@PathVariable takes a URL segment (/orders/42). @RequestParam takes a query string or form field (?page=2, required by default). @RequestBody deserializes the JSON payload of a POST/PUT.",
+        example: "GET /orders/42 → path variable = identity. GET /orders?status=SHIPPED&page=2 → request params = filtering and paging. POST /orders with a JSON body → @RequestBody OrderDto = structured input, validated before the service runs.",
+        code: "@GetMapping(\"/{id}\")\nOrder byId(@PathVariable long id);\n\n@GetMapping\nList<Order> search(@RequestParam(defaultValue = \"0\") int page,\n                   @RequestParam(required = false) String status);\n\n@PostMapping\nOrder create(@Valid @RequestBody OrderDto dto);"
       },
       {
-        what: "@Valid (Bean Validation) validates the @RequestBody DTO using annotations before your controller code runs.",
-        how: "Put @NotNull, @Size, @Email, @Min on DTO fields; add @Valid before @RequestBody. Violations → MethodArgumentNotValidException → handle in @ControllerAdvice → 400 with field error list.",
-        why: "Never trust client input; validating at the boundary keeps services clean.",
-        tradeoff: "Validation checks format — re-check critical business rules inside the service (DB may have changed).",
-        code: "record CreateUserReq(@NotBlank String name, @Email String email) {}\n@PostMapping(\"/users\") User create(@RequestBody @Valid CreateUserReq req) { ... }",
+        description: "@Valid on a @RequestBody parameter triggers Jakarta Bean Validation (@NotNull, @Min, @Email, @Size) — violations throw MethodArgumentNotValidException, which advice maps to 400 with per-field messages.",
+        example: "A checkout POST with qty = -5 or a missing email is rejected at the edge with {\"qty\": \"must be greater than 0\"} — no service code runs, no bad data reaches the DB, and the frontend gets a precise error to render.",
+        code: "record OrderDto(@NotBlank String email, @Min(1) int qty, @Email String notify) {}\n\n@PostMapping\nResponseEntity<Order> create(@Valid @RequestBody OrderDto dto) { ... }\n// violation -> MethodArgumentNotValidException -> 400 + field errors"
       },
       {
-        what: "CORS = browser security rules for calling your API from a different domain; you allow it by sending Access-Allow-* response headers.",
-        how: "Browser sends preflight OPTIONS for non-simple requests → server must reply allowed origin/methods/headers. Configure globally with WebMvcConfigurer, or per-endpoint @CrossOrigin. Credentials need explicit allow-origin (never * with credentials).",
-        why: "Without CORS config, frontend on localhost:5173 calling localhost:8080 is blocked by the browser.",
-        tradeoff: "Never allow * with credentials in production — restrict to your real frontend origins.",
-        code: "registry.addMapping(\"/api/**\")\n  .allowedOrigins(\"https://bskcoding.com\")\n  .allowedMethods(\"GET\",\"POST\",\"PUT\",\"DELETE\");",
+        description: "The browser blocks cross-origin calls unless the server answers with Access-Control-Allow-* headers; non-simple requests trigger an OPTIONS preflight that must also be allowed. Configure globally with addCorsMappings or per-endpoint @CrossOrigin.",
+        example: "Frontend at app.example.com calling api.example.com: the browser first sends OPTIONS. If the API doesn't allow that origin, method and headers, the real request never leaves the browser — the console shows a CORS error even though the endpoint works in Postman. Allow credentials only with an explicit origin, never *.",
+        code: "@Configuration\nclass CorsConfig implements WebMvcConfigurer {\n  @Override public void addCorsMappings(CorsRegistry r) {\n    r.addMapping(\"/api/**\")\n     .allowedOrigins(\"https://app.example.com\")\n     .allowedMethods(\"GET\", \"POST\", \"PUT\", \"DELETE\")\n     .allowCredentials(true).maxAge(3600);\n  }\n}"
       },
       {
-        what: "Spring MVC request lifecycle: request → filters → DispatcherServlet → handler mapping → interceptor → controller → message converter → response.",
-        how: "1) Tomcat receives HTTP request. 2) Filters run (auth, CORS, logging). 3) DispatcherServlet (front controller) asks HandlerMapping which method handles this URL. 4) HandlerInterceptors.preHandle. 5) Controller runs. 6) Return value → HttpMessageConverter (Jackson → JSON). 7) AfterCompletion, response written.",
-        why: "Explains where cross-cutting logic goes: filter (before MVC), interceptor (after mapping), AOP (around business methods).",
-        tradeoff: "Filters know nothing about the handler; interceptors do — pick the right layer.",
-        code: "Client → Filter(s) → DispatcherServlet → HandlerMapping → Interceptor → Controller\n       → MessageConverter (JSON) → Response",
+        description: "Filter (auth, logging) → DispatcherServlet → HandlerMapping finds the controller → HandlerAdapter invokes it → message converters (Jackson) write the response. Errors go through @ExceptionHandler and come back on the same chain.",
+        example: "GET /api/orders/42: the servlet maps it to OrderApi.one(), Jackson serializes JSON, a timing filter measured the whole trip. Knowing the chain localizes failures: 404 = no mapping, 415 = wrong Content-Type, 400 = validation, 500 = handler exception.",
+        code: "// Filter (auth, logging) -> DispatcherServlet\n//   -> HandlerMapping -> HandlerAdapter -> @Controller method\n//   -> HttpMessageConverter (Jackson) -> response\n// errors: @ExceptionHandler -> same chain writes the error body"
       },
     ],
     scenarios: [
       {
-        what: "@Transactional did not roll back — the most common Spring interview scenario.",
-        how: "Top causes: 1) CHECKED exception thrown (only unchecked roll back by default → add rollbackFor=Exception.class), 2) self-invocation: method calls this.otherTxMethod() in same class → proxy bypassed, 3) try/catch swallows the exception before it reaches the proxy, 4) method is private/final (proxy can't wrap it), 5) wrong propagation (REQUIRES_NEW vs REQUIRED).",
-        why: "Shows you understand the proxy-based nature of Spring transactions (AOP).",
-        code: "@Transactional(rollbackFor = Exception.class)\n// never call it via this.method() — inject self or move to another bean",
+        description: "By default only RuntimeException/Error trigger rollback, the call must go through the Spring proxy (self-invocation bypasses it), and the exception must actually escape the method — swallowed exceptions commit.",
+        example: "A service catches its own exception to log it, or calls a @Transactional method on this inside the same bean — the transaction commits anyway and the data is half-written. Also classic: annotation on a private method (proxies can't see it) or a checked exception needing rollbackFor = Exception.class.",
+        code: "// broken: self-invocation skips the proxy\nvoid place() { this.save(); }   // this.save() is a plain method call\n\n// fix: separate bean, or let the exception propagate\n@Transactional(rollbackFor = Exception.class)\nvoid save() { ... }"
       },
       {
-        what: "Auto-configuration is not picking your bean — how to debug.",
-        how: "Run with --debug → log shows CONDITIONS EVALUATION REPORT: which auto-config matched / did not match and why (@ConditionalOnMissingBean found yours, @ConditionalOnClass missing jar). Also check component scan package and @ConditionalOnProperty flags.",
-        why: "30 seconds with this report beats 30 minutes of guessing.",
-        code: "./mvnw spring-boot:run -Dspring-boot.run.arguments=--debug",
+        description: "Turn on the conditions report (--debug or debug=true) — Boot prints positive and negative matches for every auto-configuration with the @Conditional that decided it (OnClass, OnMissingBean, OnProperty).",
+        example: "The DataSource bean you expected is missing. The report says DataSourceAutoConfiguration did not match because spring.datasource.url was not found — one line of evidence instead of hours of guessing which starter or property is missing.",
+        code: "$ java -jar app.jar --debug\n# ============================\n# AUTO-CONFIGURATION REPORT\n# JdbcTemplateAutoConfiguration:\n#   Did not match: @ConditionalOnMissingBean (types: JdbcTemplate)"
       },
       {
-        what: "JPA firing N+1 queries: 1 query for the list + 1 extra query PER row.",
-        how: "See it in logs: 'select ... from orders' repeated per row. Fix: 1) JOIN FETCH in JPQL, 2) @EntityGraph on repository method, 3) @BatchSize(size=50) on the collection → replaces N+1 with batched queries, 4) @NamedEntityGraph.",
-        why: "100 rows = 101 queries = slow API — classic performance question.",
-        code: "@Query(\"SELECT o FROM Order o JOIN FETCH o.items WHERE o.customer.id = :cid\")\nList<Order> findByCustomer(@Param(\"cid\") long cid);",
+        description: "N+1 = one query for the list plus one query per row for its children. Detect it in SQL logs/statistics, then fix with a fetch join, @EntityGraph, or batch fetching.",
+        example: "An order list page runs SELECT orders, then 20 separate SELECT items — 21 round trips where one would do; 60ms becomes 600ms. Hibernate statistics or p6spy expose the pattern instantly; JOIN FETCH or @BatchSize collapses it back to 1-2 queries.",
+        code: "// detect: repeated identical selects in the log / Hibernate statistics\n\n// fix 1: fetch join\nSELECT o FROM Order o JOIN FETCH o.items WHERE o.status = :s\n\n// fix 2: entity graph\n@EntityGraph(attributePaths = \"items\")\nList<Order> findTop20ByOrderByCreatedAtDesc();\n\n// fix 3: @BatchSize(size = 20) on the child entity"
       },
       {
-        what: "Two users update the same row (optimistic locking) — second UPDATE matches 0 rows → ObjectOptimisticLockingFailureException → HTTP 409.",
-        how: "@Version field in entity: Hibernate adds WHERE version = ? to UPDATE. If someone else changed it → 0 rows → exception. Handle: catch in advice → 409 'data changed, please refresh' → frontend reloads and user retries.",
-        why: "Optimistic locking avoids long DB locks; tradeoff = retry-on-conflict at app layer.",
-        code: "@Version private Long version;\n@ExceptionHandler(ObjectOptimisticLockingFailureException.class)\nResponseEntity<Void> conflict() { return ResponseEntity.status(409).build(); }",
+        description: "@Version on the entity increments on every UPDATE; if someone else changed the row first, Hibernate throws OptimisticLockException — surfaced as 409 Conflict. Handle by re-reading and retrying or merging, never by blindly overwriting.",
+        example: "Two support agents edit the same customer: the second save gets 409. The UI shows 'this record just changed — refresh?', reloads the fresh row and retries — the first agent's edit is never silently lost. Blind last-write-wins would discard it without a word.",
+        code: "@Entity\nclass Customer { @Version long version; ... }\n\n@PutMapping(\"/{id}\")\nResponseEntity<?> update(@PathVariable long id, @RequestBody CustomerDto dto) {\n  try { return ok(service.save(id, dto)); }\n  catch (OptimisticLockingFailureException e) {\n    return status(HttpStatus.CONFLICT).body(\"stale data, reload\");\n  }\n}"
       },
       {
-        what: "Design a global exception handling strategy with @ControllerAdvice.",
-        how: "Layered handlers: custom business exceptions → mapped status (404/400/409); MethodArgumentNotValidException → field error list; AccessDeniedException → 403; Exception → 500 + traceId with full stack logged. Response: {status, message, errors[], traceId, timestamp}.",
-        why: "One consistent contract for the frontend; security: never expose stack traces.",
-        tradeoff: "Each new exception type needs explicit mapping — set the pattern early in the project.",
-        code: "@RestControllerAdvice\nclass ApiExceptionHandler { /* @ExceptionHandler per type */ }",
+        description: "@RestControllerAdvice with ordered @ExceptionHandler methods maps domain exceptions to status codes and a problem-details body (RFC 7807), plus a catch-all that logs with a correlation id and never leaks stack traces.",
+        example: "Controllers throw NotFoundException / BusinessRuleException freely; the advice returns {type, title, status, detail, correlationId} consistently for every endpoint. Clients rely on a stable contract, ops grep logs by correlation id, and internals stay server-side only.",
+        code: "@RestControllerAdvice\nclass ApiExceptionHandler {\n  @ExceptionHandler(BusinessRuleException.class)\n  ProblemDetail business(BusinessRuleException e) { /* 409/422 + e.getCode() */ }\n\n  @ExceptionHandler(Exception.class)\n  ProblemDetail unexpected(Exception e) {\n    log.error(\"unhandled {}\", MDC.get(\"correlationId\"), e);\n    return ProblemDetail.forStatus(500);   // generic, no stack trace\n  }\n}"
       },
       {
-        what: "A REST endpoint is slow — profiling and fixing it.",
-        how: "Steps: 1) Measure — micrometer timers show where time goes (DB, external API, CPU). 2) DB: slow queries, N+1, missing index (EXPLAIN). 3) External calls: add timeout, circuit breaker, cache. 4) Code: unnecessary loops/serialization. 5) Load test again (JMeter/Gatling) to confirm.",
-        why: "Interviewers want a systematic process, not a random fix.",
-        tradeoff: "Caching fixes latency but adds staleness — choose TTL wisely.",
-        code: "management.endpoints.web.exposure.include=health,metrics\n// /actuator/metrics/http.server.requests",
+        description: "Measure first, fix second: SQL log (N+1, missing index) → external calls (timeouts, serial vs parallel) → thread dumps for blocked threads → profiler for CPU → GC. Change one thing, re-measure.",
+        example: "An endpoint takes 2.1s: p6spy shows one 15ms query repeated 40 times (N+1) plus two external HTTP calls at 800ms each, executed serially. Fetch join + parallel calls with 500ms timeout → 340ms total. actuator metrics show the p95 drop on the dashboard.",
+        code: "management.endpoints.web.exposure.include: health,metrics,prometheus\n# http_server_requests_seconds{uri=\"/api/orders\"} — baseline per endpoint\n# then: SQL log (n+1), jstack (blocked threads), async-profiler -e cpu"
       },
       {
-        what: "Circular dependency at startup: A needs B, B needs A → BeanCurrentlyInCreationException.",
-        how: "Fixes: 1) constructor injection + redesign (move shared logic to C), 2) @Lazy on one injection (proxy created, real bean resolved on first use), 3) setter injection where one side can tolerate late binding. Boot 2.6+ fails fast by default — good, because it exposes bad design.",
-        why: "Circular deps are a design smell — mention you'd rather split responsibilities than hide it.",
-        tradeoff: "@Lazy hides the problem; redesign solves it.",
-        code: "class A { A(@Lazy B b) { ... } }   // breaks the startup cycle",
+        description: "A → B → A cannot be constructed: Spring fails with BeanCurrentlyInCreationException. Fix with constructor injection (surfaces the cycle immediately), @Lazy to defer one side, or break the cycle via events / a shared abstraction — the real fix is usually redesign.",
+        example: "OrderService and InventoryService inject each other via field @Autowired — it 'worked' on old Spring (hidden by proxies) and now fails at boot. Constructor injection turns it into a visible design smell: both sides truly need each other, so extract the shared rule or publish an event instead.",
+        code: "// hidden cycle (field injection)\n@Service class A { @Autowired B b; }\n@Service class B { @Autowired A a; }\n\n// fix 1: @Lazy breaks construction-time cycle\n@Service class A { A(@Lazy B b) { this.b = b; } }\n// fix 2: extract shared logic or use ApplicationEvent"
       },
       {
-        what: "JWT auth with access + refresh token flow.",
-        how: "Login → server issues short-lived ACCESS token (15 min, JWT, sent as Authorization: Bearer) + long-lived REFRESH token (30 days, httpOnly cookie/DB, revocable). Access expires → POST /auth/refresh with refresh token → new pair. Refresh token rotated on each use; logout/compromise → refresh token revoked.",
-        why: "Short-lived access token = tiny window if stolen; refresh keeps user logged in without re-login.",
-        tradeoff: "Stateless access tokens can't be revoked early — keep them short; keep a revocation list for high security.",
-        code: "Authorization: Bearer <access-jwt>\nPOST /auth/refresh { refreshToken } → { accessToken, refreshToken }",
+        description: "Login issues a short-lived access token (JWT, ~15 min) plus a long-lived rotating refresh token. Requests carry the access token; on expiry the client silently refreshes; refresh tokens rotate on use and are revoked when reuse is detected.",
+        example: "User logs in once a week: every API call sends the 15-minute access JWT; when it expires the app calls /auth/refresh transparently — no re-login prompt. A stolen refresh token gets one use before rotation invalidates the whole family.",
+        code: "// login\nString access = JWT.create()\n  .withSubject(user.getId()).withClaim(\"roles\", roles)\n  .withExpiresAt(Date.from(now.plus(15, MINUTES)))\n  .sign(Algorithm.RSA256(null, privateKey));\n// request:  Authorization: Bearer <access>\n// 401 -> POST /auth/refresh (rotated) -> new access + refresh pair"
       },
       {
-        what: "Call 3 external APIs where one may fail — partial success/failure handling.",
-        how: "Wrap each call: timeout + retry(1-2) + circuit breaker + fallback (default/stale value). Then policy: allCritical must succeed (fail fast, compensate) OR merge partial results and mark failed parts (degraded mode). Isolate with bulkheads so one slow API can't block the request.",
-        why: "Real systems must stay available when a dependency is down.",
-        tradeoff: "Fallbacks can return stale data — always expose which parts were degraded.",
-        code: "CompletableFuture a = callA().orTimeout(2, SECONDS)\n    .exceptionally(ex -> DEFAULT_A);\n// Resilience4j @CircuitBreaker(name=\"svcA\", fallbackMethod=\"fbA\")",
+        description: "Wrap each call with timeout + retry + circuit breaker; collect results per feature; fail fast when a dependency is mandatory, degrade with defaults when it's optional — and bulkhead the pools so one slow API can't consume everything.",
+        example: "A search page calls pricing, inventory and reviews: pricing is required (fail the request → 502 + retry page) while inventory and reviews are optional — render 'temporarily unavailable' placeholders. Resilience4j bulkheads keep the reviews outage from eating the whole connection pool.",
+        code: "CompletableFuture<Price> p = supplyAsync(() -> priceApi.get(id))\n  .orTimeout(500, MILLISECONDS);                    // mandatory: may propagate\nCompletableFuture<Stock> s = supplyAsync(() -> stockApi.get(id))\n  .orTimeout(500, MILLISECONDS)\n  .exceptionally(e -> Stock.unknown());              // optional: degrade\n"
       },
       {
-        what: "Production readiness checklist for a Spring Boot service.",
-        how: "1) Externalized config (env vars/profiles, secrets in vault — never in git). 2) Actuator: health/metrics/prometheus; readiness/liveness probes. 3) Structured JSON logs with traceId. 4) Timeouts on all outbound calls. 5) Graceful shutdown. 6) Docker image + healthcheck. 7) Alerts on error rate/latency. 8) Flyway/Liquibase migrations.",
-        why: "'Works on my laptop' ≠ production-ready — this list shows real-world awareness.",
-        tradeoff: "Each item adds setup time; skipping them moves cost to incident response at 2 AM.",
-        code: "management.endpoints.web.exposure.include=health,info,prometheus\nserver.shutdown=graceful",
+        description: "Externalized config and secrets, liveness/readiness probes, structured logs with correlation id, metrics and tracing, timeouts on every remote call, graceful shutdown, resource limits, alerts with a runbook.",
+        example: "Before go-live: K8s probes wired to /actuator/health, JSON logs carrying the request id, Prometheus dashboards for p95 latency and error rate, server.shutdown=graceful for zero-downtime deploys, sane container heap flags. The 3am page links straight to the dashboard and the runbook.",
+        code: "management.endpoints.web.exposure.include: health,metrics,prometheus\nmanagement.endpoint.health.probes.enabled: true\nserver.shutdown: graceful\nspring.lifecycle.timeout-per-shutdown-phase: 30s\nlogging.pattern.console: \"%d %X{traceId} %-5level %logger - %msg%n\""
       },
     ],
   },
   microservices: {
     important: [
       {
-        what: "Monolith = one deployable app (UI + logic + DB in one). Microservices = many small independent services, each owning one business capability, deployed and scaled separately.",
-        how: "Monolith: everything in one process — fast to build initially, any change = full redeploy. Microservices: each service has own DB and pipeline; they talk via REST/gRPC/events; failure in one shouldn't crash others.",
-        why: "Split when the domain and team scale — small teams own one service end-to-end.",
-        tradeoff: "Monolith: simpler ops, coupled scaling. Microservices: independent deploy, but network calls, distributed data and debugging cost much more.",
+        description: "A monolith is one deployable with a shared database and in-process calls — simple but coupled. Microservices are small, independently deployable services owning their data — autonomous teams, at the price of network failures, eventual consistency and heavier operations.",
+        example: "A 5-person startup ships one monolith daily — fastest path to product. At 50 devs, every release needs three teams to coordinate → split by bounded context (orders, payments, catalog): each team deploys on its own. The bill comes due as distributed tracing, sagas and on-call complexity.",
+        code: ""
       },
       {
-        what: "Database-per-service = each microservice owns its data; no other service reads/writes it directly.",
-        how: "Orders service has orders DB, Payments has payments DB. To need each other's data → APIs or events (publish 'OrderPlaced' → payments service reacts). Cross-service views are built by consuming events (CQRS read model).",
-        why: "Shared DB = hidden coupling; one team's migration breaks another's queries. Per-service DB enables independent schema evolution.",
-        tradeoff: "Joins across services are impossible → you accept eventual consistency and denormalized data.",
-        code: "Service A → [DB A]      (nobody else touches DB A)\nService B → [DB B]  ← consumes events from A",
+        description: "Each service owns its schema exclusively — no other service reads it directly, all access goes through the owning service's API. Independent deployment and schema evolution; the cost is you can no longer JOIN across services.",
+        example: "Orders can't SELECT from the users table — it calls the User API, or consumes UserChanged events into a local read model. 'Show the buyer name on the order page' becomes API composition or event replication, never a cross-service join.",
+        code: ""
       },
       {
-        what: "Sync (REST/gRPC): caller waits for a response — simple, but couples availability. Async (events/messages): caller publishes and continues — receiver processes later.",
-        how: "Use sync when you need the answer NOW (GET user profile). Use async for notifications/fan-out that don't need immediate response (order placed → email, inventory, billing react independently).",
-        why: "Async breaks temporal coupling: receiver down → messages wait in queue → sender keeps working.",
-        tradeoff: "Sync is easy to trace but has cascading failures; async is resilient but eventually consistent and harder to debug.",
-        code: "Sync  : orders → GET payments/charge/42 (wait)\nAsync : orders → kafka 'order.placed' → payments, inventory, notify",
+        description: "Sync (REST/gRPC): the caller waits — right for queries needing an answer now, but couples availability and latency. Async (events/queues): fire-and-forget — decoupled in time, survives downstream outages, ideal for side effects and fan-out.",
+        example: "Confirming an order checks stock synchronously (the answer is needed this second). Then 'OrderPlaced' is published async: email, analytics and loyalty each react independently — the email service being down doesn't block a single order.",
+        code: "// query: answer needed now (sync)\nGET /inventory/stock/SKU-1  ->  200 OK, 200ms budget\n\n// process: answer not needed (async)\npublish(\"OrderPlaced\", event);   // consumers react independently"
       },
       {
-        what: "API Gateway = single entry point in front of all microservices (routing, auth, rate limiting, TLS, caching).",
-        how: "Client → gateway (/api/orders/** → orders-service). Gateway validates JWT once, applies rate limits per client, logs metrics; services behind it stay private (not exposed to internet).",
-        why: "Clients shouldn't know the topology of 50 services; cross-cutting concerns implemented once.",
-        tradeoff: "Gateway is a single point of failure/bottleneck — must scale horizontally and stay thin (no business logic).",
-        code: "Client → [Gateway: auth + rate-limit + routing]\n              ├── /orders   → orders-svc\n              └── /payments → payments-svc",
+        description: "An API Gateway is the single entry point: routing, TLS, authentication/authorization, rate limiting, request aggregation and cross-cutting observability — clients know one URL, not the service topology.",
+        example: "The mobile app calls api.shop.com: the gateway validates the JWT, rate-limits each client, routes /orders → order-service and /search → search-service (rerouting traffic without an app release), and aggregates the home page from five services in one response.",
+        code: "spring:\n  cloud:\n    gateway:\n      routes:\n        - id: orders\n          uri: lb://order-service\n          predicates: Path=/api/orders/**\n# cross-cutting filters: JWT auth, rate limiter, correlation-id"
       },
       {
-        what: "Service discovery = dynamic lookup of a service's current network address, because instances scale up/down and IPs change.",
-        how: "Client-side: a registry (Eureka/Consul) — client asks for instances of 'orders-service' and load-balances. Server-side/DNS: Kubernetes Service DNS resolves to pod IPs; proxy handles balancing.",
-        why: "Hardcoded URLs break every autoscale/redeploy — discovery makes services addressable by NAME.",
-        tradeoff: "Adds an infrastructure component that must itself be highly available.",
-        code: "orders-service → 10.0.1.5:8080, 10.0.1.7:8080   (registry keeps this list)",
+        description: "Instances change constantly — services register with a registry (Eureka, Consul, or Kubernetes DNS) and clients resolve names to healthy addresses with load balancing and health checks built in.",
+        example: "order-service pods register on startup; inventory-service asks for healthy instances and round-robins across them. A pod dies → fails health check → removed within seconds and traffic shifts — no hardcoded IPs, no config redeploy when you scale out.",
+        code: "// client-side load balancing\n@LoadBalanced @Bean RestTemplate restTemplate() { ... }\nrestTemplate.getForObject(\"http://inventory-service/stock/{id}\", Stock.class, id);\n\n// k8s: DNS discovery — order-service.default.svc.cluster.local -> pod IPs"
       },
       {
-        what: "Saga = a long business transaction split into local transactions across services, with COMPENSATING actions to undo steps if one fails.",
-        how: "Choreography: each service listens to events and acts (OrderCreated → reserve stock → if ok charge payment; if payment fails → release stock). Orchestration: a central orchestrator calls each step and directs compensation.",
-        why: "Distributed 2PC (locking DBs across services) doesn't scale — saga gives eventual consistency instead.",
-        tradeoff: "Saga is complex to design (compensations for every step) and needs idempotency; but it's the standard answer for 'transaction across microservices'.",
-        code: "Order → ReserveStock → ChargePayment\n          ↓ fail              ↓ fail\n     cancel order       release stock (compensation)",
+        description: "A saga is a sequence of local transactions; if one step fails, compensating actions undo the previous ones. Choreography: services react to each other's events. Orchestration: a central coordinator drives the flow — clearer, but a single point of logic that must itself be reliable.",
+        example: "Order → reserve stock → charge payment → confirm. Choreography: StockReserved triggers PaymentCaptured; PaymentFailed publishes StockReleaseRequested. Orchestration: a PaymentOrchestrator executes each step and on failure explicitly calls release + refund — the whole flow lives in one readable class.",
+        code: "// orchestration\nlong reservation = inventory.reserve(order);\ntry { payment.charge(order); }\ncatch (PaymentFailed e) { inventory.release(reservation); throw e; }\n\n// choreography\nOrderPlaced -> StockReserved -> PaymentCaptured\n                    \\-> StockReleaseRequested (on failure)"
       },
       {
-        what: "Circuit breaker: stop calling a failing service for a while (like an electrical fuse). Resilience4j also gives Retry, Bulkhead (limit concurrent calls), TimeLimiter (timeout).",
-        how: "States: CLOSED (normal) → failures cross threshold → OPEN (calls fail fast, no traffic) → half-open (trial calls) → CLOSED again if healthy. Retry with backoff handles transient errors; bulkhead limits thread-pool/semaphore so one slow service can't eat all resources.",
-        why: "Prevents cascading failure: without it, threads pile up waiting on a dead dependency and YOUR whole service dies.",
-        tradeoff: "Too-aggressive retry amplifies load on a struggling service — cap retries with backoff + jitter.",
-        code: "CLOSED --3 failures--> OPEN --60s--> HALF_OPEN --success--> CLOSED",
+        description: "Timeout caps every call. Retry heals transient faults (bounded, with backoff + jitter). Circuit breaker stops calling a failing dependency (open → half-open → closed). Bulkhead caps concurrency per dependency so it can't drain the whole pool.",
+        example: "The inventory API starts returning 500s: without protection, order threads queue behind it and the entire service collapses. After repeated failures the breaker opens — calls fail fast in milliseconds with a fallback answer — and half-open probes detect recovery. Blind retries would multiply the load 3x and finish the job off.",
+        code: "CircuitBreaker cb = CircuitBreaker.of(\"inventory\",\n  CircuitBreakerConfig.custom()\n    .failureRateThreshold(50)\n    .slidingWindowSize(10)\n    .waitDurationInOpenState(Duration.ofSeconds(30)));\n\nStock s = Decorators.ofSupplier(() -> inventory.get(id))\n  .withCircuitBreaker(cb)\n  .withRetry(Retry.ofDefaults(\"retry\"))\n  .withFallback(List.of(Exception.class), e -> Stock.unknown())\n  .get();"
       },
       {
-        what: "CQRS = separate models for command (write) and query (read). Event sourcing = store the CHAIN OF EVENTS (OrderCreated, ItemAdded...) as the source of truth instead of just current state.",
-        how: "Writes go to the write model/database; queries hit a read model (often denormalized, updated by consuming events). Event sourcing rebuilds state by replaying events; you can also rebuild ANY past state and audit everything.",
-        why: "Read-heavy and write-heavy workloads scale separately; audit trail comes for free.",
-        tradeoff: "More moving parts and eventual consistency; event schema changes need versioning — overkill for simple CRUD.",
-        code: "events: [Created, +Item A, +Item B, Shipped]\nreplay → state {items: [A,B], status: Shipped}",
+        description: "CQRS separates the write model from the read model, each optimized for its job. Event sourcing stores the immutable event stream as the source of truth — current state is derived by replaying events.",
+        example: "The orders write service enforces invariants in a normalized table, while a denormalized read model answers dashboard queries with zero joins. With event sourcing, 'OrderShipped' is a permanent record: rebuild any projection, audit any decision, replay last month to debug — but queries always hit a materialized view, never the event store.",
+        code: "// write side\napply(new OrderShipped(orderId, Instant.now()));   // append event\n\n// read side (projection)\n@EventListener void on(OrderShipped e) { readModel.update(e); }\n\n// state = fold(events) — replay to rebuild a model"
       },
       {
-        what: "Centralized config = external configuration served from one place (Spring Cloud Config / Consul / K8s ConfigMap) so all environments and services read config centrally.",
-        how: "Service starts → calls config server with its app name + profile (dev/prod) → gets application.yml as an API response (often backed by a Git repo: change = commit + refresh). Dynamic refresh via /actuator/refresh or Spring Cloud Bus broadcast.",
-        why: "No more rebuilding jars to change a URL; secrets/config are versioned in one repo and identical across instances.",
-        tradeoff: "Config server becomes critical — run it in HA, and cache config locally for startup resilience.",
-        code: "GET /config/orders-service/prod\n→ { db.url, kafka.brokers, feature.flags... }",
+        description: "A centralized config source (Spring Cloud Config, git-backed, or K8s ConfigMaps) gives one versioned place for every service's settings — with environment overrides, audit history and dynamic refresh — instead of per-service env files drifting apart.",
+        example: "The payment timeout must change across 12 services: one commit in the config repo changes all of them, and git blame answers 'who changed this and why'. Without it: 12 hand-edited YAMLs, silent drift between environments and no audit trail.",
+        code: "# config client\nspring:\n  config:\n    import: optional:configserver:http://config-server:8888\n  application:\n    name: order-service\n# server serves order-service-prod.yml from git\n@RefreshScope @RestController   // /actuator/refresh picks up changes"
       },
       {
-        what: "Distributed tracing tracks one request across many services using a TRACE ID that travels in headers; correlation IDs tie logs together; metrics = numbers over time (latency, error rate).",
-        how: "Gateway creates traceId → passes to orders-service → orders-service passes to payments. Every span (service hop) reports to collector (Zipkin/Jaeger/OpenTelemetry). In logs: same [traceId] in every service → one search shows the full journey.",
-        why: "In a sync chain of 6 services, logs alone can't answer 'where did 3 seconds go?' — tracing shows per-hop duration.",
-        tradeoff: "Sampling needed at high volume (keep 1-10% of traces) to control cost.",
-        code: "traceId=abc → gateway 20ms → orders 80ms → payments 2400ms ← bottleneck!",
+        description: "Every request gets a traceId at the edge, propagated across services (W3C traceparent / X-Request-Id); spans record each hop; the same id lands in MDC so logs, metrics and the latency waterfall can be stitched together (OpenTelemetry → Zipkin/Jaeger).",
+        example: "A user reports a slow checkout: the traceId from their error screen opens the full waterfall — gateway 8ms → orders 120ms → payments 1.9s (timeout retry). Without propagation you'd grep six services' logs by timestamp and never prove which hop caused it.",
+        code: "server:\n  tracing:\n    propagation: w3c\nlogging.pattern.console: \"%d %X{traceId} %-5level %logger - %msg%n\"\n\n// traceparent: 00-<trace-id>-<span-id>-01\n// OTel agent -> Zipkin/Tempo -> waterfall per traceId"
       },
       {
-        what: "Docker = package app + dependencies into an image (runs anywhere). Kubernetes (K8s) = orchestrator that runs/repairs/scales those containers.",
-        how: "Dockerfile builds immutable image → registry (Docker Hub/ECR). K8s Deployment declares replicas=3, probes (readiness/liveness), autoscaling; Service gives stable DNS; Ingress routes traffic. Rollout = new pods replace old gradually with zero downtime.",
-        why: "Same container runs on laptop, test, prod — no 'works on my machine'; K8s self-heals crashed pods.",
-        tradeoff: "Docker image size matters (use distroless/ multi-stage). K8s has steep learning curve — a small app may just need one VM.",
-        code: "FROM maven:build → jar → FROM eclipse-temurin:17-jre (small runtime image)",
+        description: "Docker packages app + dependencies into an immutable image; a container runs one instance. Kubernetes schedules them: Deployments manage replicas and rolling updates, Services give stable discovery, ConfigMaps/Secrets inject config, HPA scales on load, probes drive self-healing.",
+        example: "The identical image runs in dev, staging and prod. A rollout to v2 surges pods gradually with readiness gates so no request hits a dead instance; a crash loop backs off and restarts itself; HPA adds replicas at 70% CPU — ending 'works on my machine' and manual scaling.",
+        code: "apiVersion: apps/v1\nkind: Deployment\nspec:\n  replicas: 3\n  template:\n    spec:\n      containers:\n        - name: orders\n          image: shop/order-service:1.4.2\n          readinessProbe:\n            httpGet: { path: /actuator/health/readiness, port: 8080 }\n# + Service (discovery), HPA (autoscaling), ConfigMap/Secret (config)"
       },
       {
-        what: "Idempotency = doing the same operation multiple times has the SAME effect as doing it once.",
-        how: "Client generates an Idempotency-Key per logical request; server stores (key → first response). Retry with same key → return stored response instead of charging again. For consumers: record processed event IDs (dedupe table / unique constraint).",
-        why: "Networks fail ambiguously: the response was lost after the payment succeeded — retry is mandatory, so the operation MUST be idempotent.",
-        tradeoff: "Requires storage of keys/results — but double-charging customers is far worse.",
-        code: "POST /payments  Idempotency-Key: 550e8400-...\n→ first call: charged; retry: returns same receipt, no new charge",
+        description: "An idempotent operation behaves the same no matter how many times it runs. Clients send an Idempotency-Key; the server stores key → response and replays it on retries, with a unique constraint preventing races.",
+        example: "A payment times out — did the charge go through? The client retries with the same key; the server finds it and returns the original response instead of charging twice. Network retries are ambiguous by nature; idempotency makes them safe.",
+        code: "POST /payments\nIdempotency-Key: 8f14e45f-ea1b-4c9a-...\n\n// server\nif (repo.exists(key)) return repo.findResult(key);   // replay\n// DB: PRIMARY KEY (key) — unique index is the race-proof backstop"
       },
       {
-        what: "Strong consistency = every read immediately sees the latest write (single source of truth). Eventual consistency = after a write, replicas/services catch up 'eventually' — for a short window reads may be stale.",
-        how: "Single DB with ACID = strong. Distributed systems use events/replication: write to orders service, payment service updates milliseconds later by consuming the event. Conflict rules needed (last-write-wins, version checks).",
-        why: "You choose per data type: account balance should be strongly consistent; a like counter or feed can be eventual.",
-        tradeoff: "Strong = locks/slowness across nodes. Eventual = fast & available, but users may briefly see old data.",
-        code: "Strong : write 100 → next read ALWAYS 100\nEventual: write 100 → other service reads 90 for 200ms, then 100",
+        description: "Strong consistency: every read right after a write sees it (single-transactional store). Eventual consistency: reads may lag until events propagate — the realistic choice across services, since distributed 2PC sacrifices availability. Design for it explicitly.",
+        example: "After 'pay', the confirmation page must show paid → read-your-writes by querying the service that wrote it. The analytics board showing it 300ms later is fine. Money movement across services uses a saga + outbox, not a distributed transaction — and reconciliation jobs mop up the rare drift.",
+        code: "-- strong: single-DB transaction\nBEGIN; UPDATE accounts SET bal = bal - 100 WHERE id = 1; COMMIT;\n\n// eventual: event published, read model lags ~300ms (acceptable)\n// read-your-writes: route the user's next read to the write service\n// never: UPDATE another service's tables directly"
       },
       {
-        what: "Contract testing = producer and consumer agree on the SHAPE of requests/responses (the 'contract') and each side runs tests that verify it independently.",
-        how: "Consumer-driven: consumer team publishes expected request/response examples (Pact); CI runs them against the producer build → catches breaking changes before deploy. Plus schema validation (OpenAPI/JSON Schema) in pipelines.",
-        why: "Prevents the classic outage: producer renames a field Friday, consumers break Saturday.",
-        tradeoff: "Better than full end-to-end tests (fast, isolated) but won't catch runtime/infra issues.",
-        code: "consumer expects: GET /orders/{id} → {id, total, status}\nproducer CI runs this contract → fails if 'status' renamed",
+        description: "Each consumer publishes what it expects from a provider (the contract); the provider verifies all consumer contracts in CI — breaking changes fail the build before deployment, with no full end-to-end environment needed. Pact is the classic tool.",
+        example: "Billing depends on GET /users/{id} returning {id, email}. Someone renames email → mail in user-service: provider CI immediately fails against Billing's contract — instead of the break surfacing two weeks later in staging, or in production at midnight.",
+        code: "// consumer test defines the contract\npact = consumer(\"billing\").hasPactWith(\"user-service\")\n  .uponReceiving(\"get user\").matchRequest(\"/users/42\")\n  .willRespondWith(200, body(id, email));\n\n// provider CI: pact-verify runs every published consumer contract\n// -> build fails if a change breaks any consumer"
       },
       {
-        what: "Service mesh = dedicated infrastructure layer (sidecar proxy next to each pod) handling service-to-service traffic: mTLS, retries, timeouts, metrics, traffic splitting.",
-        how: "App talks to localhost proxy; proxy (Envoy) talks to other services — Istio/Linkerd control plane configures all proxies centrally: mTLS encryption, per-route timeouts, canary % routing, traffic mirroring.",
-        why: "Cross-cutting network concerns move OUT of application code — same behavior in Java, Go, Python services.",
-        tradeoff: "Adds sidecar overhead (memory/latency) and operational complexity — worth it mainly for large clusters.",
-        code: "app ⇄ sidecar(proxy) ⇄ mTLS ⇄ sidecar ⇄ app",
+        description: "A service mesh puts a sidecar proxy (Envoy) beside every pod and moves cross-cutting traffic concerns — mTLS, retries, timeouts, traffic splitting, metrics — from application code into infrastructure, controlled centrally (Istio, Linkerd).",
+        example: "Enable mTLS everywhere and give the new order version 10% of traffic — pure config, zero code changes, no redeploy of application logic. Every service gets golden metrics for free. The trade-off: an extra layer with its own upgrades, memory overhead and failure modes.",
+        code: "apiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nspec:\n  http:\n    - route:\n        - destination: { host: orders, subset: v1 }, weight: 90\n        - destination: { host: orders, subset: v2 }, weight: 10\n# PeerAuthentication: mTLS STRICT for the namespace"
       },
       {
-        what: "Securing service-to-service calls: JWT = signed token carrying identity, passed along; OAuth2 = delegated authorization (tokens from auth server); mTLS = both sides authenticate via certificates (zero trust).",
-        how: "External client → gateway (validates JWT) → internal hops either forward the JWT (propagate identity) or mint a service token. mTLS ensures only certificate-holding services can talk; SPIFFE/istio issue short-lived certs automatically.",
-        why: "In zero-trust networks, even internal traffic must be authenticated and encrypted — assume the network is hostile.",
-        tradeoff: "mTLS gives strongest identity but needs cert management (mesh automates it). JWT propagation can leak tokens — use short TTLs.",
-        code: "Client --JWT--> Gateway --JWT or service-token--> Orders --mTLS--> Payments",
+        description: "Authenticate internal calls with OAuth2 client-credentials JWTs (identity + audience) and encrypt/authenticate the channel with mTLS — or both via a mesh (SPIFFE). Verify every inbound claim; never trust identity headers you haven't validated.",
+        example: "order-service calls payment-service carrying the user's JWT plus an audience claim restricted to 'payments'. payment-service verifies signature, expiry and audience itself, while mTLS proves the peer really is an in-cluster order-service pod — not a random workload that found the port.",
+        code: "// outgoing\nHttpRequest req = HttpRequest.newBuilder(uri)\n  .header(\"Authorization\", \"Bearer \" + userJwt)\n  .header(\"X-Request-Id\", traceId)\n  .POST(body)\n  .build();\n// incoming: verify signature + exp + aud; mTLS between pods (mesh)"
       },
       {
-        what: "Backpressure = the receiver tells the sender to slow down when it can't keep up. Rate limiting = cap requests per time window per client/IP.",
-        how: "Backpressure: queues with limits, consumer lag-based throttling, Reactive Streams request(n). Rate limiting: token bucket (allow N tokens/sec, burst capacity) at gateway/service (Resilience4j RateLimiter).",
-        why: "Without them, traffic spikes overload the system → cascade of timeouts and crashes.",
-        tradeoff: "Rejecting/queueing excess requests hurts UX slightly but keeps the system alive for everyone.",
-        code: "token bucket: capacity 100, refill 10/s\n→ burst up to 100, then 10 requests/second sustained",
+        description: "Backpressure tells the producer to slow down (bounded queues, reactive streams, 429 responses). Rate limiting caps request rate per client (token bucket) at the edge — protecting capacity before queues balloon latency.",
+        example: "Flash sale at 10x normal traffic: without limits, the orders DB drowns and everything times out. The gateway's token bucket admits 100 rps and answers the rest with 429 + Retry-After — predictable latency for those let in, clear signal for those not, capacity never exceeded.",
+        code: "TokenBucket bucket = new TokenBucket(capacity = 100, refillPerSec = 100);\n\nif (bucket.tryAcquire()) handle(req);\nelse { response(429, \"Retry-After: 1\"); }   // shed load fast\n\n// bounded queue = backpressure: full -> reject, never grow unbounded"
       },
       {
-        what: "Zero-downtime DB migration = change schema while old and new app versions run together, using the expand-contract pattern.",
-        how: "1) EXPAND: add new column/table (non-breaking). 2) MIGRATE: backfill data, app writes to both old+new (dual write/read). 3) SWITCH: new version reads new field. 4) CONTRACT: drop old column after all instances upgraded.",
-        why: "In rolling deploys both versions run simultaneously — a destructive migration breaks the old pods.",
-        tradeoff: "Takes several releases instead of one, but avoids downtime and rollback is easy at every step.",
-        code: "ADD col_new  →  dual write  →  read col_new  →  DROP col_old",
+        description: "Expand-contract: (1) expand — add the new column/table alongside the old, dual-write; (2) migrate data; (3) switch reads to the new schema; (4) contract — drop the old, in a LATER release. Old and new app versions must coexist throughout.",
+        example: "Renaming full_name → name: never ALTER in one deploy. Release A adds name and backfills; release B writes both and reads name; weeks later release C drops full_name. At no point does a running old version hit a column that no longer exists — rolling deploys stay safe.",
+        code: "-- release A (expand)\nALTER TABLE users ADD COLUMN name VARCHAR(100);\nUPDATE users SET name = full_name WHERE name IS NULL;   -- backfill\n\n-- release B: write name + full_name, read name\n-- release C (weeks later, contract)\nALTER TABLE users DROP COLUMN full_name;"
       },
       {
-        what: "Bounded context (DDD) = a boundary within which a domain model and its terms are consistent. Anti-corruption layer (ACL) = translation layer so legacy/external models don't leak into your domain.",
-        how: "In 'Shipping' context an 'Order' means address+items; in 'Billing' it means amounts+tax. Each service keeps its own model. ACL = adapter converting external payloads into your clean internal types.",
-        why: "Without boundaries you get one giant shared 'Order' class every team edits — distributed monolith.",
-        tradeoff: "Mapping code between contexts is extra work, but it protects you from upstream changes.",
-        code: "External DTO --[ACL converter]--> internal ShippingOrder\n(names/fields mapped, junk ignored)",
+        description: "Bounded context (DDD): a boundary where each domain concept has exactly one meaning (Catalog's Product ≠ Shipping's Product). An anti-corruption layer translates external/legacy models into yours once, so foreign concepts never leak into your domain code.",
+        example: "The legacy billing system calls everything a 'deal' with 40 fields; orders needs three. A single adapter maps Deal → Invoice at the boundary — when legacy renames a field, you change one class, not twenty services. Two teams merging vocabularies each keep their own model behind the ACL.",
+        code: "class LegacyDealAdapter {\n  Invoice toInvoice(LegacyDeal d) {\n    return new Invoice(d.getDealId(), d.getAmtCents() / 100.0, mapStatus(d.getSt()));\n  }\n}\n// domain code never sees LegacyDeal — the ACL is the only door"
       },
       {
-        what: "The 3 pillars of observability: LOGS (discrete events, text), METRICS (numeric aggregates over time), TRACES (one request's path across services).",
-        how: "Logs answer 'what happened' (structured JSON logs with traceId). Metrics answer 'how much/how fast' (request rate, error rate, latency percentiles → dashboards/alerts). Traces answer 'where did the time go'. Tools: ELK/Loki, Prometheus+Grafana, Jaeger/Tempo.",
-        why: "Metrics alert you something is wrong → traces find WHERE → logs tell WHY. You need all three.",
-        tradeoff: "Cardinality/cost control needed: don't put user IDs in metric labels; sample traces/logs.",
-        code: "RED per service: Rate, Errors, Duration\nGolden signals: traffic, errors, latency, saturation",
+        description: "Logs = discrete events (why it failed), metrics = aggregated numeric time series (how often/how slow, cheap to alert on), traces = one request's path across services (where the time went). Correlation ids tie all three together.",
+        example: "An alert fires on error rate (metrics) → the dashboard shows checkout p95 climbing (metrics) → one trace reveals payments is the slow hop (traces) → its traceId greps the exact log lines with the stack trace (logs). Each pillar alone is half-blind; together they answer any 'what happened'.",
+        code: "// metrics: error rate, p95, queue depth -> Prometheus + Grafana + alerts\n// logs: structured JSON with traceId -> ELK / Loki\n// traces: spans across services -> OpenTelemetry -> Tempo / Zipkin\n// workflow: alert -> dashboard -> trace -> log (same id everywhere)"
       },
     ],
     scenarios: [
       {
-        what: "Order flow where inventory reservation AND payment must both succeed — how do you design it?",
-        how: "Saga with compensation: 1) Create order (PENDING) 2) Reserve inventory → fails → cancel order, stop. 3) Charge payment → fails → release inventory + mark order FAILED. 4) Confirm order. Use orchestration (state machine in order-saga service) or choreography (events).",
-        why: "Cross-service 2PC locks don't scale; saga keeps each service's DB local with compensating undo steps.",
-        tradeoff: "Business must accept temporary intermediate states (order PENDING while stock reserved).",
-        code: "OrderCreated → ReserveStock ✔ → Charge ✖ → ReleaseStock (compensate) → OrderFAILED",
+        description: "Every step is a local transaction that publishes an event; when one step fails, compensating actions undo the completed steps in reverse order — never a distributed lock.",
+        example: "Order saga: reserve stock (10-min hold), charge payment, confirm order. Payment declined → compensate: release the reservation, mark the order FAILED with a reason. The saga state machine records where it stopped, so a retry resumes safely instead of double-charging.",
+        code: "res = inventory.reserve(order);          // local tx + event\ntry {\n  payment.charge(order);                   // local tx\n  orders.confirm(order);\n} catch (PaymentFailed e) {\n  inventory.release(res);                  // compensation\n  orders.cancel(order, e.reason());\n  throw e;\n}"
       },
       {
-        what: "The same payment event is consumed twice — how do you avoid double side effects?",
-        how: "Idempotent consumer: keep a processed_events table (event_id UNIQUE) or use natural idempotency (upsert by payment_id: SET status='CHARGED' WHERE status='PENDING'). First insert wins; duplicate → skip.",
-        why: "At-least-once delivery guarantees duplicates WILL happen (retries, rebalances) — consumers must be idempotent.",
-        tradeoff: "Dedup storage grows — clean old IDs periodically (TTL/retention window).",
-        code: "INSERT INTO processed_events(event_id) VALUES (?)\n-- duplicate key → already handled, skip",
+        description: "Dedupe on a deterministic event id: store processed ids in a table with a unique key — the first message inserts and processes, a redelivery collides and is skipped. Make the business operation itself idempotent too (unique charge id).",
+        example: "payment-processed(evt#123) arrives twice because a consumer crashed after processing but before committing the offset. The handler inserts evt#123 into processed_events; the second insert throws DuplicateKeyException → ack and move on. Money moves exactly once, ever.",
+        code: "@EventListener\nvoid on(PaymentProcessed e) {\n  try { processedRepo.insert(e.eventId()); }        // PK = eventId\n  catch (DuplicateKeyException dup) { return; }      // already handled\n  wallet.credit(e.accountId(), e.amount());          // runs exactly once\n}"
       },
       {
-        what: "One downstream service is down and calls pile up — how do you protect your service?",
-        how: "Circuit breaker (fail fast after N errors) + TimeLimiter (e.g. 2s timeout) + Bulkhead (limit concurrent calls to that dependency, e.g. semaphore of 10) + bounded thread pool + retry with backoff only on idempotent ops + fallback (default response / queue for later).",
-        why: "Without these, your threads block until socket timeouts → all threads consumed → your service stops responding (cascading failure).",
-        tradeoff: "Users get degraded/fallback responses instead of correct ones — availability over correctness; decide per endpoint.",
-        code: "breaker: OPEN → call payments? NO, fast-fail + return cached estimate",
+        description: "The circuit breaker fails fast instead of queueing doomed calls; the bulkhead (semaphore or pool limit) caps concurrency per dependency so its latency cannot consume every thread in the service.",
+        example: "The shipping API degrades to 10s responses: before, every order thread waited 30s until Tomcat's pool emptied — a total outage. Now the breaker opens after repeated failures (calls return a fallback in ms) and max 20 concurrent shipping calls protect the rest of the service — checkout keeps serving.",
+        code: "CircuitBreaker cb = CircuitBreaker.of(\"shipping\",\n  CircuitBreakerConfig.custom()\n    .failureRateThreshold(50)\n    .slowCallDurationThreshold(Duration.ofSeconds(2))\n    .slidingWindowSize(10));\nBulkhead bh = Bulkhead.of(\"shipping\",\n  BulkheadConfig.custom().maxConcurrentCalls(20));\n// breaker open -> fallback; bulkhead -> pool never exhausted"
       },
       {
-        what: "Trace a request across 6 services — how do you correlate everything?",
-        how: "Propagate traceId + spanId in a header (W3C traceparent or B3) through every hop; middleware (e.g. Micrometer Tracing) auto-creates spans and injects traceId into MDC so every log line has it. One search for traceId=abc shows the full journey; compare span durations to find the slow hop.",
-        why: "Without propagation, each service only sees its own piece — you can't reconstruct the request flow.",
-        tradeoff: "Must handle async too (kafka headers) — traces break where context isn't propagated.",
-        code: "traceparent: 00-<traceId>-<spanId>-01   (propagated header)",
+        description: "Generate a correlation id at the gateway, propagate it downstream (X-Request-Id / traceparent), put it into MDC for every log line, and return it in error responses — one id stitches six services into one story.",
+        example: "A ticket says 'checkout failed at 14:03': the traceId from the user's error screen greps gateway → orders → payments → bank-adapter logs in seconds. OpenTelemetry renders the same correlation as a latency waterfall automatically.",
+        code: "// gateway filter\nString traceId = firstNonNull(req.getHeader(\"X-Request-Id\"), randomUUID());\nMDC.put(\"traceId\", traceId);              // pattern: %X{traceId}\nforwarded.add(\"X-Request-Id\", traceId);   // next service logs it too\n// error body: { \"traceId\": \"...\" } -> support can grep it"
       },
       {
-        what: "Split an order module out of a legacy monolith without a big-bang rewrite.",
-        how: "Strangler fig: 1) Put a proxy/facade in front. 2) Identify seams (e.g. Order API). 3) Route ONE endpoint at a time to the new service. 4) Sync data between old and new (dual write or CDC) until migration done. 5) Kill the old code path. Repeat for next capability.",
-        why: "Big-bang rewrites fail (years of work, everything changes at once); strangler delivers value incrementally with instant rollback.",
-        tradeoff: "Temporary complexity of running both systems and syncing data.",
-        code: "proxy: /api/orders/* → orders-svc (new)\n       /api/*        → monolith (old)",
+        description: "Strangler fig: put a facade in front of the monolith, route one use case to the new service, shadow-read to compare, flip traffic per use case, then delete the old module — no big-bang rewrite, rollback = a routing flag.",
+        example: "Order module of a 10-year-old monolith: the facade proxies /checkout to the new Order Service while inventory and catalog stay put. Shadow reads compare both outputs until parity holds, then reads flip, then writes, one use case at a time — old code dies only when nothing references it.",
+        code: "if (path.startsWith(\"/checkout\")) route(orderService);   // strangled out\nelse route(monolith);\n\n// order: 1) proxy  2) shadow reads  3) compare  4) flip writes  5) drop old code"
       },
       {
-        what: "A schema change must go live without breaking old consumers.",
-        how: "Rules: ADD fields only (old consumers ignore unknown fields) → deploy consumers first → then producers. Avoid renaming/removing/retyping fields until all consumers are upgraded. Version the event type (order.placed.v2) or keep both in a compatibility window.",
-        why: "In async systems consumers may be deployed days later — changes must be backward AND forward compatible.",
-        tradeoff: "Schema evolution discipline slows feature work slightly but prevents outages.",
-        code: "+ added field  → safe (additive)\n~ rename field → BREAKING (deploy consumers first or dual-publish)",
+        description: "Additive-only changes within a version: new optional fields are safe; never rename, remove or reorder in place. Consumers must ignore unknown fields; deprecate with a sunset date; bump a major version only when unavoidable.",
+        example: "orders v1 returns {id, total}: adding currency as an optional field keeps old clients working (they ignore it). Removing 'total' would break every consumer at once — instead mark it deprecated, migrate clients to 'grandTotal', watch usage drop to zero, and only then remove it.",
+        code: "// additive change — safe for all consumers\n{ \"id\": 1, \"total\": 10.0, \"currency\": \"EUR\" }\n// consumer: ignore unknown fields (Jackson FAIL_ON_UNKNOWN_PROPERTIES=false)\n// removal: deprecated in 1.2 -> sunset 1.9 -> gone in 2.0"
       },
       {
-        what: "Two services need the same data — share one DB or replicate via events?",
-        how: "Sharing DB = tight coupling (the exact thing microservices avoids) — only OK inside one bounded context. Between services: owner service exposes API for reads, and/or publishes change events; the other service maintains its OWN local copy (CQRS) updated by events.",
-        why: "Local copy gives fast reads and isolation — service works even if the owner is down.",
-        tradeoff: "Replica can be slightly stale (eventual) and you need dedupe/versioning of events.",
-        code: "orders-svc (owns orders) --OrderUpdated event--> search-svc [local copy]",
+        description: "Sharing one database recreates coupling — the fix is replication: the owning service publishes change events, consumers maintain a local projection. Direct table sharing is only ever a temporary, documented shortcut.",
+        example: "Reporting needs catalog prices, but orders must not query the catalog DB — its next schema change would break orders. Catalog publishes ProductChanged events and orders keeps its own product_read table updated by consumers: each service owns its data and still shows consistent prices.",
+        code: "// producer\npublish(new ProductChanged(id, price, version));\n\n// consumer builds its own read model\n@EventListener void on(ProductChanged e) { localProductRepo.upsert(e.toRow()); }\n// orders DB owns product_read — catalog's schema changes never touch it"
       },
       {
-        what: "Roll out a breaking API change with zero downtime.",
-        how: "1) Add new version path/header (/v2 or Accept header) while /v1 stays. 2) Upgrade all clients/consumers to v2 (monitor v1 traffic → 0). 3) Sunset v1 (deprecation headers, then block, then remove). For events: dual-publish old+new schema during transition.",
-        why: "You can't atomically upgrade all clients of a public/long-lived API.",
-        tradeoff: "Maintaining two versions temporarily costs effort; many teams hide versioning behind additive-change discipline instead.",
-        code: "v1: GET /orders          (deprecated, 6 months)\nv2: GET /v2/orders       (new shape)",
+        description: "Run both versions in parallel behind one facade: add the new contract alongside the old, migrate clients, keep the old path as an adapter, and remove it only when metrics prove zero traffic — no flag day.",
+        example: "Changing POST /orders' response shape: ship /orders/v2, move the mobile app over two weeks, and watch v1 access logs. When v1 sits at zero requests for a week, delete it. Old and new clients coexist the entire migration; rollback is pointing traffic back.",
+        code: "@PostMapping(\"/orders/v2\") OrderV2 createV2(@Valid @RequestBody OrderDto dto)\n// v1 adapter still serves old clients\n// removal gate:\nhttp_server_requests_seconds_count{uri=\"/orders\"}  // flatlines at 0 -> drop v1"
       },
       {
-        what: "After deploy, cache is cold and every request hits the DB (thundering herd) — how do you protect it?",
-        how: "1) Only ONE request rebuilds the cache: lock/semaphore or distributed lock (others wait or serve stale). 2) Pre-warm cache during deploy. 3) Serve stale while refreshing (stale-while-revalidate). 4) Add jitter to expiry so keys don't all expire at once. 5) Rate-limit / shed load if DB is saturated.",
-        why: "10k concurrent requests on a missing key = 10k identical DB queries → DB crash.",
-        tradeoff: "Users may briefly see stale data during refresh — acceptable for most read-heavy pages.",
-        code: "if (cacheMiss) {\n  if (tryLock(key)) { value = db(); cache.set(key, value); unlock(); }\n  else { waitForCache(key); }\n}",
+        description: "Cache miss storm: everyone misses at once and hits the DB together. Fixes: request coalescing / singleflight (one DB call per key), TTL jitter so keys don't expire together, stale-while-revalidate, negative caching, and a hard limit on DB concurrency.",
+        example: "A deploy flushes Redis at peak: 5k req/s all request the same product → DB collapses. With coalescing, only one query runs and the other 4,999 wait milliseconds for its result. Adding ±30s of TTL jitter ensures next time's expirations never align either.",
+        code: "// singleflight / coalescing — one loader per key\nCache.get(key, () -> db.load(key));     // concurrent callers wait & share\n\n// TTL jitter + stale-while-revalidate\ncache.put(key, v, ttl.plus(random(0, 30s)));\nif (stale) return old; refreshAsync(key);   // serve, don't stampede"
       },
       {
-        what: "One service is overloaded while others are idle — scaling and load-shedding strategy.",
-        how: "1) Horizontal scale the hot service (HPA/CPU+queue-depth autoscaling). 2) Apply backpressure: bounded queues, reject with 429 when queue full. 3) Rate limit per tenant at gateway. 4) Check the bottleneck first (DB? external API?) — scaling app won't help if DB is the limit.",
-        why: "Scaling blindly adds cost; first identify whether the bottleneck is CPU, DB connections, or a downstream dependency.",
-        tradeoff: "Load shedding rejects some users to save the system for everyone (prioritize critical endpoints).",
-        code: "queue depth > 1000 → return 429 (retry-after)\nHPA: replicas 3 → 10 when CPU > 70%",
+        description: "Scale out (HPA on CPU/RPS), shed load early (429 + Retry-After, bounded queues), degrade non-essential work (defaults for enrichment, pause batch jobs), and prioritize the critical path over background tasks.",
+        example: "Payments hit 10x normal load: HPA adds pods, the gateway rate-limits partner traffic, nightly reports pause, and optional enrichment returns defaults — interactive latency stays flat because load is rejected or deferred instead of queueing behind everything.",
+        code: "# HPA\nmetrics:\n  - type: Resource\n    resource: { name: cpu, target: { averageUtilization: 70 } }\n\n// app: bounded queue — when full, reject fast (429 + Retry-After)\n// prioritize: interactive pool > batch executor; pause non-critical jobs"
       },
     ],
   },
   kafka: {
     important: [
       {
-        what: "Apache Kafka = distributed event streaming platform: a commit log where producers append messages (events) and consumers read them at their own pace.",
-        how: "Kafka stores everything on disk as an append-only log and uses page cache + sequential I/O — that's why it can handle millions of messages/second. Data is kept for a retention period (e.g. 7 days), so any new consumer can read from the beginning anytime.",
-        why: "It decouples producers from consumers (fire-and-forget), buffers huge spikes, and lets many services react to the same event.",
-        tradeoff: "Not a traditional queue — consumers manage their own position (offset); no per-message routing logic (topic-level).",
+        description: "Kafka is a distributed commit log / event streaming platform: producers append immutable events to topics, consumers read at their own pace — durable, horizontally scalable and replayable.",
+        example: "Every order and payment change is published once; search, analytics, email and warehouse services each consume independently — the order service never needs to know who's listening. With 7-day retention, a new consumer can replay history from the start.",
+        code: "# produce\nkafka-console-producer --broker-list localhost:9092 --topic orders\n# consume from the beginning with a group\nkafka-console-consumer --topic orders --from-beginning --group analyzer"
       },
       {
-        what: "Kafka architecture = Producers (write), Brokers (servers storing data), Topics (categories), Partitions (parallel slices of a topic), Consumers (read), Consumer Groups (parallel consumers).",
-        how: "A topic is split into partitions across brokers. Producer writes a record to one partition; consumer group members each own some partitions and read in order. ZooKeeper/KRaft keeps metadata and leader elections.",
-        why: "Understanding this map is required for every Kafka interview: parallelism = partitions, ordering = per partition.",
-        tradeoff: "More brokers/partitions = more parallelism but more coordination overhead.",
-        code: "Topic 'orders' (3 partitions)\n Broker1: P0    Broker2: P1    Broker3: P2\n Producer ──append──▶ log: [0,1,2,...] (offsets grow)",
+        description: "Brokers form the cluster. A topic is split into partitions — each an ordered, immutable append log with monotonically increasing offsets. Producers write, consumer groups read; replication across brokers gives durability; KRaft (formerly ZooKeeper) holds cluster metadata.",
+        example: "topic orders with 12 partitions on 3 brokers means 4 partitions stored per broker, each with its own offset sequence (0,1,2…). A consumer's 'position' is simply the next offset it will read inside its assigned partitions.",
+        code: "orders (topic, RF=3, 12 partitions)\n  partition-0  [leader @ broker-1]  offsets 0,1,2,...  retention 7d\n  partition-1  [leader @ broker-2]\n  ...\nmetadata: KRaft quorum (ZooKeeper in older clusters)"
       },
       {
-        what: "Producer sends messages, Broker stores them, Topic = category of messages, Partition = ordered, append-only log inside a topic, Offset = sequence number of a record inside a partition, Consumer reads records.",
-        how: "Producer picks a partition (round-robin or by message key hash) and appends. Broker replicates partitions to other brokers. Consumer tracks its offset — 'I have read up to offset 105' — and commits it so a restart resumes from 106.",
-        why: "Offset is what makes Kafka consumers replayable and stateless on the broker side.",
-        tradeoff: "Consumer-side complexity: you must manage offsets and handle rebalances correctly.",
-        code: "partition P0: [offset0] [offset1] [offset2] ...\nconsumer: committed offset = 2 → next read = 3",
+        description: "Broker = a server storing data. Topic = a named stream. Partition = an ordered shard of a topic. Offset = a record's position in its partition. Producer writes, consumers read, a consumer group shares a topic's partitions.",
+        example: "producers (checkout, payment) append to topic 'orders'; consumer group 'billing' with 4 consumers covers all 16 partitions; an offset like 4,813,992 is just that message's row number inside its partition.",
+        code: "Producer --> Broker --> Topic = { P0 [offsets 0..n], P1 [...], ... } <-- Consumer(group)"
       },
       {
-        what: "Partitions exist for PARALLELISM and SCALABILITY — one partition is the unit of ordering and the unit of work.",
-        how: "Each partition lives on one broker and can be consumed by ONE consumer in a group. N partitions → up to N consumers in parallel → throughput scales linearly with consumers/brokers.",
-        why: "A single-threaded log is a bottleneck; partitions let Kafka scale horizontally.",
-        tradeoff: "Too many partitions = more file handles, more replica overhead, longer leader elections. Order is only guaranteed WITHIN a partition, not across.",
+        description: "Partitions are Kafka's unit of parallelism: more partitions = more consumers and throughput, plus room for replication. The trade-off: ordering is guaranteed only within a single partition.",
+        example: "A one-partition topic can never be consumed faster than one consumer. 16 partitions let a group run 16 consumers in parallel across brokers. That's why throughput-heavy topics get many partitions — and why global ordering across a topic is impossible at scale.",
+        code: "throughput ~ partitions x per-consumer rate\nordering: per partition only\nsame key -> same partition (ordering per key, parallelism across keys)"
       },
       {
-        what: "Partition selection: if a KEY is given → hash(key) % partitionCount (same key → same partition). If no key → round-robin/sticky for even load.",
-        how: "Hash-based keying guarantees all messages for that key (e.g. userId) land in the SAME partition, so they are processed in order by one consumer. Changing partition count changes the hash mapping — old and new messages for a key may then go to different partitions (be careful!).",
-        why: "This is how you get ordering per business key (the classic 'order of one user must not scramble' question).",
-        tradeoff: "Hot key = one busy partition (skew) — throughput limited by that single partition.",
-        code: "key=userId42 → hash → P1\nmsg1, msg2, msg3 (same user) all → P1 → ordered",
+        description: "With a key: hash(key) % numPartitions, so the same key always lands in the same partition. Without a key: round-robin or sticky partitioning (fill one partition per batch, then move). A custom Partitioner can override.",
+        example: "All events for user 42 use key=\"user-42\" — they all land in partition 7 and are consumed strictly in order. Keyless metrics spread round-robin so no single partition becomes a hotspot.",
+        code: "partition = Math.abs(murmur2(key) % numPartitions);\n// same key -> same partition -> per-key ordering\n// no key -> sticky/round-robin for even load"
       },
       {
-        what: "Consumer group = a set of consumers that jointly consume a topic; Kafka divides partitions of the topic among the group's members.",
-        how: "With 6 partitions: group of 3 → each gets 2 partitions. Group of 8 → 6 consume, 2 idle (never more consumers than partitions). When a member joins/leaves → coordinator triggers REBALANCE → partitions reassigned.",
-        why: "Groups give both horizontal scaling (more consumers = more parallelism) and a shared-work semantics.",
-        tradeoff: "During rebalance, consumption pauses briefly — use cooperative sticky assignment to minimize it.",
-        code: "topic P0..P5 (6 partitions)\nC1: P0,P1   C2: P2,P3   C3: P4,P5   (group of 3)",
+        description: "A consumer group shares a group id: the group receives every message exactly once as a whole, with partitions divided among members — each partition owned by exactly one consumer in the group. Different groups read independently (broadcast).",
+        example: "group 'billing' with 4 consumers over 16 partitions → 4 partitions each. Scale to 8 → rebalance → 2 each. group 'analytics' separately also reads 100% of messages — groups are Kafka's broadcast mechanism.",
+        code: "props.put(\"group.id\", \"billing\");\nconsumer.subscribe(List.of(\"orders\"));\n// each partition: one consumer per group\n// other groups see all messages independently"
       },
       {
-        what: "Kafka assigns partitions to consumers as EXCLUSIVELY as possible: each partition goes to exactly one consumer in the group (evenly divided, no sharing).",
-        how: "Assignment algorithm takes all partitions of the subscribed topics and deals them out to members (Range: per-topic contiguous; RoundRobin: round-robin across all; CooperativeSticky: keep current assignment, move only what's needed). 6 partitions / 3 consumers = 2 each.",
-        why: "Exclusive ownership per partition is what preserves ordering — two consumers on one partition would process interleaved.",
-        tradeoff: "Rebalancing the assignment pauses the moved partitions; consumers more than partitions sit idle.",
+        description: "The coordinator divides partitions as evenly as possible (round-robin / sticky assignor): each partition to one consumer; if there are more consumers than partitions, the extras sit idle.",
+        example: "10 partitions / 4 consumers → 3,3,2,2. Add a 5th → rebalance, partitions move (committed offsets mean no loss, just a short pause). 12 consumers on 10 partitions → 2 consumers get nothing — never run more consumers than partitions.",
+        code: "10 partitions / 4 consumers -> [3,3,2,2]\n12 consumers / 10 partitions -> 2 idle\nrebalance on join/leave: revoke + reassign (COOPERATIVE sticky avoids full stop)"
       },
       {
-        what: "When a consumer joins/leaves (crash, deploy, scale-up), the group REBALANCES: all partitions are revoked and re-assigned among current members.",
-        how: "Group coordinator detects change (membership heartbeat lost or voluntary leave) → commits final offsets → re-assigns partitions → consumers resume from last committed offsets. Strategies: Range/RoundRobin (eager: all revoke) vs CooperativeSticky (incremental: only moved partitions pause).",
-        why: "Explains why deploying consumers causes brief pauses and sometimes duplicate processing (at-least-once around rebalance).",
-        tradeoff: "Frequent rebalances (flaky consumers) = downtime in consumption → see max.poll.interval.ms.",
-        code: "C2 crashes → coordinator: revoke all → assign\nC1: P0,P2   C3: P1,P3   (work redistributed)",
+        description: "The coordinator triggers a rebalance: consumers stop, partitions are revoked and reassigned, processing resumes from committed offsets. Heartbeats/session timeout detect dead members; max.poll.interval.ms detects consumers that are too slow.",
+        example: "A rolling deploy adds a new pod: group pauses for a second or two, partitions redistribute, and consumption continues — no messages lost (offsets committed), though some in-flight records may be processed twice (at-least-once).",
+        code: "session.interval.ms / heartbeat  -> liveness detection\nmax.poll.interval.ms            -> too-slow consumer evicted -> rebalance\ngroup.instance.id               -> static membership: restarts don't rejoin"
       },
       {
-        what: "Offset = the commit marker of 'how far a consumer has processed a partition'.",
-        how: "Consumer polls records, processes them, then commits offset (e.g. 107). On restart it seeks to committed+1. Auto-commit (enable.auto.commit=true) commits every auto.commit.interval.ms during poll — even unprocessed messages if you crash.",
-        why: "Offset management = the difference between losing messages and duplicating them.",
-        tradeoff: "Auto-commit is simple but unsafe with real processing; manual commit after successful processing gives at-least-once.",
+        description: "An offset is a record's sequential id inside a partition (0,1,2…). The consumer's position is the next offset to read; committed offsets are stored per group+partition in the internal __consumer_offsets topic.",
+        example: "A consumer processed through 4999 and committed 5000. It crashes, restarts, and resumes at 5000 — nothing skipped. If no commit exists (brand-new group), auto.offset.reset (earliest/latest) decides where it starts; seek() can jump anywhere, including replaying from 0.",
+        code: "__consumer_offsets: (group, partition) -> committed offset\nauto.offset.reset = earliest | latest     // fresh group, no commit\nconsumer.seek(tp, 0L)                     // manual replay"
       },
       {
-        what: "Ordering in Kafka = guaranteed ONLY within a single partition, never across partitions of a topic.",
-        how: "A partition is an append-only log read sequentially → strictly ordered. But messages with different keys go to different partitions, so their global arrival order is undefined. Consumers of a partition process in order (single-threaded per partition).",
-        why: "Interview answer: 'ordering per key' (key → partition) is the realistic guarantee at scale.",
-        tradeoff: "Global ordering = single partition = no parallelism → Kafka's whole scalability advantage disappears.",
+        description: "Ordering is guaranteed only within one partition (single producer session). Cross-partition ordering requires sacrificing throughput; retries can reorder unless you use an idempotent producer or max.in.flight=1.",
+        example: "Key events by userId and that user's sequence stays in order — created, paid, shipped. A retry after a network blip could otherwise deliver an older record after a newer one: enable.idempotence=true with acks=all prevents it while keeping pipelining.",
+        code: "props.put(\"enable.idempotence\", true);\nprops.put(\"acks\", \"all\");\n// strictest order (lower throughput):\nprops.put(\"max.in.flight.requests.per.connection\", 1);"
       },
       {
-        what: "acks = how many brokers must confirm before the producer considers the send successful. acks=0: fire and forget. acks=1: leader alone confirms. acks=all (-1): all in-sync replicas confirm.",
-        how: "With acks=all + min.insync.replicas=2: the write is durable on at least 2 replicas → survives broker failure. Producer also retries on failures and can use idempotence (enable.idempotence=true) to avoid duplicates from retries.",
-        why: "This is the durability knob: payment events → acks=all; metrics firehose → acks=1 or 0 is fine.",
-        tradeoff: "acks=all adds latency (wait for replicas) but prevents data loss on broker crash.",
-        code: "acks=0 : fast, may lose data\nacks=1 : leader ok, may lose if leader dies\nacks=all + min.insync=2 : safest",
+        description: "acks=0: fire-and-forget, may lose. acks=1: leader acknowledges alone — fast, but loss if the leader fails before replication. acks=all/-1: every in-sync replica acknowledges — safest and slowest (pair with min.insync.replicas).",
+        example: "Payment events use acks=all + min.insync.replicas=2: the leader dies right after the write and a synced follower still has the record — zero loss. Internal telemetry with acks=0 accepts losing a few points in exchange for maximum speed.",
+        code: "acks=0    // no confirmation; fastest; possible loss\nacks=1    // leader only; loss if leader fails pre-replication\nacks=all  // all ISR ack; safe with min.insync.replicas=2"
       },
       {
-        what: "Replication factor (RF) = on how many brokers a partition's copies are stored (usually 3). Leader replica handles reads/writes; follower replicas copy from the leader.",
-        how: "Each partition: 1 leader + (RF-1) followers, spread across brokers/racks. Producers with acks=all wait for the ISR set (leader + in-sync followers).",
-        why: "RF=3 survives losing 2 brokers; RF=1 loses data if that broker dies.",
-        tradeoff: "RF>1 → more disk/network for replication, higher write latency with acks=all.",
-        code: "RF=3: Broker1: leader, Broker2: ISR, Broker3: ISR",
+        description: "The replication factor is how many copies of each partition exist across brokers. RF=1 loses data on broker failure; RF=3 is standard — survives one broker loss without data loss. Higher RF costs more storage and replication traffic.",
+        example: "RF=3 on a 3-broker cluster: leader + 2 followers on different brokers. One broker dies → its leaders promote from the ISR with zero loss. RF=5 only pays off if you must survive two simultaneous failures.",
+        code: "kafka-topics --create --topic orders \\\n  --partitions 12 --replication-factor 3\n# plus: min.insync.replicas=2 — tolerates 1 failure, no data loss"
       },
       {
-        what: "Leader = the replica that serves all reads/writes for a partition. Follower = replica replicating the leader's data. When the leader fails, one follower is elected new leader.",
-        how: "Controller (broker acting as cluster manager) notices leader death → promotes an in-sync follower → producers/consumers reconnect to new leader. With acks=all + ISR ≥ 2, no committed data is lost because the new leader already has it.",
-        why: "Explains 'what happens when a broker goes down' — a core HA question.",
-        tradeoff: "If the promoted follower was behind (unclean leader election allowed), you may lose recent messages.",
+        description: "Every partition has one leader that serves all reads and writes; followers replicate from it. Only the leader talks to clients. If the leader dies, an ISR follower is promoted by the controller.",
+        example: "Partition-5's leader is broker-2: producers and consumers connect only to it; brokers 1 and 3 follow. b2 crashes → the controller elects a synced follower within seconds and clients reconnect transparently — kafka-topics --describe shows the new Leader.",
+        code: "kafka-topics --describe --topic orders\n  Partition:5  Leader:2  Replicas:2,1,3  Isr:2,1,3\n// leader failure -> controller promotes a replica that is in Isr"
       },
       {
-        what: "When a broker (machine) goes down: its partition leaders move to surviving brokers' ISR replicas; producers/consumers reconnect automatically. Data loss only happens if committed data existed ONLY on the dead broker.",
-        how: "Controller detects broker death → for each affected partition, elects a new leader from the ISR (if clean election allowed) → metadata updated cluster-wide → clients fetch new metadata and continue. If ISR had only the dead replica → with unclean.leader.election=false the partition stays unavailable until a replica returns (prefer availability loss over data loss).",
-        why: "Shows you understand HA at cluster level: RF + ISR + acks=all together prevent loss.",
-        tradeoff: "Unavailable partition (writes blocked) vs silent data loss — Kafka's default chooses safety.",
-        code: "Broker2 dies (leader of P1)\n→ controller promotes Broker3 (ISR copy) → P1 continues",
+        description: "The controller detects the dead broker (session timeout), elects new leaders for its partitions from the ISR, and clients refresh metadata and reconnect. Data is lost only when too few replicas survived (unclean election or RF=1).",
+        example: "One of three brokers dies at 2am: ~40 partitions promote leaders in a couple of seconds and producers' retries cover the gap — RF=3 with min.insync=2 means zero acknowledged messages lost. With RF=1 you just lost that broker's partitions permanently.",
+        code: "# controller: onBrokerFailure -> elect leader from Isr\n# clients: metadata refresh -> reconnect (retries cover the window)\n# monitor: under-replicated partitions = 0, live brokers = expected"
       },
       {
-        what: "ISR (In-Sync Replicas) = replicas that are fully caught up with the leader's log (within replica.lag.time.max.ms, default 10s).",
-        how: "Leader tracks followers. acks=all requires acknowledgment from leader + all current ISR members. A slow follower falls OUT of ISR; if it catches up, it's back in. min.insync.replicas sets the minimum ISR needed to accept acks=all writes.",
-        why: "ISR is the safety contract: 'the write is on N in-sync copies' — without ISR, acks=all would wait on dead/slow replicas forever.",
-        tradeoff: "If followers lag consistently, ISR shrinks → with min.insync=2 the producer gets NotEnoughReplicas errors (signal to fix followers).",
-        code: "ISR = {Broker1(leader), Broker3}   (Broker2 fell behind)\nmin.insync.replicas=2 → write OK on 2 copies",
+        description: "ISR = the replicas fully caught up with the leader. acks=all waits only for the ISR; a follower lagging past replica.lag.time.max.ms is evicted and rejoins when caught up. unclean.leader.election decides whether a non-ISR replica may take over (availability vs data loss).",
+        example: "Describe shows Isr:2,1,3 — all healthy. Broker-3 lags 30s (network hiccup) → Isr:2,1. If b2 now dies, b1 (still in sync) takes over with no loss. Had both followers been out of ISR, an unclean election would trade data loss for availability — which is why it's off by default.",
+        code: "replica.lag.time.max.ms=30000       // eviction threshold\nunclean.leader.election.enable=false // default: never elect unsynced leaders\n# Isr shrinks/grows -> alert on under-replicated partitions"
       },
       {
-        what: "Auto-commit = the client commits offsets automatically on a timer during poll(), without knowing if you processed the messages. Manual-commit = your code commits after business processing succeeds.",
-        how: "Auto: enable.auto.commit=true, auto.commit.interval.ms=5000 — simple, but a crash between processing and next auto-commit replays messages (duplicates), and offsets may be marked consumed before your work finished (skipped records). Manual: disable auto, commitSync()/commitOffsets() after successful processing → at-least-once.",
-        why: "Any real work (DB write, API call) should commit AFTER the work — 'process then commit'.",
-        tradeoff: "Manual commit = more code and one extra round-trip; batch commits (every N records or on rebalance) amortize cost.",
-        code: "records = poll();\nprocess(records);\nconsumer.commitSync();   // at-least-once",
-      },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      {
-        what: "If a consumer crashes BEFORE committing: on restart/rebalance it resumes from the LAST committed offset — everything after that is re-read (duplicates, not loss).",
-        how: "At-least-once path: process → crash → commit never happened → replay from last commit → your sink sees the records again. Risky path: auto-commit already marked them consumed while you hadn't finished → those records are SKIPPED (at-most-once).",
-        why: "Interview trick: 'crash before commit' → at-least-once (reprocess); 'auto-commit fired early' → potential loss.",
-        tradeoff: "Reprocessing means downstream must be idempotent.",
+        description: "auto-commit (enable.auto.commit=true) commits every auto.commit.interval.ms during poll — a crash between commit and processing skips unprocessed messages. Manual commit processes first, then commits: never a skip, worst case a duplicate.",
+        example: "Processing takes 5s while auto-commit fires at 2s: crash → the committed offset is already past messages that were never handled → silent data loss. Manual sync commit after the DB write removes that window entirely — that's the single most important consumer setting.",
+        code: "props.put(\"enable.auto.commit\", false);\nwhile (running) {\n  ConsumerRecords rs = consumer.poll(Duration.ofMillis(1000));\n  process(rs);            // -> DB / side effects\n  consumer.commitSync();  // commit AFTER success\n}"
       },
       {
-        what: "Duplicates come from: producer retries, at-least-once consumption, rebalances, and replays. Kafka itself dedupes producer retries only via the idempotent producer (sequence numbers per partition).",
-        how: "End-to-end needs BOTH sides: producer enable.idempotence=true (no retry dupes) + consumer/process in a Kafka transaction (read-process-write with a transactional.id) OR make the processing idempotent (dedupe table / natural unique keys) — simpler and works across external systems too.",
-        why: "For most systems, idempotent processing + at-least-once is the pragmatic choice.",
-        tradeoff: "True exactly-once (EOS) costs throughput and stays inside Kafka — not across external DBs.",
-        code: "producer: enable.idempotence=true\nconsumer: isolation.level=read_committed + transaction\nor simply: dedupe by business key in your DB",
+        description: "The messages processed since the last commit are re-delivered from that offset after restart — at-least-once semantics. With no commit at all (brand-new group), auto.offset.reset picks earliest or latest.",
+        example: "A consumer processed offsets 51-100 but committed only 50 before crashing → on restart it reprocesses 51-100. Nothing is lost, but side effects run twice — which is why handlers must be idempotent. Setting reset=earliest on a new group re-reads the whole topic.",
+        code: "last committed offset: 50\nprocessed before crash: 51..100\nrestart -> poll resumes at 51 -> reprocess 51..100 (duplicates)\n// therefore: idempotent handler (event-id dedup)"
       },
       {
-        what: "Delivery semantics: At-most-once = may LOSE messages (ack=0 / commit before processing). At-least-once = may DUPLICATE (process then commit). Exactly-once = no loss and no dupes (idempotent producer + transactions, or idempotent sinks).",
-        how: "Kafka's default reliable path = at-least-once. Exactly-once for Kafka-in-Kafka flows: transactional producer/consumer. Exactly-once into a DB = DB transaction + idempotency key in YOUR application code.",
-        why: "Pick per use case: metrics can drop a few (at-most-once OK); payments must not double-charge (idempotent at-least-once).",
-        tradeoff: "Exactly-once outside Kafka is really 'effectively-once' — it depends on your sink supporting dedupe.",
+        description: "Kafka guarantees at-least-once across restarts and rebalances — deduplicate downstream: a unique event-id table, idempotent upserts keyed by business id, or the downstream system's own natural dedup key.",
+        example: "A rebalance rolls offsets back and 500 payment events replay. The handler inserts event_id into processed_events (PK) — replays collide and are skipped — while the charge carries chargeId so the bank also rejects duplicates. Effectively exactly-once, without distributed transactions.",
+        code: "try { processedRepo.insert(e.eventId()); }      // PK = event id\ncatch (DuplicateKeyException dup) { return; }   // replay -> skip\npayments.charge(e.chargeId(), e.amount());      // chargeId deduped at bank\n\n// or upsert: INSERT ... ON CONFLICT (id) DO UPDATE"
       },
       {
-        what: "Choosing partition count = balance between required throughput, consumer parallelism, and cluster size.",
-        how: "Rule of thumb: partitions ≥ target consumers; per-partition producer throughput ~10-20 MB/s → partitions ≈ peak MB/s ÷ 10. Also consider replicas, rebalance time and key skew. You can add partitions later, but it changes key→partition mapping (breaks per-key ordering).",
-        why: "Too few = bottleneck, extra consumers idle. Too many = memory/file-handle/replication overhead and slower elections.",
-        tradeoff: "Plan generously but don't over-partition.",
-        code: "need 300 MB/s → ~30 partitions (+20% headroom)\nwant 6 parallel consumers → ≥6 partitions",
+        description: "At-most-once: commit before processing (can lose). At-least-once: process then commit (can duplicate — the practical default). Exactly-once: Kafka EOS — idempotent producer + transactions atomic across output writes and offset commits.",
+        example: "Metrics tolerate at-most-once. Business events use at-least-once plus an idempotent consumer. Kafka→Kafka money pipelines turn on exactly_once_v2 so the produced records and the consumed offsets commit as one transaction.",
+        code: "// at-least-once (typical)\nprocess(); consumer.commitSync();\n// exactly-once for Kafka -> Kafka flows\nprops.put(\"processing.guarantee\", \"exactly_once_v2\");"
+      },
+      {
+        description: "From peak throughput (partitions ≥ target MB/s ÷ per-partition capacity), consumer parallelism (consumers ≤ partitions) and broker count — balanced against cost: each partition costs files, memory, replica traffic and longer rebalances. Increasing is easy; decreasing needs a new topic.",
+        example: "Need 60 MB/s at a safe 15 MB/s per partition → 4-8 partitions with 2x headroom gives 8-16; you also want at least as many partitions as consumers. 1,000 partitions on 3 brokers means sluggish rebalances and idle consumers — partition count is effectively a one-way door.",
+        code: "partitions ~ ceil(peakMBs / 15) * 2   // headroom\nlimits: consumers <= partitions; ~2-4k partitions per broker\n// shrinking: create new topic + re-create data (destructive)"
       },
     ],
     scenarios: [
       {
-        what: "Consumers keep REBALANCING (join/leave loop) — causes and fixes.",
-        how: "Causes: 1) processing slower than max.poll.interval.ms → consumer kicked out; 2) auto-commit on + rebalance; 3) frequent deploys/crashes; 4) eager assignment revoking everything. Fixes: raise max.poll.interval.ms, lower max.poll.records, use CooperativeStickyAssignor, make processing faster/async, stable group of consumers.",
-        why: "A rebalance storm stalls consumption and duplicates messages — a very common production incident question.",
-        tradeoff: "Bigger poll intervals hide crashes longer — balance between kick-out and failure detection.",
-        code: "max.poll.interval.ms=300000 (5 min)\nmax.poll.records=100\npartition.assignment.strategy=CooperativeStickyAssignor",
+        description: "Rebalance loops come from consumers exceeding max.poll.interval.ms, too-slow batches, session timeouts (GC/network) or constant deploys. Fix: raise the interval above the worst batch time, shrink batches, use static membership and the cooperative sticky assignor.",
+        example: "A consumer processes a 12-minute batch while max.poll.interval.ms is 5 minutes: the coordinator evicts it, a rebalance moves its partitions to another consumer that also gets a fat batch and is evicted — an endless loop with ~zero throughput. Raising the interval to 10 minutes AND processing in small batches breaks the cycle.",
+        code: "max.poll.interval.ms=600000    // > worst-case batch time\nmax.poll.records=500           // smaller batches between polls\npartition.assignment.strategy=CooperativeStickyAssignor\ngroup.instance.id=pod-$(ORDINAL)   // static membership: no rejoin on restart"
       },
       {
-        what: "A consumer is LAGGING (kafka.consumer.lag grows) — detect and fix.",
-        how: "Detect: consumer lag monitoring (Burrow, kafka-consumer-groups --describe, JMX). Fix: 1) add consumers (≤ partitions) or partitions; 2) batch DB writes instead of per message; 3) reduce max.poll.records to get bigger batches; 4) parallelize processing per partition with a worker pool; 5) remove slow synchronous external calls (make async).",
-        why: "Lag = how far behind you are; growing lag means business events are delayed (payments, notifications).",
-        tradeoff: "Faster processing may need idempotency + careful offset commits (batch commit).",
+        description: "Lag = log-end offset − committed position. Detect with kafka-consumer-groups --describe (or the lag metric); fix with more consumers (≤ partitions), removing blocking work, batching, or parallel processing inside the consumer.",
+        example: "Lag hits 2M messages (8h behind) after a slow DB deploy: --describe shows partition 7 holding 90% of it — a hot partition from bad keying. You accelerate that consumer, fix the DB latency, then scale the group; adding partitions helps future throughput but doesn't drain existing lag.",
+        code: "kafka-consumer-groups --bootstrap-server b:9092 \\\n  --describe --group billing\n# TOPIC  PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG\n# orders 7          1000            1900000         1899000  <- hotspot\n// fixes: consumers <= partitions, batch I/O, faster downstream"
       },
       {
-        what: "Guarantee ordering ONLY for one business key (e.g. userId) at scale.",
-        how: "Set message KEY = userId → hash routes all of user's events to ONE partition → read sequentially → process that partition with a single thread (or per-partition ordered queue). Other users go to other partitions in parallel.",
-        why: "Global order across all messages would need 1 partition (no parallelism); per-key order is the realistic guarantee.",
-        tradeoff: "One extremely active key = hot partition; extremely skewed throughput for that partition.",
-        code: "producer.send(topic, key=userId, value=event)\n→ all user42 events → P3 → one consumer, in order",
+        description: "Key every event by that business key: hashing routes all of its records to one partition, which a single consumer in the group reads sequentially — per-key order preserved while other keys run in parallel.",
+        example: "Order events must flow created → paid → shipped per order: producer sends key=orderId, so all of order 123's events land in partition 9 and one consumer reads them in sequence. Millions of other orders fan out across the other partitions — ordering exactly where you need it, scale everywhere else.",
+        code: "producer.send(new ProducerRecord<>(\"orders\", orderId, event));\n// same key -> same partition -> per-key ordering\n// group consumers split partitions, never messages within one"
       },
       {
-        what: "Poison message keeps crashing the consumer — design retry topic + Dead Letter Topic (DLQ).",
-        how: "1) Consumer catches processing errors instead of crashing. 2) Send failed message to 'topic-retry' with attempt count header. 3) Delay/retry N times (retry topic with delayed consumption). 4) After max attempts → send to 'topic-dlq' for manual inspection/alerting. 5) Commit offset so the main stream continues.",
-        why: "Without it, one bad message blocks the whole partition forever (head-of-line blocking).",
-        tradeoff: "DLQ needs tooling/alerts and a replay path — a parked message is forgotten if nobody watches it.",
-        code: "orders → try{}catch{} → orders-retry (2h delay) → orders-dlq (alert)",
+        description: "A poison message must not block its partition forever: cap retries, then route to a delayed retry topic or a dead-letter topic carrying error metadata; alert on the DLQ and replay it after the fix.",
+        example: "One malformed payload crashes the handler, the offset never commits, and the same record restarts the crash loop — every message behind it stalls. After 3 attempts it's parked in orders.DLQ with headers (exception, original offset), the partition moves on, and a fixed consumer replays the DLQ.",
+        code: "try { handle(r); consumer.commitSync(); }\ncatch (NonRetryableException e) { toDlq(r, e); commit(); }\ncatch (Exception e) {\n  if (attempts(r) < 3) toRetryTopic(r); else toDlq(r, e);\n  commit();\n}\n// retry topic + delay: reprocess after backoff, move toward DLQ"
       },
       {
-        what: "Retries produce duplicate side effects (double email / double charge) — how to deduplicate.",
-        how: "1) Idempotent consumer: unique business key (paymentId) with DB UNIQUE constraint — insert first; if duplicate key exists, skip. 2) Store processed offsets/event IDs (dedupe table). 3) Producer idempotence for retry dupes at source. 4) Fingerprint dedup window for at-least-once windows around rebalances.",
-        why: "At-least-once guarantees duplicates will occur — dedupe at the side-effect point is the only reliable fix.",
-        tradeoff: "Dedup storage must be cleaned (retention ≥ max redelivery window).",
-        code: "INSERT INTO payments(id) VALUES (?) ON CONFLICT DO NOTHING;\n-- 0 rows inserted → already processed, just ack",
+        description: "Retries re-deliver messages (at-least-once) — make side effects idempotent: unique event-id dedup table, business-key upserts, or a downstream natural key (charge id) that rejects repeats.",
+        example: "After an offset rollback, 500 payment events are replayed. The handler inserts event_id into processed_events first — the duplicate collides with the primary key and is acked without re-charging. The wallet's own chargeId gives a second dedup layer at the bank.",
+        code: "void handle(PaymentEvent e) {\n  try { processedRepo.insert(e.eventId()); }      // PK = event id\ncatch (DuplicateKeyException dup) { return; }   // replay -> skip\n  payments.charge(e.chargeId(), e.amount());      // chargeId deduped downstream\n}"
       },
       {
-        what: "A broker crashes — what data can be lost and how does ISR protect you?",
-        how: "Producers with acks=all wait for all IN-SYNC replicas to acknowledge. If leader dies, an ISR follower is promoted. Data is lost only if the failed leader was SO behind that it wasn't in ISR (unclean leader election) — controlled by min.insync.replicas (e.g. acks=all + min.insync=2 tolerates 1 failure).",
-        why: "This is the durability story interviewers expect: replication factor + acks + min.insync together.",
-        tradeoff: "More replicas/min.isr = safer but higher write latency.",
-        code: "replication.factor=3, min.insync.replicas=2, acks=all\n→ survives 1 broker failure with NO data loss",
+        description: "A broker crash loses only un-replicated data and delays leadership until the controller elects new leaders. With RF=3, min.insync.replicas=2 and acks=all, a synced follower takes over with zero acknowledged loss; RF=1 or acks=1 exposes you to real loss.",
+        example: "Broker-2 dies holding partition-5's leadership: the controller promotes an ISR member in a couple of seconds, producers' retries cover in-flight writes — nothing acknowledged is gone. Had followers lagged below min.insync, the last acked write would have failed instead of vanishing silently.",
+        code: "replication.factor=3\nmin.insync.replicas=2\nacks=all\nunclean.leader.election.enable=false\n# broker down -> controller elects from Isr -> clients refresh metadata"
       },
       {
-        what: "Design a high-throughput order-events pipeline with exactly-once semantics.",
-        how: "Producer: enable idempotence (enable.idempotence=true), acks=all, batching (batch.size, linger.ms). Topic: partitions by orderId, RF=3. Consumer: process + write with transactions or store offsets in the destination DB (consumer co-commit / read-process-write EOS with Kafka Streams). Make side effects idempotent as safety net.",
-        why: "Finance/order systems must not lose or double-process events even with retries and crashes.",
-        tradeoff: "Exactly-once across an EXTERNAL DB is not free — you approximate it with idempotent writes; true EOS only holds inside Kafka or with transactional sinks.",
-        code: "producer: idempotent + acks=all\nconsumer: BEGIN txn → write DB + send output + commitOffsets → COMMIT\nfallback: dedupe on (orderId, eventId) in target DB",
+        description: "A high-throughput order pipeline: keyed topics (per-order ordering), idempotent producer with acks=all, consumers that commit after processing, DLQ for poison records, lag monitoring — and exactly-once semantics only where they're actually needed (Kafka→Kafka).",
+        example: "10k order events/s: 24 partitions keyed by orderId, producer batches with lz4 and acks=all; the DB consumer processes then commits with dedup; the analytics copy to another topic runs exactly_once_v2. Lag dashboard and DLQ alerts give production visibility.",
+        code: "// producer\nenable.idempotence=true; acks=all; compression.type=lz4; linger.ms=5\n// consume -> Kafka (EOS)\nprocessing.guarantee=exactly_once_v2\n// consume -> DB (practical at-least-once)\nprocess(); insertIdempotently(); consumer.commitSync();"
       },
       {
-        what: "Replay 3 months of history into a new service without disturbing live consumers.",
-        how: "Option A: new consumer group with auto.offset.reset=earliest reads the topic from the beginning (retention must still cover 3 months — set retention.ms accordingly). Option B: MirrorMaker2/copy to a dedicated topic. Read with a SLOWER, throttled rate so the new consumer doesn't steal throughput from live ones.",
-        why: "Backfills (new search index, analytics rebuild) are common — doing it on the live group would break production processing.",
-        tradeoff: "Long retention costs storage; replaying through the same partitions can hit head-of-line blocking for live keys — better on a copy topic.",
-        code: "new group 'indexer-v2', auto.offset.reset=earliest\nconsumer.fetch.max.bytes throttled to 20MB/s",
+        description: "A new consumer group replays history without touching live groups — groups are independent. Run the backfill under its own group id with rate limits so it doesn't starve live consumers, then cut over when it catches up.",
+        example: "A search indexer needs 3 months of order events: start it with group 'search-backfill' and auto.offset.reset=earliest — it races through history while 'billing' continues on its committed offsets. Throttled polls/quotas keep the brokers healthy; at lag≈0 the service switches to its live group.",
+        code: "# new group, replay from the start — live groups unaffected\nkafka-console-consumer --topic orders --from-beginning \\\n  --group search-backfill\n// programmatic: consumer.seekToBeginning(tps)\n// throttle: client quotas / max.poll.records to protect live traffic"
       },
       {
-        what: "Kafka vs RabbitMQ — choose by pattern, not hype.",
-        how: "Kafka: persistent log, replayable, high throughput, partitioned ordering, stream processing — events/event sourcing/audit. RabbitMQ: per-message routing (exchanges, routing keys), low latency point-to-point tasks, fine-grained acks — task queues, RPC-style jobs.",
-        why: "Notifications (few messages, instant, per-consumer ack) often fit RabbitMQ; order/event streams (many consumers, replay, analytics) fit Kafka.",
-        tradeoff: "Kafka retains everything (ops + storage); RabbitMQ is simpler for classic work queues but replay needs extra setup.",
-        code: "Kafka     : stream of events  (retain & replay, many readers)\nRabbitMQ  : queue of messages  (deliver once, per-consumer ack)",
+        description: "Kafka: a durable, replayable, partitioned log — high throughput, many independent consumers, ordering per key — for streams of facts. RabbitMQ: per-message routing and acks (exchanges, TTLs, DLX) — better for task queues and low-latency delivery.",
+        example: "Order events with audit replay, five consumer teams and 10k/s → Kafka. Push notifications needing per-device acks, routing rules and delayed retries → RabbitMQ, whose exchanges model that directly. Kafka would force you to build the routing and per-message bookkeeping yourself.",
+        code: "order events   -> Kafka    (retention, replay, partitions, fan-out)\nnotifications  -> RabbitMQ (exchanges, routing keys, per-message ack, TTL/DLQ)\nrule of thumb: stream of facts -> Kafka; task/delivery -> RabbitMQ / SQS"
       },
       {
-        what: "Throughput is low — a systematic tuning checklist for producer AND consumer.",
-        how: "Producer: batch (batch.size=16k+, linger.ms=5-100), compression (lz4/zstd), acks tradeoff (1 vs all), more partitions, async send. Cluster/IO: more disks (direct IO), avoid small messages (batch into JSON/Avro/Protobuf). Consumer: bigger fetch (fetch.min.bytes, fetch.max.wait.ms), lower max.poll.records processing cost, parallelize per partition, fast DB writes (batch inserts).",
-        why: "Interviewers want ordered diagnosis: measure first (per-partition rates), find whether producer, network, disk or consumer is the bottleneck.",
-        tradeoff: "Higher throughput settings increase latency and memory — tune to the SLA.",
-        code: "producer: linger.ms=50, compression.type=lz4, batch.size=65536\nconsumer: fetch.min.bytes=50000, max.poll.records=500 + batch DB inserts",
+        description: "Producer: batching (linger.ms, batch.size), compression, acks trade-off, partitions for parallelism. Consumer: more consumers (≤ partitions), larger fetches, less blocking per record. Broker: fast disks, replication headroom, avoid hot partitions.",
+        example: "At 5k small msgs/s, linger.ms=5 + batch.size=64KB bundles messages into big network writes and snappy compression halves the bytes; the consumer's fetch.min.bytes=1MB pulls in bulk. Same workload, ~8x throughput, and p99 latency stays under 100ms.",
+        code: "// producer\nlinger.ms=5; batch.size=65536; compression.type=snappy\nbuffer.memory=67108864; acks=all\n// consumer\nfetch.min.bytes=1048576; fetch.max.wait.ms=500; max.poll.records=500\n// topic: enough partitions; broker: SSD, monitor under-replicated count"
       },
     ],
   },
   reactive: {
     important: [
       {
-        what: "Reactive Programming = programming with ASYNCHRONOUS data streams: you define 'what to do when data arrives' instead of polling or blocking for it.",
-        how: "You get a stream (Publisher), attach operators (map/filter), and a subscriber handles each item as it arrives. Nothing blocks — the thread is free to process other work while waiting for data.",
-        why: "Traditional request-thread model needs a thread per waiting request (limited). Reactive uses event-loop callbacks → thousands of connections with few threads.",
-        tradeoff: "Code becomes harder to read/debug (no normal top-to-bottom flow) — use it only where concurrency actually matters.",
-        code: "Imperative: User u = repo.get(id);   // thread sleeps here\nReactive  : repo.get(id).map(u -> u.name).subscribe(name -> send(name));  // thread free",
+        description: "Reactive programming is an asynchronous, non-blocking, event-driven paradigm: data flows as streams of events and consumers react to them as items arrive — described by the Reactive Streams specification.",
+        example: "Nothing waits for a result: you subscribe, and when the row arrives the callback runs. A price change event triggers recalculate-cart → push-notification as a chain of reactions, without a single thread parked in between.",
+        code: "Flux.fromIterable(orders)          // stream of events\n  .filter(Order::isOpen)\n  .subscribe(this::handle);          // react when data arrives"
       },
       {
-        what: "Imperative (traditional): code runs step by step, each call may block until done. Reactive: built on non-blocking event-driven streams that react to data/completion/failure.",
-        how: "Imperative thread sits idle during I/O (1000 requests ≈ 1000 threads). Reactive registers a callback: when I/O finishes, an event fires on a shared event loop (1000 requests ≈ a few threads).",
-        why: "For high-concurrency, I/O-heavy systems (chat, feeds, streaming) reactive uses resources far better.",
-        tradeoff: "Imperative is simpler to write and debug — most CRUD apps don't need reactive.",
-        code: "Imperative: thread blocked 200ms per call\nReactive  : thread does 100 other calls during those 200ms",
+        description: "Imperative code calls a function and blocks the thread until it returns. Reactive code composes asynchronous pipelines — threads only run when an events fire — so a handful of threads serve thousands of concurrent operations.",
+        example: "Imperative: 100 concurrent requests × 2s downstream latency = 100 threads mostly sleeping. Reactive: 2-4 event-loop threads handle 10,000+ connections. The cost: harder debugging (stack traces end at the callback) and an absolute rule — every link in the chain must be non-blocking.",
+        code: "// imperative: thread parked for 2s\nOrder o = http.get(\"/order/1\");\n\n// reactive: same result, thread released meanwhile\nhttp.get(\"/order/1\").subscribe(this::render);"
       },
       {
-        what: "Reactive Streams spec = 4 interfaces: Publisher (produces data), Subscriber (consumes), Subscription (link with request(n) control), Processor (both).",
-        how: "Subscriber calls publisher.subscribe(this) → gets a Subscription → calls subscription.request(n) to say 'send me n items'. This request-based protocol IS the backpressure mechanism. Reactor's Mono/Flux implement Publisher.",
-        why: "Standardizes async streaming across libraries so any publisher can talk to any subscriber.",
-        tradeoff: "Low-level API — in practice you use Mono/Flux instead of implementing these interfaces.",
-        code: "Subscriber → subscription.request(10) → Publisher sends max 10 items\n          ← onNext(item) x10, onComplete()",
+        description: "Reactive Streams spec: Publisher<T> emits items; Subscriber<T> receives them; Subscription is the link — request(n) declares demand, cancel() stops it; Processor<T,R> is a subscriber that is also a publisher. Backpressure is part of the contract.",
+        example: "A subscriber says 'send me 10 at a time' — the publisher must not push an 11th until more demand arrives. Reactor's Flux and Mono are the reference implementations; any spec-compliant library (Kafka Reactive Streams, RSocket) can plug into the same operators.",
+        code: "interface Subscriber<T> {\n  void onSubscribe(Subscription s);   // s.request(n) / s.cancel()\n  void onNext(T item);                // one element\n  void onError(Throwable t);\n  void onComplete();\n}"
       },
       {
-        what: "Non-blocking I/O = start an I/O operation and immediately continue; a completion event returns later — no thread waits.",
-        how: "Built on OS features (epoll/kqueue/netty): one event-loop thread watches many sockets; when data arrives it dispatches the callback. Contrast: blocking sockets make the thread sleep until data comes.",
-        why: "This is why WebFlux/Netty handles 10k+ connections on a handful of threads while Tomcat thread-per-request runs out of threads.",
-        tradeoff: "Any library you call from non-blocking code must also be non-blocking, or one blocking call stalls the whole event loop.",
-        code: "Blocking   : thread waits 200ms doing nothing\nNon-blocking: thread returns, resumes via callback when data arrives",
+        description: "Non-blocking I/O releases the thread immediately; a completion event delivers the result later (selectors/epoll under the hood). Blocking pins the thread for the whole operation, so scale equals thread count.",
+        example: "Blocking server with 500 threads: most threads just sleep waiting on sockets (memory + context switches). Netty event loop: one thread multiplexes thousands of connections and only runs a callback when a response actually arrives. Same box: hundreds vs tens of thousands of connections.",
+        code: "// blocking — thread parked to completion\nbyte[] data = inputStream.readAllBytes();\n// non-blocking — thread freed, callback later\nchannel.read(buf).whenComplete((n, err) -> handle(n));\n// Reactor\nMono<byte[]> data = webClient.get().uri(u).bodyToMono(byte[].class);"
       },
       {
-        what: "Backpressure = consumer tells the producer HOW MUCH data it can handle, so a fast producer can't overwhelm a slow consumer.",
-        how: "In Reactive Streams: subscriber calls subscription.request(n) — producer emits at most n items until more are requested. Reactor strategies: BUFFER (default, queue), DROP (discard), LATEST (keep newest), ERROR (fail).",
-        why: "Without it: producer at 1M items/s, consumer at 1k/s → unbounded queue → OutOfMemoryError.",
-        tradeoff: "Applying DROP/ERROR policies means data loss by design — choose consciously based on what data can be skipped.",
-        code: "producer ──1000/s──▶ [buffer grows...] ──10/s──▶ consumer  → OOM risk\nbackpressure: consumer.request(10) → producer sends only 10",
+        description: "Backpressure is the consumer telling the producer how much it can handle (request(n)) instead of the producer buffering without limits — the defense against OOM when a fast producer meets a slow consumer.",
+        example: "A market-data feed pushes 100k events/s while your DB writes take 10ms: unbounded buffering grows until the pod dies. With a demand window of 100, or an explicit strategy (buffer, drop-oldest, latest-only), the rate mismatch becomes a design decision instead of an outage.",
+        code: "// demand-driven flow\nsubscriber.request(100);        // publisher may send at most 100\n\nFlux.interval(Duration.ofMillis(1))\n  .onBackpressureBuffer(1000, BufferOverflowStrategy.DROP_OLDEST);\n// strategies: BUFFER | DROP | LATEST | ERROR"
       },
       {
-        what: "Mono<T> = stream with 0 or 1 item (like Optional that may complete async). Flux<T> = stream with 0..N items.",
-        how: "Both are lazy Publishers: nothing runs until you subscribe(). Operators (map/filter/flatMap) transform the pipeline; terminal operators (subscribe/blockOn/getCount) trigger execution. Mono methods: map, flatMap, defaultIfEmpty, switchIfEmpty. Flux adds: concat, merge, zip, window, buffer.",
-        why: "One item (response of an API call) → Mono; a list/sequence (rows, events) → Flux.",
-        tradeoff: "Mono/Flux are immutable — every operator returns a NEW pipeline; nothing mutates in place.",
-        code: "Mono<User> user = repo.findById(1);          // 0..1\nFlux<Order> orders = repo.findAll();          // 0..N\nuser.map(User::getName).subscribe(System.out::println);  // runs here",
+        description: "Mono<T> is a Publisher of 0 or 1 value (like a future). Flux<T> is a Publisher of 0..n values (a stream). Both are lazy, asynchronous and composable with operators — nothing happens until subscribe().",
+        example: "Mono<User> for a single lookup, Flux<Order> for a list or an endless event feed. flatMap is the bridge: fetch a user, then issue the orders call for that user and flatten the resulting Flux into the outer stream.",
+        code: "Mono<User> user = repo.findById(id);\nFlux<Order> orders = repo.findAllByUser(id);\n\nuser.flatMap(u -> client.orders(u.getId()))   // Mono -> Flux, flattened\n     .subscribe();"
       },
       {
-        what: "Lifecycle of Mono/Flux: 1) assembly (build pipeline), 2) subscription (trigger), 3) signals: onNext* → (onComplete XOR onError), 4) termination.",
-        how: "onNext(item) = element arrives (Flux only; Mono has at most one). onComplete = stream finished normally. onError(throwable) = stream failed — it REPLACES onComplete (terminal). Subscription happens exactly once; each subscriber to a cold source re-executes the pipeline.",
-        why: "Knowing the signals explains why code after an error never runs and why you must handle onError (otherwise error is dropped/logged as onOperatorError).",
-        code: "subscribe(onNext, onError, onComplete)\nFlux: onNext(a), onNext(b), onNext(c), onComplete ✓\n        or: onNext(a), onError(x) ✗",
+        description: "Lifecycle: assemble the pipeline (nothing runs) → subscribe() starts it → onNext 0..n times → exactly one terminal signal (onError XOR onComplete) → resources released (dispose / cancel upstream).",
+        example: "You build the pipeline when you write it; it starts when WebFlux subscribes on the incoming request. Items flow; the stream ends once with either completion or an error. If the client disconnects, dispose() cancels upstream so no more work is done for nobody.",
+        code: "Disposable d = Flux.fromIterable(ids)\n  .doOnSubscribe(s -> log.info(\"started\"))\n  .subscribe(\n    x -> handle(x),\n    err -> log.error(\"failed\", err),\n    () -> log.info(\"done\"));\n\nd.dispose();   // cancel early (e.g. client disconnected)"
       },
       {
-        what: "Lazy = nothing happens until subscribe(). Cold publisher = each subscriber gets the FULL sequence re-executed (like re-playing a recording). Hot publisher = all subscribers SHARE one execution (like live radio — items missed are gone).",
-        how: "flux.map(...) only builds a plan (assembly). subscribe() runs it. Cold: Flux.range(1,5) → two subscribers each get 1..5. Hot: connectable sources like emitMany/shared(), hotKafka — execution starts once, late subscribers only see new items.",
-        why: "Explains a classic bug: 'why does my expensive call run twice?' — because two subscribes = two runs (cold).",
-        tradeoff: "Hot sources need care: late joiners miss data (or need replay cache for recent items).",
-        code: "Flux<Integer> cold = Flux.range(1, 3);   // each subscribe → 1,2,3 again\nFlux<Integer> hot = cold.publish().autoConnect(); // shared, one run",
+        description: "Cold publishers run the sequence per subscriber — everyone gets the whole flow. Hot publishers share one execution: subscribers only see items emitted after they subscribe. Everything is lazy until subscribe().",
+        example: "Flux.just(1,2,3) delivered twice = each subscriber sees 1-3 (cold — like re-running the query). A live price ticker is hot: join late and you've missed earlier ticks — publish() makes one shared source, replay(1) also hands the newest tick to newcomers.",
+        code: "Flux.just(1, 2, 3).subscribe(::print);   // cold: per subscriber, full sequence\n\nFlux.create(sink -> feed.onTick(sink::next))\n  .publish().refCount(1);   // hot: shared, starts with first subscriber\n  // .replay(1).autoConnect() — late joiners get the last tick too"
       },
       {
-        what: "map() = 1 input → 1 output, synchronous transformation of the VALUE. flatMap() = 1 input → returns a Publisher (Mono/Flux) that gets FLATTENED into the stream — used when the transformation is itself async.",
-        how: "map: item → item' (no new stream). flatMap: item → publisher → items of that publisher merged into result (can interleave, concurrency = maxConcurrency default 256 in Reactor).",
-        why: "Use map for pure functions (change field); flatMap when you must call a service returning Mono/Flux.",
-        tradeoff: "flatMap does NOT guarantee order and can run many inner streams in parallel — if order matters use concatMap.",
-        code: "users.map(User::getName)          // String stream, sync\nusers.flatMap(u -> repo.findOrders(u)) // each user → Flux<Order> merged",
+        description: "map transforms each element synchronously (1:1). flatMap transforms each element into its own Publisher and merges the results asynchronously — order may interleave, concurrency unbounded (default cap 256).",
+        example: "map: order → \"ORDER-\" + id (pure, no I/O). flatMap: order id → Mono<Order> fetched over HTTP — every lookup runs concurrently and the results flatten into the stream. Returning a Mono from map gives you Mono<Mono<Order>> — the classic sign you needed flatMap.",
+        code: "flux.map(o -> o.getId())                  // T -> U, synchronous\nflux.flatMap(id -> client.getOrder(id))     // T -> Publisher<U>, merged async\n// lambda returns Mono/Flux? -> flatMap, not map"
       },
       {
-        what: "flatMap = parallel + unordered merge (fast). concatMap = strictly sequential, keeps order (waits for inner to finish). flatMapSequential = starts parallel but REORDERS output to match input order (best of both).",
-        how: "flatMap: inner streams interleave — orders may come back in any sequence. concatMap: process item 1 completely, then item 2… (throughput = 1 at a time). flatMapSequential: runs concurrently but buffers results and emits in original order.",
-        why: "Interview favourite: 'show user's feeds in order while calling N services in parallel' → flatMapSequential.",
-        tradeoff: "concatMap is slow but safe; flatMap is fast but unordered; flatMapSequential = ordered AND parallel (memory cost of buffering).",
-        code: "ids.flatMap(id -> get(id))                    // fast, order random\nids.concatMap(id -> get(id))                   // ordered, slow\nids.flatMapSequential(id -> get(id))           // ordered, parallel ✔",
+        description: "flatMap runs inner publishers concurrently and merges as results arrive (order lost, default concurrency 256). concatMap is strictly serial, one inner at a time (order kept, slowest). flatMapSequential is concurrent but emits in original order.",
+        example: "Fetching details for 500 items where order doesn't matter → flatMap (fastest). Building a CSV where rows must stay in input order but calls can overlap → flatMapSequential: full concurrency with deterministic output. Each call depends on the previous result → concatMap.",
+        code: "flux.flatMap(id -> fetch(id))             // concurrent, order not guaranteed\nflux.flatMapSequential(id -> fetch(id))     // concurrent, order kept\nflux.concatMap(id -> fetch(id))             // strictly serial, one at a time"
       },
       {
-        what: "merge() = combine streams, items arrive as they come (interleaved). concat() = finish first stream completely, then second (preserves order of sources). zip() = pair items by position — waits until ALL sources have an item, emits a tuple.",
-        how: "merge: A emits a1, B emits b1 → a1,b1,a2,b2 in arrival order. concat: all of A, then all of B. zip: (a1,b1), (a2,b2) — stops when the shortest source completes.",
-        why: "merge for max speed, concat for strict order, zip when you must JOIN results of independent calls (e.g. user + orders + ratings → one response object).",
-        tradeoff: "zip waits for the slowest source per pair — a slow source stalls the zipped output.",
-        code: "Flux.zip(userMono, ordersMono, (u, o) -> new Dto(u, o))  // join 2 async results\nflux1.mergeWith(flux2)          // interleaved\nflux1.concatWith(flux2)         // sequential",
+        description: "concat subscribes sequentially — the first stream must finish before the second starts (order kept). merge subscribes immediately and interleaves items as they arrive. zip pairs items positionally — one from each source per tuple, waiting for the slow side.",
+        example: "Combine user + profile + settings for one page → zip (exactly one from each). Blend two sensor feeds → merge (timing irrelevant). Read page 1 then page 2 → concat (dependency, cannot start the second early).",
+        code: "Flux.merge(sensorA, sensorB);            // interleaved as they arrive\nFlux.concat(page1, page2);                 // page1 completes first\nFlux.zip(user, profile, Tuple2::new);      // (u1,p1), (u2,p2)... waits for slowest"
       },
       {
-        what: "subscribeOn() decides WHERE (which scheduler/ thread pool) the SOURCE emits from. publishOn() switches the thread for EVERYTHING DOWNSTREAM after that point.",
-        how: "subscribeOn affects the upstream chain (usually one place, near the start — can be called anywhere but only the closest to source matters for non-parallel sources). publishOn cuts the pipeline: operators after it run on the new scheduler.",
-        why: "You use them to move blocking/expensive work OFF the event-loop thread (Netty's few threads must never block).",
-        tradeoff: "Wrong placement = blocking call on event loop → whole app stalls. Answer pattern: subscribeOn(boundedElastic) for blocking source, publishOn(boundedElastic) after it.",
-        code: "Flux.fromCallable(() -> jdbcQuery())     // blocking\n  .subscribeOn(Schedulers.boundedElastic()) // run it off event loop\n  .publishOn(Schedulers.parallel());       // rest back on parallel",
+        description: "subscribeOn fixes where subscription (and the source's work) happens — it only matters upstream and effectively once. publishOn switches the thread for everything downstream of it. Rule: publishOn after each point where you must hop threads.",
+        example: "A JDBC read runs on boundedElastic (blocking allowed there), then publishOn(parallel) hops back to a normal pool for enrichment and rendering. Just subscribeOn would move only the source — your map/flatMap would still run on the blocking pool.",
+        code: "Mono.fromCallable(() -> jdbc.query())       // blocking source\n  .subscribeOn(Schedulers.boundedElastic())  // where source executes\n  .map(this::enrich)                        // still on boundedElastic\n  .publishOn(Schedulers.parallel())         // hop for downstream ops\n  .flatMap(this::render);"
       },
       {
-        what: "Schedulers = Reactor's thread pools. parallel() = fixed CPU-core pool for CPU work. boundedElastic() = grows elastically (bounded) — for BLOCKING/I/O work. single() = one shared thread (rare). immediate() = current thread (testing).",
-        how: "Event loop (Netty) handles network I/O. CPU-heavy ops → parallel() (cores count). JDBC/file/sleep → boundedElastic() (has queue limits so it won't explode).",
-        why: "Choosing the right scheduler keeps the event loop free — the core rule of WebFlux performance.",
-        tradeoff: "boundedElastic is capped (default 100k tasks queued, 10×CPU threads) — beyond that it rejects, protecting you from runaway load.",
-        code: "Schedulers.parallel()        // CPU-bound, size = CPU cores\nSchedulers.boundedElastic()  // blocking/I/O, elastic threads\nSchedulers.immediate()       // same thread, no switch",
+        description: "parallel(): fixed pool = CPU cores, for CPU-bound non-blocking work. boundedElastic(): grows elastically (bounded), the only place blocking code may run. single(): one shared thread for sequencing. immediate(): current thread, no switch.",
+        example: "JSON serialization and hashing → parallel(). JDBC, file reads, legacy SDKs → boundedElastic (it's capped, so runaway blocking can't grow infinitely). Minute-level cleanup on single() for guaranteed ordering. Running blocking work on parallel() stalls every task sharing that pool.",
+        code: "Schedulers.parallel();        // CPU cores, non-blocking compute\nSchedulers.boundedElastic();   // blocking / legacy I/O (bounded, elastic)\nSchedulers.single();           // one shared thread, serialized work\nSchedulers.immediate();        // same thread, no switch (trampoline)"
       },
       {
-        what: "NO. Reactive does not magically make blocking code non-blocking — a blocking call inside a reactive pipeline still holds the thread.",
-        how: "If you call a blocking JDBC driver on the event-loop thread, that thread waits — and the event loop serves ALL other requests → the whole app becomes slow (head-of-line blocking).",
-        why: "This is the #1 production mistake when migrating to WebFlux: wrapping blocking code in Mono without moving it to boundedElastic.",
-        tradeoff: "Only benefit of reactive disappears if most of your stack (DB driver, HTTP client) is blocking — in that case MVC may be the better fit.",
-        code: "Mono.fromCallable(() -> blockingJdbcQuery())\n  .subscribeOn(Schedulers.boundedElastic())   // required!\n// without subscribeOn → blocks Netty event loop",
+        description: "No. Reactor only manages where callbacks run — a blocking call inside a non-blocking thread still freezes that thread. You must isolate it on its own scheduler or remove it; reactive does not magically convert blocking I/O.",
+        example: "jdbc.query() inside flatMap on the Netty event loop stalls every other request that loop serves — one slow query and the whole node's latency spikes. Mono.fromCallable().subscribeOn(boundedElastic) isolates it; a truly non-blocking driver (R2DBC) removes the problem entirely.",
+        code: "// WRONG: blocks the event loop for everyone\nMono.fromCallable(() -> jdbc.find(id))          // no subscribeOn\n\n// BETTER: isolate blocking\nMono.fromCallable(() -> jdbc.find(id))\n  .subscribeOn(Schedulers.boundedElastic())\n\n// BEST: non-blocking driver (r2dbc)"
       },
       {
-        what: "Blocking APIs (JDBC, old file I/O, synchronous HTTP) must be isolated from the event loop.",
-        how: "Wrap the blocking call in Mono.fromCallable / Flux.fromIterable and subscribeOn(boundedElastic()). Better: use non-blocking alternatives — R2DBC (reactive DB), async drivers, WebClient instead of RestTemplate. Heavy CPU → parallel().",
-        why: "boundedElastic gives the blocking call its own thread while the event loop stays responsive.",
-        tradeoff: "Too many blocked elastic threads = thread explosion — cap the pool (newBoundedElastic(maxThreads, ...)) and set timeouts.",
-        code: "Flux.fromIterable(() -> legacyJdbcFetchAll())\n  .subscribeOn(Schedulers.boundedElastic())\n  .timeout(Duration.ofSeconds(3));",
+        description: "Prefer a non-blocking driver (R2DBC) where available. Otherwise wrap the blocking call in Mono.fromCallable + subscribeOn on a dedicated, size-limited elastic pool — or simply keep that service on blocking MVC; reactive adoption need not be all-or-nothing.",
+        example: "A legacy Oracle JDBC dependency inside an otherwise reactive service: a boundedElastic pool of 64 threads, sized to the DB connection pool — blocking work queues among itself and can never exhaust the event loops. A CSV export using Files.readAllLines follows the same pattern.",
+        code: "Mono<Order> load = Mono.fromCallable(() -> legacyDao.find(id))\n  .subscribeOn(Schedulers.boundedElastic())   // dedicated pool\n  .timeout(Duration.ofSeconds(2));\n\n// dedicated: Schedulers.newBoundedElastic(64, 1000, \"legacy-db\")"
       },
       {
-        what: "Reactor error-handling operators: onErrorReturn(value) = replace error with a default value; onErrorResume(fn) = switch to a FALLBACK publisher; onErrorMap(fn) = wrap/convert the exception to a business one.",
-        how: "They intercept the onError signal and continue the stream successfully: onErrorReturn ends the stream with a value, onErrorResume subscribes to another Mono/Flux (e.g. cache lookup when DB fails), onErrorMap keeps error flow but changes type (DbDownException → ServiceUnavailableException).",
-        why: "Without any of them an error cancels the pipeline and the subscriber's onError callback fires — callers expect graceful degradation.",
-        tradeoff: "Never swallow errors silently — log before returning defaults, or you lose visibility in production.",
-        code: "repo.findById(id)\n  .onErrorResume(e -> cache.get(id))      // fallback source\n  .onErrorReturn(User.guest())             // last-resort default\n  .onErrorMap(e -> new ServiceException(e));",
+        description: "onErrorReturn emits a default value and completes; onErrorResume switches to a fallback Publisher; onErrorMap transforms the error type. Errors travel via onError — you compose recovery, you don't try/catch around operators.",
+        example: "Pricing service down: onErrorReturn(Price.unavailable()) to keep the page alive, onErrorResume(e -> cache.get(id)) to serve stale prices, onErrorMap(ExternalException::new) to hide internals behind a clean API error. Each is a deliberate, visible degradation strategy.",
+        code: "pricingClient.get(id)\n  .onErrorReturn(Price.unavailable())            // default value\n  .onErrorResume(e -> cache.get(id))             // fallback source\n  .onErrorMap(ex -> new ApiException(502, ex));  // translate error"
       },
       {
-        what: "retry(n) = resubscribe the WHOLE chain n times on error. retryWhen(Retry.backoff(3, Duration.ofSeconds(1))) = retry with exponential delay/jitter. timeout(d) = fail if no onNext within d; you then recover with onErrorResume (fallback).",
-        how: "Retry resubscribes from the source (side effects repeat — hence idempotency matters). Retry.backoff adds growing delays so a recovering service isn't hammered. timeout emits TimeoutException → chain it with onErrorResume to a fallback value/circuit-breaker call.",
-        why: "Handles transient failures (blip in network) while timeout guarantees you never hang forever.",
-        tradeoff: "Infinite/immediate retry on a down service makes things worse — cap attempts with backoff and jitter.",
-        code: "webClient.get().uri(\"/users/\" + id).retrieve().bodyToMono(User.class)\n  .timeout(Duration.ofSeconds(2))\n  .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)))\n  .onErrorResume(e -> Mono.just(User.guest()));",
+        description: "retry(n) re-subscribes n times immediately. retryWhen composes a retry policy (exponential backoff, jitter, attempt caps, filtering). timeout() fails the stream if no signal arrives in time. All three end in a terminal fallback — never infinite retries.",
+        example: "A flaky partner API: 3 attempts with 1s → 2s → 4s backoff and jitter, inside a 5s timeout; if it still fails, onErrorResume returns a default so the user sees the page. Retrying forever with no backoff against a down service is a self-inflicted DDoS.",
+        code: "partnerClient.get(id)\n  .timeout(Duration.ofSeconds(5))\n  .retryWhen(Retry.backoff(3, Duration.ofSeconds(1))\n              .maxBackoff(Duration.ofSeconds(8))\n              .jitter(0.5)\n              .filter(e -> e instanceof TimeoutException))\n  .onErrorResume(e -> Mono.just(Fallback.INSTANCE));"
       },
       {
-        what: "Spring MVC = thread-per-request, blocking servlet stack. Spring WebFlux = non-blocking, event-loop (Netty) stack with Mono/Flux.",
-        how: "MVC: 1 request = 1 thread held for the whole processing (Tomcat pool ~200 threads → ~200 concurrent requests, threads mostly idle waiting on I/O). WebFlux: few event-loop threads (default = CPU cores) multiplex thousands of in-flight requests via callbacks.",
-        why: "WebFlux shines for high-concurrency, I/O-bound workloads (many slow downstream calls). MVC is simpler and faster for typical CRUD where the DB driver is blocking anyway.",
-        tradeoff: "WebFlux: debugging harder, blocking forbidden on event loop. MVC: thread exhaustion risk at high concurrency. Both support annotated controllers — you choose the engine.",
-        code: "MVC    : 200 threads → ≤ ~200 requests in flight\nWebFlux: 8 event-loop threads → 10k+ requests in flight",
+        description: "Spring MVC is servlet-based, thread-per-request and blocking-friendly — mature and simple when your stack is blocking anyway. WebFlux is event-loop based, non-blocking, and reaches huge concurrency with few threads — at the cost of a stricter non-blocking discipline.",
+        example: "Internal CRUD with JDBC at 50 rps → MVC: less risk, similar performance. A gateway with 10k concurrent SSE connections → WebFlux: ~4 event-loop threads instead of 10k. A team deep in blocking JPA gains little by switching — pick per service, both can coexist.",
+        code: "// MVC: thread per request, blocking is fine\n@GetMapping Order get() { return service.get(id); }\n\n// WebFlux: event loop, everything non-blocking\n@GetMapping Mono<Order> get() { return service.get(id); }"
       },
       {
-        what: "WebFlux uses a small fixed set of event-loop threads (Netty): each thread runs a loop that processes network events (new request, data arrived, response ready) for MANY connections — no thread waits per request.",
-        how: "Request arrives → registered as a callback → thread is released immediately; when the downstream response comes back, an event is queued and processed. Because no thread blocks on I/O, 8 threads handle thousands of concurrent slow calls. Work-stealing parallel scheduler handles CPU-heavy parts separately.",
-        why: "That's the direct answer to 'how can 8 threads serve 10,000 concurrent requests?' — because threads never wait, they only react to events.",
-        tradeoff: "If any code blocks (JDBC, Thread.sleep) on an event-loop thread, ALL requests on that thread stall — measure with blockhound in dev.",
-        code: "thread-1: [req A] → release → [req B] → release → [A data ready] → resume A\nthread-2: [req C] → release → [C data ready] → resume C ...",
+        description: "WebFlux runs handlers on a few Netty event-loop threads: a request's thread is released while awaiting I/O, and its continuation resumes when the response arrives. Concurrency equals in-flight operations, not OS threads.",
+        example: "8,000 concurrent requests each waiting 200ms on a downstream call: thread-per-request needs ~8,000 parked threads (gigabytes of stacks); the event loop needs one thread per core multiplexing thousands of channels through selectors — the same workload with a fraction of the memory.",
+        code: "8000 requests x 200ms wait\n// thread-per-request: ~8000 threads (mostly parked)\n// event loop: N = cores threads, selector events -> callbacks\n// thread only runs while doing actual CPU work, never while waiting"
       },
       {
-        what: "WebClient = Spring's non-blocking HTTP client returning Mono/Flux (works in MVC too). To call multiple APIs concurrently: create the futures first, then combine.",
-        how: "Each webClient.get()...retrieve().bodyToMono() returns immediately (a promise). Independent calls run in parallel automatically. Combine with Mono.zip (all three → tuple/DTO) or Flux.merge. Then block only at the very edge (in MVC) or subscribe (in WebFlux).",
-        why: "Sequential calls = sum of latencies (3×200ms = 600ms). zip = max latency (200ms).",
-        tradeoff: "zip waits for ALL — one slow call delays the response; add .timeout per call and sensible fallbacks.",
-        code: "Mono<User> u = webClient.get().uri(\"/users/\"+id).retrieve().bodyToMono(User.class);\nMono<List<Order>> o = webClient.get().uri(\"/orders/\"+id).retrieve().bodyToFlux(Order.class).collectList();\nreturn Mono.zip(u, o, (user, orders) -> new ProfileDto(user, orders));  // parallel ✔",
+        description: "WebClient is the reactive HTTP client (Netty-backed, non-blocking). Start the calls first, then combine with zip/allOf — total latency becomes the slowest call instead of the sum. Wrap with timeout and a degradation strategy per call.",
+        example: "A page needs user (150ms) + recommendations (400ms): sequential flatMap chains take 550ms; Mono.zip takes ~400ms. Add three more services and the saving multiplies — but parallelism isn't automatic: a chain of flatMaps is sequential by design.",
+        code: "Mono<User> u = webClient.get().uri(\"/users/{id}\", id)\n  .retrieve().bodyToMono(User.class);\nMono<Recs> r = webClient.get().uri(\"/recs/{id}\", id)\n  .retrieve().bodyToMono(Recs.class);\n\nMono.zip(u, r)\n  .timeout(Duration.ofSeconds(2))\n  .map(t -> new Page(t.getT1(), t.getT2()));"
       },
     ],
     scenarios: [
       {
-        what: "A downstream service is slow — protect your WebFlux app from being dragged down.",
-        how: "1) .timeout(2s) on every WebClient call → fast failure. 2) Retry with backoff (limited). 3) Circuit breaker (Resilience4j Reactor) — after failures, fail fast instead of calling. 4) Bulkhead/semaphore limit: at most N concurrent calls to that dependency. 5) Return fallback (cache/default) so users still get a response.",
-        why: "Slow dependency without protection = your event loop keeps accepting work nobody can finish → queue grows → memory and latency explode.",
-        tradeoff: "Timeouts/fallbacks mean partial results — communicate degraded mode with flags/metrics.",
-        code: "webClient.get().uri(url).retrieve().bodyToMono(X.class)\n  .timeout(Duration.ofSeconds(2))\n  .transform(CircuitBreakerOperator.of(cb))\n  .onErrorResume(e -> Mono.just(X.defaults()));",
+        description: "Protect the call on every axis: timeout on each request, bulkhead (limited concurrency) so one dependency can't consume your capacity, circuit breaker to stop hammering a dead service, and a fallback to degrade gracefully.",
+        example: "Recommendation service degrades to 3s responses: without protection, WebFlux's massive concurrency opens thousands of connections to it and pushes it into collapse. Timeout 500ms + max 50 in flight + breaker opening after 50% failures → requests serve cached recommendations in milliseconds.",
+        code: "webClient.get().uri(\"/recs/{id}\", id).retrieve().bodyToMono(Recs.class)\n  .timeout(Duration.ofMillis(500))\n  .transformDeferred(CircuitBreakerOperator.of(cb))  // resilience4j-reactor\n  .transformDeferred(BulkheadOperator.of(bh))        // max concurrent\n  .onErrorResume(e -> Mono.just(Recs.empty()));      // fallback"
       },
       {
-        what: "Producer sends faster than the app can process — implement backpressure so memory doesn't blow up.",
-        how: "In Reactive Streams the subscriber controls flow with request(n). Reactor strategies on overflow: Buffer (default — bounded queue, may eventually OOM if producer never slows), Drop (discard newest), Latest (keep only newest), Error (signal OverflowException). For Kafka: consumer fetch.size/pause-resume; for HTTP: 429 or credit-based flow.",
-        why: "Unbounded buffering just moves the crash later (OutOfMemoryError) — backpressure or drop consciously.",
-        tradeoff: "DROP/LATEST lose data silently — only OK for metrics/live views where old data is worthless.",
-        code: "flux.onBackpressureDrop(dropped -> log.warn(\"dropped {}\", dropped));\n// or Kafka consumer: pause() when processing queue is full, resume() later",
+        description: "Demand-driven flow: the subscriber requests n items and the publisher may never exceed it; for sources you don't control, pick an explicit overflow strategy — buffer (bounded), drop, latest, or error — instead of unbounded queues.",
+        example: "A feed emits every 1ms while the DB sink writes every 50ms: limitRate(100) pulls in batches of 100 so the sink sets the pace. A live dashboard only needs the newest tick — onBackpressureDrop throws stale values away, which is exactly right for that UI.",
+        code: "Flux.create(sink -> producer.onMessage(sink::next),\n            FluxSink.OverflowStrategy.BUFFER)\n  .limitRate(100)                 // request in windows of 100\n  .onBackpressureLatest();        // keep only the newest for live views\n// strategies: BUFFER | DROP | LATEST | ERROR — never unbounded"
       },
       {
-        what: "Stream 10M rows without loading everything into memory — use lazy, chunked processing.",
-        how: "Never collect() all rows. Process in batches: reactive Flux window/buffer(1000) → per batch write to file/DB → or JDBC setFetchSize(1000) with streaming ResultSet (PostgreSQL: autoCommit=false + cursor). Keep only one batch in memory at a time.",
-        why: "collectList() of 10M objects = heap exhausted. Streaming keeps memory flat (constant).",
-        tradeoff: "Cannot random-access or re-iterate a stream — single forward pass only.",
-        code: "repo.findAllBy()                       // Flux rows (lazy)\n  .buffer(1000)                          // batch in memory\n  .concatMap(batch -> saveBatch(batch))  // write, free, next",
+        description: "Stream in batches: page through the source with a cursor, emit each page as a Flux, process chunks with bounded flatMap concurrency — heap holds one page at a time, never the whole dataset.",
+        example: "Exporting 10M rows to S3: a loop of paged queries (1,000 rows each) feeds flatMap(uploadChunk, 16) — memory stays at a few MB in a 512MB container. Loading all rows into a List first is the guaranteed OOM that kills naive exports.",
+        code: "Flux.range(0, 10_000)                        // pages\n  .concatMap(i -> Mono.fromCallable(() -> repo.page(i, 1000)))\n  .flatMapIterable(List::stream)               // rows\n  .flatMap(this::uploadChunk, 16)              // bounded concurrency\n  .then();\n// heap holds ~1 page, not 10M rows"
       },
       {
-        what: "WebFlux app slow under high concurrency — structured troubleshooting.",
-        how: "1) Check event-loop stalls: blockhound in dev; look for Thread.sleep/JDBC on netty threads. 2) Metrics: gateway/spring MVC metrics, latency per endpoint, active requests. 3) Thread dump (jstack) — are netty-threads RUNNABLE or blocked? 4) Downstream health (timeouts, retry storms amplifying load). 5) GC logs — young GC frequency, heap growth (unbounded buffers/queues). 6) Check boundedElastic queue size (blocked tasks piling up).",
-        why: "Reactive slowdowns are almost always: blocking on event loop, downstream slowness + no timeout, or memory pressure from unbounded buffers.",
-        tradeoff: "Reactor has fewer ready-made dashboards than MVC — add Micrometer + distributed tracing early.",
-        code: "jstack <pid> | grep -A5 \"reactor-http-nio\"  // look for BLOCKED / parked",
+        description: "Find where the time goes before touching anything: thread dumps (event loop stuck in blocking code?), GC logs (buffering leak?), WebClient connection pool exhaustion, missing timeouts causing pileups, downstream latency — via metrics first.",
+        example: "p99 spikes under load: reactor-nio thread dumps show Netty workers inside JDBC — a blocking call sneaked into a handler; and the WebClient has no timeout so slow downstreams hold sockets open until the pool starves. Fix: boundedElastic for the DB, 500ms timeouts, pool caps — latency flattens on the same dashboard.",
+        code: "evidence:\n  thread dump -> reactor-http-nio-* inside JDBC? blocking on the loop\n  metrics    -> reactor.netty pool active/max, timeouts, GC pauses\nfixes:\n  Mono.fromCallable(db).subscribeOn(boundedElastic)\n  .timeout(500ms);  webClient maxConnections / maxInMemorySize; alert on lag"
       },
       {
-        what: "Design a reactive order-processing system with WebFlux + WebClient + Kafka — handle concurrency, failures, retries, backpressure and reliability.",
-        how: "API layer (WebFlux controller) validates and returns 202 quickly; publishes OrderRequested to Kafka (durable buffer = natural backpressure). Worker consumes with manual offset control: process → on success commit offset, on failure to retry topic, after N attempts to DLQ (idempotent by orderId). Downstream calls via WebClient with timeout + circuit breaker + fallback. Scale = more consumer instances up to partition count; monitor consumer lag.",
-        why: "Kafka decouples intake from processing (spikes absorbed in topics); WebFlux handles many in-flight calls with few threads; retries/DLQ guarantee eventual completion without data loss.",
-        tradeoff: "Order status is eventually consistent — expose status endpoint; exactly-once needs idempotent writes or Kafka transactions.",
-        code: "POST /orders → validate → kafka('orders.in') → return 202\nconsumer: process (WebClient + CB + timeout)\n  ✔ commit offset   ✘ retry topic → DLQ after 3",
+        description: "WebFlux API validates the order, runs payment + inventory concurrently (zip) with timeouts and breakers, publishes OrderPlaced idempotently to Kafka, and lets downstream react asynchronously — the API returns as soon as the critical path completes.",
+        example: "POST /orders: payment (400ms) and inventory (300ms) run in parallel; success → Kafka event (acks=all, idempotent producer); notifications and analytics consume with their own lag. Kafka backpressure buffers safely while the API stays at a constant 80ms p95 regardless of consumer speed.",
+        code: "Mono.zip(charge(id), reserve(id))          // concurrent critical path\n  .timeout(Duration.ofSeconds(2))\n  .flatMap(t -> kafka.send(\"order.placed\", event))\n  .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)))\n  .onErrorResume(e -> Mono.error(new OrderFailed(e)));\n// consumers: idempotent + DLQ; producer: idempotence=true, acks=all"
       },
       {
-        what: "Limit concurrency to max 10 parallel calls to an external API.",
-        how: "Reactor: .flatMap(fn, 10) — the second argument is maxConcurrency (default 256). Alternative: Semaphore/Bulkhead (Resilience4j), or a boundedElastic scheduler with 10 threads.",
-        why: "External API has a rate limit — unbounded parallel calls get you 429/banned.",
-        tradeoff: "Lower concurrency = slower total completion — balance between safety and speed.",
-        code: "Flux.range(1, 1000)\n  .flatMap(i -> callApi(i), 10)   // max 10 in flight\n  .subscribe();",
+        description: "flatMap(mapper, maxConcurrency = 10) is the one-liner — demand windows keep at most 10 inner publishers active. If output order must be preserved, flatMapSequential(mapper, 10) does the same with ordered emission.",
+        example: "500 calls to a partner API limited to 10 in flight (their rate limit): flux.flatMap(this::call, 10) — violations become 429s avoided instead of throttling. Results must arrive in input order for the report? flatMapSequential with the same cap.",
+        code: "Flux.fromIterable(ids)\n  .flatMap(this::callPartner, 10)          // max 10 concurrent\n\nFlux.fromIterable(ids)\n  .flatMapSequential(this::callPartner, 10) // concurrent, order preserved\n// manual alternative: Semaphore(10) around each inner Mono"
       },
       {
-        what: "Three independent calls in parallel — one fails: fail fast (all-or-nothing) or return partial results?",
-        how: "Fail fast (data needed for correctness): Mono.zip with no error handling → whole chain errors → onErrorResume fallback. Partial results (each piece optional): zip with each source having its own onErrorReturn(default), or Mono.zip(a, b.onErrorReturn(empty)) — combine what succeeded and mark missing pieces.",
-        why: "Profile page: avatar failing shouldn't block name → partial. Payment authorization: all parts required → fail fast.",
-        tradeoff: "Partial = better availability but clients must handle 'missing' fields; fail fast = simpler contract but less availability.",
-        code: "Mono.zip(\n  userMono,                                   // required\n  recommendationsMono.onErrorReturn(List.of()) // optional → partial OK\n)",
+        description: "It depends on criticality. Required data: let the error propagate and fail fast with a clear message. Optional data: recover that inner Mono alone (onErrorReturn / onErrorResume) before zipping — the page renders with partial content.",
+        example: "A product page needs profile (required) plus recommendations (optional): zip(profile, recs.onErrorReturn(empty)) — if recs fails the page loads with a placeholder section. Payment + inventory are both required: zipping them means any failure aborts the whole order — no half-placed orders.",
+        code: "Mono.zip(profile,\n         recs.onErrorReturn(Recs.empty()))    // partial: degrade one source\n  .map(Page::new);\n\nMono.zip(payment, inventory)               // fail fast: both required\n  .timeout(Duration.ofSeconds(2));\n// recover per-source BEFORE combining, never swallow inside"
       },
       {
-        what: "A legacy blocking JDBC call must stay inside a reactive pipeline — isolate it on boundedElastic.",
-        how: "Wrap it: Mono.fromCallable(() -> jdbcTemplate.queryForObject(...)) and .subscribeOn(Schedulers.boundedElastic()) so it runs on a dedicated elastic thread, not the event loop. Add .timeout(). Long-term plan: migrate to R2DBC / async driver.",
-        why: "Keeps the event loop free — the app stays responsive while the blocking call waits.",
-        tradeoff: "Bounded by elastic pool size — heavy blocking load degrades to thread-pool behavior (that's expected; size it consciously).",
-        code: "Mono<User> user = Mono.fromCallable(() -> legacyDao.find(id))\n  .subscribeOn(Schedulers.boundedElastic())\n  .timeout(Duration.ofSeconds(2));",
+        description: "Wrap it: Mono.fromCallable(blockingWork).subscribeOn(Schedulers.boundedElastic()) so the event loop never executes it, size that pool to the underlying resource, and always put a timeout around it. Long-term: replace it with a non-blocking driver.",
+        example: "The legacy Oracle JDBC stays put: every access goes through a dedicated 32-thread boundedElastic pool matching the DB's connection pool. If the database slows, only that pool queues and timeouts trip — the event loops and every other endpoint keep serving.",
+        code: "Mono<Order> load = Mono.fromCallable(() -> legacyDao.find(id))\n  .subscribeOn(Schedulers.boundedElastic())   // never on the event loop\n  .timeout(Duration.ofSeconds(2));\n\n// size to the DB: Schedulers.newBoundedElastic(32, 1000, \"legacy-db\")"
       },
       {
-        what: "Live stock ticks to MANY subscribers: use a HOT publisher — execution starts once, everyone shares the same stream.",
-        how: "cold.publish().autoConnect() or Flux.create(..., FluxSink.unicast/ MulticastSink) / .share() (refCount): first subscriber connects, all subscribers get live items, no replay for late joiners (add .replay(1, Duration.ofSeconds(5)) via ReplayProcessor for 'last known price').",
-        why: "Cold (e.g. repo.findAll()) would open a NEW source per subscriber — hundreds of subscribers = hundreds of DB queries for the same ticks.",
-        tradeoff: "Hot = late subscribers miss earlier items; refCount disconnects when subscriber count hits 0 — use autoConnect(1) to keep it alive.",
-        code: "Flux<Tick> live = tickSource.publish().autoConnect();  // shared\nFlux<Tick> withLast = tickSource.replay(1).autoConnect(); // new subscriber gets last tick",
+        description: "Cold = each subscriber runs its own execution and receives the full sequence. Hot = one shared execution; subscribers see only items emitted after they attach. Make a live feed hot with publish()/multicast, optionally replaying the latest item to newcomers.",
+        example: "200 dashboard tabs must share ONE WebSocket connection to the exchange (hot) — publish().refCount() connects on the first subscriber and tears down with the last. A tab that opens late would otherwise see nothing until the next tick, so replay(1) hands it the current price immediately.",
+        code: "Flux.create(sink -> feed.onTick(sink::next))   // single upstream source\n  .publish()\n  .refCount(1);        // hot: shared, starts on first, stops on last\n\n// late joiners need the latest value:\n  .replay(1).autoConnect();   // multicast + replay last tick"
       },
       {
-        what: "Incident: unbounded subscribe() everywhere caused memory growth — explanation and fix.",
-        how: "Problem: subscribing to a hot/fast source without requesting limits (or subscribe() on an infinite source like Flux.interval without disposing) creates subscriptions, buffers and closures that are never released; combined with default Buffer backpressure, queue grows until heap OOM. Fix: use take(n)/takeUntil, .limitRate(n) for prefetch control, dispose/Disposable management, bounded queues, onBackpressureDrop where data is droppable, and metrics on queue depth.",
-        why: "Shows practical understanding: reactive memory leaks come from subscriptions and buffers, not objects you 'new'ed.",
-        tradeoff: "Prefetch too small = more requests/overhead; too large = memory spikes — tune per stream (default 256).",
-        code: "Disposable d = Flux.interval(...).subscribe();  // must d.dispose() on shutdown!\nflux.limitRate(256)                             // bounded prefetch\nflux.take(Duration.ofSeconds(10))               // auto-completes",
+        description: "An unbounded subscribe() with no demand or concurrency cap pulls the entire source into memory at once (every element and every inner Publisher queued), heap climbs, GC thrashes, and the pod OOM-kills — repeatedly. Fix: bounded flatMap concurrency + limitRate + cancellation.",
+        example: "Incident: Flux.range(0, 10_000_000).flatMap(this::call) queued all 10 million inner Monos immediately — heap hit 90% within minutes and the pod was OOM-killed 12 times in an hour. With flatMap(call, 32) and limitRate(100), memory stayed flat and p99 actually improved from queueing alone.",
+        code: "// before: unbounded demand\nFlux.range(0, 10_000_000).flatMap(this::call);      // ~10M in flight\n\n// after: bounded\nFlux.range(0, 10_000_000)\n  .flatMap(this::call, 32)          // concurrency cap\n  .limitRate(100)                   // bounded request windows\n  .subscribe();"
       },
-    ],
-  },
+    ]
+  }
 };
-
-
-
-
-
-
-
-

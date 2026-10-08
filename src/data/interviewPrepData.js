@@ -263,12 +263,8 @@ export const interviewPrepTopics = [
     ],
   },
 ];
-
-/** Prep strategy shown at the top of the page. */
 export const prepStrategy = [
-  { icon: "1️⃣", label: "What?", tip: "Definition in your own words" },
-  { icon: "2️⃣", label: "How?", tip: "Internal working / code" },
-  { icon: "3️⃣", label: "Why?", tip: "Why we use it over alternatives" },
-  { icon: "4️⃣", label: "Scenario?", tip: "Where you used it at work" },
-  { icon: "5️⃣", label: "Trade-offs?", tip: "Advantages and limitations" },
+  { icon: "📖", label: "Description", tip: "Simple definition" },
+  { icon: "🌍", label: "Real-time Example", tip: "Practical, human example" },
+  { icon: "💻", label: "Code", tip: "Short, focused code snippet" },
 ];

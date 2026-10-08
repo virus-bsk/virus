@@ -5,13 +5,10 @@ import { interviewPrepTopics } from "../data/interviewPrepData";
 import { interviewPrepAnswers } from "../data/interviewPrepAnswers";
 import "./InterviewPrep.css";
 
-/** Section labels shown in the answer popup (same 5-step strategy). */
+/** Section labels shown in the answer popup (short human-friendly format). */
 const ANSWER_SECTIONS = [
-  ["what", "1️⃣ What?", "#6366f1"],
-  ["how", "2️⃣ How?", "#0ea5e9"],
-  ["why", "3️⃣ Why?", "#f59e0b"],
-  ["scenario", "4️⃣ Scenario?", "#16a34a"],
-  ["tradeoff", "5️⃣ Trade-offs?", "#e94560"],
+  ["description", "📖 Description", "#2563eb"],
+  ["example", "🌍 Real-time Example", "#16a34a"],
 ];
 
 /** Badge label for the code header, per topic. */
@@ -96,7 +93,7 @@ function highlightCode(code) {
  *
  * Clicking any question opens a white popup with a clear,
  * interview-oriented answer structured as:
- * What → How → Why → Scenario → Trade-offs (code only when it helps).
+ * Description → Real-time Example → Code (code only when it helps).
  */
 function InterviewPrep() {
   // popup state: { topicId, kind: "important" | "scenarios", index } | null
@@ -289,7 +286,7 @@ function InterviewPrep() {
                   )}
                   {activeAnswer.code && (
                     <div className="ip-answer-section ip-answer-section-code">
-                      <span className="ip-answer-label">💻 Code / Query?</span>
+                      <span className="ip-answer-label">💻 Code / Query</span>
                       <div className="ip-codebox">
                         <div className="ip-codebox-bar">
                           <span className="ip-codebox-lang">
@@ -305,10 +302,10 @@ function InterviewPrep() {
                 </>
               ) : (
                 <div className="ip-answer-section">
-                  <span className="ip-answer-label">1️⃣ What?</span>
+                  <span className="ip-answer-label">📖 Description</span>
                   <p>
-                    Answer for this question is being written — the structure stays the
-                    same: What → How → Why → Scenario → Trade-offs.
+                    Answer for this question is being written. The format is simple:
+                    Description → Real-time Example → Code.
                   </p>
                 </div>
               )}
