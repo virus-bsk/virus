@@ -1,0 +1,17 @@
+/* FDEPythonCourse reuses ReactJSCourse.css. These overrides strip the
+   standalone page chrome so it sits cleanly inside the FDE module page. */
+.fde-python-course {
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.fde-python-course .react-course-workspace {
+  padding: 16px 0 0;
+}
+
+.fde-python-course .react-course-detail {
+  min-height: 480px;
+}

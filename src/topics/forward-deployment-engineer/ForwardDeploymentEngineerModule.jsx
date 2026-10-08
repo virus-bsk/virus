@@ -9,9 +9,14 @@ import {
   advancedTechniqueLessons,
   advancedTechniqueContent,
 } from "../../data/fde/advancedTechniquesContent";
+import FDEPythonCourse from "./FDEPythonCourse";
 import "./ForwardDeploymentEngineer.css";
 
-const WIDE_SECTIONS = ["LLM Fundamentals", "Prompt Design", "Advanced Techniques"];
+const WIDE_SECTIONS = [
+  "LLM Fundamentals",
+  "Prompt Design",
+  "Advanced Techniques",
+];
 
 function ForwardDeploymentEngineerModule() {
   const { moduleId } = useParams();
@@ -110,6 +115,18 @@ function ForwardDeploymentEngineerModule() {
           </section>
         ))}
       </div>
+
+      {/* ===== Module 2: single shared Python workspace below the
+          two side-by-side section cards ===== */}
+      {mod.id === 2 && (
+        <div className="fde-module-section fde-module-section-wide fde-python-workspace">
+          <div className="fde-module-section-head">
+            <span className="fde-module-section-num">▸</span>
+            <h3>Python & APIs — Interactive Course</h3>
+          </div>
+          <FDEPythonCourse />
+        </div>
+      )}
 
       {/* ===== Capstone ===== */}
       <div className="fde-module-project">

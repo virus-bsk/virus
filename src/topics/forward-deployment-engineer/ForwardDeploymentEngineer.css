@@ -1,8 +1,8 @@
 /* Forward Deployment Engineer — course grid page */
 .fde-page {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 40px 24px;
 }
 
 /* ===== Hero ===== */
@@ -330,6 +330,11 @@
    lesson cards can lay out side by side instead of one narrow column. */
 .fde-module-section-wide {
   grid-column: 1 / -1;
+}
+
+/* Module 2 shared workspace: full-width panel below the section cards. */
+.fde-python-workspace {
+  margin-top: 1.5rem;
 }
 
 .fde-module-section-head {
