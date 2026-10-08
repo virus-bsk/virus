@@ -8,10 +8,72 @@
   background: transparent;
 }
 
+/* Headline shown above the workspace when the parent passes one
+   (the syllabus bullets for the current section). */
+.fde-course-headline {
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 10px;
+}
+
 .fde-python-course .react-course-workspace {
   padding: 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Inside a half-width section card the sidebar+detail grid would be
+   crushed, so the navigator stacks above the lesson detail. */
+.fde-python-course .react-course-mobile-toggle {
+  display: none;
+}
+
+.fde-python-course .react-course-sidebar {
+  position: static;
+  max-height: none;
+  width: 100%;
+}
+
+.fde-python-course .react-course-list {
+  max-height: 260px;
 }
 
 .fde-python-course .react-course-detail {
-  min-height: 480px;
+  min-height: 0;
+  padding: 20px 18px;
+}
+
+.fde-python-course .react-course-detail h2 {
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+}
+
+.fde-python-course .react-course-explain-grid {
+  grid-template-columns: 1fr;
+  margin-top: 20px;
+}
+
+.fde-python-course .react-course-filters button {
+  font-size: 0.68rem;
+}
+
+/* Remove the now-unused full-width workspace panel spacing. */
+.fde-python-workspace {
+  margin-top: 1.5rem;
+}
+
+/* Embedded workspaces must never overflow their half-width section card. */
+.fde-module-section .fde-python-course {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.fde-module-section .fde-python-course pre {
+  max-width: 100%;
+  overflow-x: auto;
 }

@@ -2,31 +2,60 @@ import { useMemo, useState } from "react";
 import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark.css";
 import { pythonModuleConcepts } from "../../data/fde/pythonModuleConcepts";
+import LLMCourse from "../llm/LLMCourse";
 import "../reactjs/ReactJSCourse.css";
 import "./FDEPythonCourse.css";
 
 const PAGE_SIZE = 10;
-const categories = [
-  "all",
-  ...new Set(pythonModuleConcepts.map((item) => item.category)),
-];
 
-const highlightCode = (code) =>
+const highlightCode = (code, language = "python") =>
   hljs.highlight(code, {
-    language: "python",
+    language,
     ignoreIllegals: true,
   }).value;
 
-function FDEPythonCourse() {
-  const [selectedId, setSelectedId] = useState(1);
+// Generic FDE course workspace: left navigator + lesson detail, same layout
+// as Module 2. Two detail modes:
+// - "code" (default): description + Why/When + highlighted code example.
+// - "lessons": card-grid style lessons opened in the LLMCourse reader modal.
+function FDEPythonCourse({
+  concepts = pythonModuleConcepts,
+  filterCategories = null,
+  filterIds = null,
+  searchId = "fde-python-search",
+  mini = false,
+  mode = "code",
+  codeLanguage = "python",
+  codeLabel = "Python",
+  headline = null,
+}) {
+  const scopeConcepts = useMemo(() => {
+    if (filterIds && filterIds.length) {
+      const order = new Map(filterIds.map((id, index) => [id, index]));
+      return concepts
+        .filter((item) => order.has(item.id))
+        .sort((a, b) => order.get(a.id) - order.get(b.id));
+    }
+    return filterCategories && filterCategories.length
+      ? concepts.filter((item) => filterCategories.includes(item.category))
+      : concepts;
+  }, [concepts, filterCategories, filterIds]);
+  const scopeCategories = useMemo(
+    () => ["all", ...new Set(scopeConcepts.map((item) => item.category))],
+    [scopeConcepts],
+  );
+  const [selectedId, setSelectedId] = useState(() => scopeConcepts[0]?.id ?? 1);
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [showMobileNavigator, setShowMobileNavigator] = useState(true);
 
+  // NOTE: parents pass a stable `key` per scope (see ForwardDeploymentEngineerModule),
+  // so each scoped workspace mounts fresh with its own selection state.
+
   const filteredConcepts = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return pythonModuleConcepts.filter((item) => {
+    return scopeConcepts.filter((item) => {
       const matchesCategory = category === "all" || item.category === category;
       const matchesSearch =
         !query ||
@@ -35,7 +64,7 @@ function FDEPythonCourse() {
           .includes(query);
       return matchesCategory && matchesSearch;
     });
-  }, [category, search]);
+  }, [category, search, scopeConcepts]);
 
   const pageCount = Math.max(1, Math.ceil(filteredConcepts.length / PAGE_SIZE));
   const safePage = Math.min(page, pageCount - 1);
@@ -46,12 +75,23 @@ function FDEPythonCourse() {
   const selected =
     filteredConcepts.find((item) => item.id === selectedId) ||
     pageItems[0] ||
-    pythonModuleConcepts[0];
+    scopeConcepts[0];
 
   const chooseCategory = (value) => {
     setCategory(value);
     setPage(0);
   };
+
+  const selectedIndex = Math.max(
+    0,
+    scopeConcepts.findIndex((item) => item.id === selected?.id),
+  );
+  const prevConcept =
+    selectedIndex > 0 ? scopeConcepts[selectedIndex - 1] : null;
+  const nextConcept =
+    selectedIndex < scopeConcepts.length - 1
+      ? scopeConcepts[selectedIndex + 1]
+      : null;
 
   const chooseItem = (item) => {
     if (!item) return;
@@ -64,7 +104,8 @@ function FDEPythonCourse() {
   };
 
   return (
-    <div className="react-course-page fde-python-course">
+    <div className={`react-course-page fde-python-course${mini ? " fde-python-mini" : ""}`}>
+      {headline && <p className="fde-course-headline">{headline}</p>}
       <section className="react-course-workspace">
         <button
           type="button"
@@ -80,9 +121,9 @@ function FDEPythonCourse() {
           aria-label="Python course navigation"
         >
           <div className="react-course-sidebar-top">
-            <label htmlFor="fde-python-search">Find a concept</label>
+            <label htmlFor={searchId}>Find a concept</label>
             <input
-              id="fde-python-search"
+              id={searchId}
               value={search}
               onChange={(event) => {
                 setSearch(event.target.value);
@@ -92,7 +133,7 @@ function FDEPythonCourse() {
             />
           </div>
           <div className="react-course-filters" aria-label="Filter concepts">
-            {categories.map((item) => (
+            {scopeCategories.map((item) => (
               <button
                 key={item}
                 type="button"
@@ -104,14 +145,16 @@ function FDEPythonCourse() {
             ))}
           </div>
           <div className="react-course-list">
-            {pageItems.map((item) => (
+            {pageItems.map((item, listIndex) => (
               <button
                 key={item.id}
                 type="button"
                 className={`react-course-nav-item ${selected?.id === item.id ? "selected" : ""}`}
                 onClick={() => chooseItem(item)}
               >
-                <span>{String(item.id).padStart(2, "0")}</span>
+                <span>
+                  {String(safePage * PAGE_SIZE + listIndex + 1).padStart(2, "0")}
+                </span>
                 <strong>{item.title}</strong>
                 <small>{item.level}</small>
               </button>
@@ -152,47 +195,59 @@ function FDEPythonCourse() {
             </span>
             <span className="react-course-category">{selected.category}</span>
             <span className="react-course-number">
-              Concept {selected.id} of {pythonModuleConcepts.length}
+              Concept {selectedIndex + 1} of {scopeConcepts.length}
             </span>
           </div>
           <h2>{selected.title}</h2>
           <p className="react-course-description">{selected.description}</p>
-          <div className="react-course-explain-grid">
-            <section>
-              <h3>Why:</h3>
-              <p>{selected.why}</p>
-            </section>
-            <section>
-              <h3>When:</h3>
-              <p>{selected.when}</p>
-            </section>
-          </div>
-          <section className="react-course-example">
-            <div className="react-course-example-heading">
-              <h3>Example:</h3>
-              <span>Python</span>
-            </div>
-            <pre>
-              <code
-                className="hljs language-python"
-                dangerouslySetInnerHTML={{
-                  __html: highlightCode(selected.code),
-                }}
-              />
-            </pre>
-          </section>
+          {mode === "lessons" ? (
+            <LLMCourse
+              embedded
+              lessons={selected.lessons || []}
+              contentMap={selected.contentMap || {}}
+            />
+          ) : (
+            <>
+              <div className="react-course-explain-grid">
+                <section>
+                  <h3>Why:</h3>
+                  <p>{selected.why}</p>
+                </section>
+                <section>
+                  <h3>When:</h3>
+                  <p>{selected.when}</p>
+                </section>
+              </div>
+              {selected.code && (
+                <section className="react-course-example">
+                  <div className="react-course-example-heading">
+                    <h3>Example:</h3>
+                    <span>{codeLabel}</span>
+                  </div>
+                  <pre>
+                    <code
+                      className={`hljs language-${codeLanguage}`}
+                      dangerouslySetInnerHTML={{
+                        __html: highlightCode(selected.code, codeLanguage),
+                      }}
+                    />
+                  </pre>
+                </section>
+              )}
+            </>
+          )}
           <div className="react-course-detail-nav">
             <button
               type="button"
-              disabled={selected.id === 1}
-              onClick={() => chooseItem(pythonModuleConcepts[selected.id - 2])}
+              disabled={!prevConcept}
+              onClick={() => chooseItem(prevConcept)}
             >
               Previous concept
             </button>
             <button
               type="button"
-              disabled={selected.id === pythonModuleConcepts.length}
-              onClick={() => chooseItem(pythonModuleConcepts[selected.id])}
+              disabled={!nextConcept}
+              onClick={() => chooseItem(nextConcept)}
             >
               Next concept
             </button>

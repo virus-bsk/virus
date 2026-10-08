@@ -1,18 +1,10 @@
 import { Link, useParams } from "react-router-dom";
 import { fdeModules } from "../../data/fde/forwardDeploymentEngineerModules";
-import LLMCourse from "../llm/LLMCourse";
-import {
-  promptDesignLessons,
-  promptDesignContent,
-} from "../../data/fde/promptDesignContent";
-import {
-  advancedTechniqueLessons,
-  advancedTechniqueContent,
-} from "../../data/fde/advancedTechniquesContent";
+import { fdeModule1Concepts } from "../../data/fde/fdeModule1Concepts";
 import FDEPythonCourse from "./FDEPythonCourse";
 import "./ForwardDeploymentEngineer.css";
 
-const WIDE_SECTIONS = [
+const MODULE1_SECTIONS = [
   "LLM Fundamentals",
   "Prompt Design",
   "Advanced Techniques",
@@ -72,14 +64,16 @@ function ForwardDeploymentEngineerModule() {
         <p className="fde-module-summary">{mod.summary}</p>
       </section>
 
-      {/* ===== Actual content ===== */}
+      {/* ===== Module 1 + 2: each section card carries its own workspace
+          directly beneath its headline + topic list — navigator on the left,
+          lesson detail on the right (same pattern as Module 2) ===== */}
       <h2 className="fde-module-section-kicker">What you'll learn</h2>
       <div className="fde-module-sections">
         {mod.sections.map((section, i) => (
           <section
             key={section.heading}
             className={`fde-module-section${
-              mod.id === 1 && WIDE_SECTIONS.includes(section.heading)
+              mod.id === 1 && MODULE1_SECTIONS.includes(section.heading)
                 ? " fde-module-section-wide"
                 : ""
             }`}
@@ -95,38 +89,43 @@ function ForwardDeploymentEngineerModule() {
                 <li key={item}>{item}</li>
               ))}
             </ul>
-            {mod.id === 1 && section.heading === "LLM Fundamentals" && (
-              <LLMCourse embedded />
-            )}
-            {mod.id === 1 && section.heading === "Prompt Design" && (
-              <LLMCourse
-                embedded
-                lessons={promptDesignLessons}
-                contentMap={promptDesignContent}
+            {mod.id === 1 &&
+              MODULE1_SECTIONS.includes(section.heading) && (
+                <FDEPythonCourse
+                  key={`m1-${section.heading}`}
+                  mode="lessons"
+                  concepts={fdeModule1Concepts}
+                  filterIds={[
+                    fdeModule1Concepts.find((c) => c.title === section.heading)
+                      ?.id,
+                  ].filter(Boolean)}
+                  searchId={`fde-m1-search-${i}`}
+                  headline={section.items.join(" · ")}
+                />
+              )}
+            {mod.id === 2 && section.heading === "Python Foundations" && (
+              <FDEPythonCourse
+                key="m2-python-foundations"
+                filterCategories={[
+                  "python",
+                  "files-json",
+                  "oop-errors",
+                  "async",
+                  "env-git",
+                ]}
+                searchId="fde-python-search-foundations"
               />
             )}
-            {mod.id === 1 && section.heading === "Advanced Techniques" && (
-              <LLMCourse
-                embedded
-                lessons={advancedTechniqueLessons}
-                contentMap={advancedTechniqueContent}
+            {mod.id === 2 && section.heading === "APIs & SDKs" && (
+              <FDEPythonCourse
+                key="m2-apis-sdks"
+                filterCategories={["apis"]}
+                searchId="fde-python-search-apis"
               />
             )}
           </section>
         ))}
       </div>
-
-      {/* ===== Module 2: single shared Python workspace below the
-          two side-by-side section cards ===== */}
-      {mod.id === 2 && (
-        <div className="fde-module-section fde-module-section-wide fde-python-workspace">
-          <div className="fde-module-section-head">
-            <span className="fde-module-section-num">▸</span>
-            <h3>Python & APIs — Interactive Course</h3>
-          </div>
-          <FDEPythonCourse />
-        </div>
-      )}
 
       {/* ===== Capstone ===== */}
       <div className="fde-module-project">
