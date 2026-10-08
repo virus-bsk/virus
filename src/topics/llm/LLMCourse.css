@@ -75,6 +75,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
+  /* keep every card in a row the same height */
+  align-items: stretch;
 }
 
 .lesson-card {
@@ -86,6 +88,9 @@
   cursor: pointer;
   transition: all 0.25s ease;
   color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .lesson-card:hover {
@@ -136,14 +141,18 @@
   color: #94a3b8;
   line-height: 1.5;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  /* push the "Read lesson" label to the bottom of equal-height cards */
+  flex: 1 1 auto;
 }
 
 .lesson-open-label {
   display: inline-block;
   margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed rgba(168, 85, 247, 0.25);
   font-size: 0.78rem;
   font-weight: 600;
   color: #a78bfa;

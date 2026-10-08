@@ -1,7 +1,17 @@
 import { Link, useParams } from "react-router-dom";
 import { fdeModules } from "../../data/fde/forwardDeploymentEngineerModules";
 import LLMCourse from "../llm/LLMCourse";
+import {
+  promptDesignLessons,
+  promptDesignContent,
+} from "../../data/fde/promptDesignContent";
+import {
+  advancedTechniqueLessons,
+  advancedTechniqueContent,
+} from "../../data/fde/advancedTechniquesContent";
 import "./ForwardDeploymentEngineer.css";
+
+const WIDE_SECTIONS = ["LLM Fundamentals", "Prompt Design", "Advanced Techniques"];
 
 function ForwardDeploymentEngineerModule() {
   const { moduleId } = useParams();
@@ -61,7 +71,14 @@ function ForwardDeploymentEngineerModule() {
       <h2 className="fde-module-section-kicker">What you'll learn</h2>
       <div className="fde-module-sections">
         {mod.sections.map((section, i) => (
-          <section key={section.heading} className="fde-module-section">
+          <section
+            key={section.heading}
+            className={`fde-module-section${
+              mod.id === 1 && WIDE_SECTIONS.includes(section.heading)
+                ? " fde-module-section-wide"
+                : ""
+            }`}
+          >
             <div className="fde-module-section-head">
               <span className="fde-module-section-num">
                 {String(i + 1).padStart(2, "0")}
@@ -75,6 +92,20 @@ function ForwardDeploymentEngineerModule() {
             </ul>
             {mod.id === 1 && section.heading === "LLM Fundamentals" && (
               <LLMCourse embedded />
+            )}
+            {mod.id === 1 && section.heading === "Prompt Design" && (
+              <LLMCourse
+                embedded
+                lessons={promptDesignLessons}
+                contentMap={promptDesignContent}
+              />
+            )}
+            {mod.id === 1 && section.heading === "Advanced Techniques" && (
+              <LLMCourse
+                embedded
+                lessons={advancedTechniqueLessons}
+                contentMap={advancedTechniqueContent}
+              />
             )}
           </section>
         ))}

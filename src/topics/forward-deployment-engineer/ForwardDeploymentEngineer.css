@@ -326,6 +326,12 @@
   padding: 1.3rem 1.2rem;
 }
 
+/* Section that hosts the embedded LLM course spans the full row so the
+   lesson cards can lay out side by side instead of one narrow column. */
+.fde-module-section-wide {
+  grid-column: 1 / -1;
+}
+
 .fde-module-section-head {
   display: flex;
   align-items: center;

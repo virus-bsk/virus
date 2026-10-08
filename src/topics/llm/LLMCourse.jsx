@@ -4,17 +4,22 @@ import { llmCourseVideos } from "../../data/llm/llmCourseVideos";
 import { llmCourseContent } from "../../data/llm/llmCourseContent";
 import "./LLMCourse.css";
 
-function LLMCourse({ embedded = false }) {
+function LLMCourse({
+  embedded = false,
+  lessons = llmCourseVideos,
+  contentMap = llmCourseContent,
+  subtitle = `${llmCourseVideos.length} lessons covering Transformers, attention, KV Cache, MoE, reasoning models, ChatGPT/Claude/Copilot/Cursor, and no-code AI tools (Bolt, Lovable, v0, n8n). Click any lesson to read the full written explanation — concepts, examples and key takeaways.`,
+}) {
   const [activeLesson, setActiveLesson] = useState(null);
 
   // Build category list preserving the order of appearance
   const categories = useMemo(() => {
     const cats = [];
-    for (const v of llmCourseVideos) {
+    for (const v of lessons) {
       if (!cats.includes(v.category)) cats.push(v.category);
     }
     return cats;
-  }, []);
+  }, [lessons]);
 
   const openLesson = (lesson) => setActiveLesson(lesson);
   const closeLesson = () => setActiveLesson(null);
@@ -43,18 +48,13 @@ function LLMCourse({ embedded = false }) {
           ← Back to MAANG Preparation
         </Link>
         <h1 className="course-title">LLM Fundamentals</h1>
-        <p className="course-subtitle">
-          {llmCourseVideos.length} lessons covering Transformers, attention, KV
-          Cache, MoE, reasoning models, ChatGPT/Claude/Copilot/Cursor, and
-          no-code AI tools (Bolt, Lovable, v0, n8n). Click any lesson to read
-          the full written explanation — concepts, examples and key takeaways.
-        </p>
+        <p className="course-subtitle">{subtitle}</p>
       </section>}
 
       {/* Lessons grouped by category */}
       <section className="lessons-section">
         {categories.map((cat) => {
-          const lessons = llmCourseVideos
+          const lessonsForCat = lessons
             .map((video, idx) => ({ video, idx }))
             .filter(({ video }) => video.category === cat);
 
@@ -63,11 +63,12 @@ function LLMCourse({ embedded = false }) {
               <h2 className="lesson-category-title">
                 {cat}
                 <span className="lesson-category-count">
-                  {lessons.length} lesson{lessons.length > 1 ? "s" : ""}
+                  {lessonsForCat.length} lesson
+                  {lessonsForCat.length > 1 ? "s" : ""}
                 </span>
               </h2>
               <div className="lessons-grid">
-                {lessons.map(({ video, idx }) => (
+                {lessonsForCat.map(({ video, idx }) => (
                   <button
                     key={idx}
                     type="button"
@@ -135,7 +136,7 @@ function LLMCourse({ embedded = false }) {
 
             <div className="llm-reader-body">
               {(() => {
-                const content = llmCourseContent[activeLesson.title];
+                const content = contentMap[activeLesson.title];
                 if (!content) {
                   return (
                     <p className="llm-reader-intro">{activeLesson.description}</p>
