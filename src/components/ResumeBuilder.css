@@ -110,6 +110,14 @@
   margin: 2px 0 0;
 }
 
+.rb-header .rb-sync-status {
+  color: #34d399;
+}
+
+.rb-header .rb-sync-error {
+  color: #f87171;
+}
+
 .rb-close {
   width: 36px;
   height: 36px;

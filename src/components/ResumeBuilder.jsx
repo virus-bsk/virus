@@ -1,4 +1,5 @@
-import { useState, useRef, Fragment } from "react";
+import { useState, useRef, useEffect, Fragment } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 import {
   FaLocationDot,
   FaSquarePhone,
@@ -14,6 +15,9 @@ import {
   parseResumeFile,
   buildResumeDataExtractionPrompt,
 } from "../utils/fileParser";
+import { auth } from "../firebase";
+import { getDocument, serverTimestamp, setDocument } from "../utils/firestore";
+import { userDocId } from "../utils/userProfile";
 import "./ResumeBuilder.css";
 
 // Initialize Gemini AI client for suggestions
@@ -123,12 +127,116 @@ function ResumeBuilder({ onClose }) {
   const previewRef = useRef(null);
   const [step, setStep] = useState(0);
   const [resume, setResume] = useState(EMPTY_RESUME);
+  const [resumeDocPath, setResumeDocPath] = useState("");
+  const [resumeReady, setResumeReady] = useState(false);
+  const [resumeSyncMessage, setResumeSyncMessage] = useState(
+    "Loading saved resume...",
+  );
+  const resumeBaselineRef = useRef(JSON.stringify(EMPTY_RESUME));
+  const resumeLoadGenerationRef = useRef(0);
   const [showPreview, setShowPreview] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiMessage, setAiMessage] = useState("");
   const [uploadingResume, setUploadingResume] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [parsingComplete, setParsingComplete] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      const generation = ++resumeLoadGenerationRef.current;
+      if (!user?.email) {
+        setResumeDocPath("");
+        setResumeReady(false);
+        setResume(EMPTY_RESUME);
+        setResumeSyncMessage("Sign in to save your resume.");
+        return;
+      }
+
+      const path = `resume/${userDocId(user)}`;
+      setResumeDocPath(path);
+      setResumeReady(false);
+      setResume(EMPTY_RESUME);
+      setResumeSyncMessage("Loading saved resume...");
+
+      const result = await getDocument(path);
+      if (!active || generation !== resumeLoadGenerationRef.current) return;
+      if (!result.ok) {
+        setResumeSyncMessage(
+          `Could not load saved resume: ${result.error?.message || "Please try again."}`,
+        );
+        return;
+      }
+
+      const stored = result.exists ? result.value : null;
+      const storedResume = stored
+        ? Object.fromEntries(
+            Object.entries(EMPTY_RESUME).map(([field, defaultValue]) => [
+              field,
+              stored[field] ?? defaultValue,
+            ]),
+          )
+        : EMPTY_RESUME;
+      const loadedResume = stored
+        ? {
+            ...EMPTY_RESUME,
+            ...storedResume,
+            experience: Array.isArray(storedResume.experience)
+              ? storedResume.experience
+              : EMPTY_RESUME.experience,
+            projects: Array.isArray(storedResume.projects)
+              ? storedResume.projects
+              : EMPTY_RESUME.projects,
+            skills: { ...EMPTY_RESUME.skills, ...(storedResume.skills || {}) },
+            education: Array.isArray(storedResume.education)
+              ? storedResume.education
+              : EMPTY_RESUME.education,
+            certificates: Array.isArray(storedResume.certificates)
+              ? storedResume.certificates
+              : EMPTY_RESUME.certificates,
+          }
+        : EMPTY_RESUME;
+      resumeBaselineRef.current = JSON.stringify(loadedResume);
+      setResume(loadedResume);
+      setStep(stored ? 1 : 0);
+      setResumeReady(true);
+      setResumeSyncMessage(
+        stored ? "Saved resume loaded." : "Changes save automatically.",
+      );
+    });
+
+    return () => {
+      active = false;
+      resumeLoadGenerationRef.current += 1;
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!resumeReady || !resumeDocPath) return undefined;
+
+    const serializedResume = JSON.stringify(resume);
+    if (serializedResume === resumeBaselineRef.current) return undefined;
+
+    const timeout = setTimeout(async () => {
+      setResumeSyncMessage("Saving resume...");
+      const result = await setDocument(resumeDocPath, {
+        ...resume,
+        updatedAt: serverTimestamp(),
+      });
+      if (!result.ok) {
+        setResumeSyncMessage(
+          `Could not save resume: ${result.error?.message || "Please try again."}`,
+        );
+        return;
+      }
+
+      resumeBaselineRef.current = serializedResume;
+      setResumeSyncMessage("Resume saved.");
+    }, 700);
+
+    return () => clearTimeout(timeout);
+  }, [resume, resumeDocPath, resumeReady]);
 
   // Resume upload handler - parses the file and uses AI to auto-fill all fields
   const handleResumeUpload = async (e) => {
@@ -2231,6 +2339,12 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
               <p>
                 Fill in your details step by step to create a professional
                 resume
+              </p>
+              <p
+                className={`rb-sync-status${resumeSyncMessage.startsWith("Could not") ? " rb-sync-error" : ""}`}
+                role="status"
+              >
+                {resumeSyncMessage}
               </p>
             </div>
           </div>

@@ -160,6 +160,30 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /resume/{userId} {
+      function ownsResumeDoc() {
+        return signedIn()
+          && request.auth.token.email is string
+          && userId == userId.lower()
+          && request.auth.token.email.lower().size() > userId.size()
+          && request.auth.token.email.lower()[0:userId.size()] == userId
+          && request.auth.token.email.lower()[userId.size():userId.size() + 1] == "@";
+      }
+
+      function validResume() {
+        return request.resource.data.keys().hasOnly([
+          'name', 'title', 'email', 'phone', 'linkedin', 'github', 'website',
+          'websiteName', 'location', 'summary', 'experience', 'projects',
+          'skills', 'education', 'certificates', 'updatedAt'
+        ])
+          && request.resource.data.updatedAt == request.time;
+      }
+
+      allow read: if ownsResumeDoc();
+      allow create, update: if ownsResumeDoc() && validResume();
+      allow delete: if false;
+    }
+
     match /pricing/{planId} {
       allow read: if signedIn();
       allow write: if false;
