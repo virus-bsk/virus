@@ -374,7 +374,7 @@ function DsaSheetPage({
   const [selectedProblem, setSelectedProblem] = useState(null);
   const [selectedTopic, setSelectedTopic] = useState("All");
   const [selectedDifficulty, setSelectedDifficulty] = useState("All");
-  const [weekOffset, setWeekOffset] = useState(0);
+  const [weekOffset, setWeekOffset] = useState(null);
   const [firebaseUser, setFirebaseUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [solvedWeeks, setSolvedWeeks] = useState([]);
@@ -386,6 +386,7 @@ function DsaSheetPage({
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setFirebaseUser(user);
       setAuthReady(true);
+      setWeekOffset(null);
       setSolvedWeeks([]);
       const hasEmail = Boolean(user?.email?.includes("@"));
       setProgressError(
@@ -534,16 +535,21 @@ function DsaSheetPage({
     nextUnlockedWeek,
     courseWeekCount(problems) - 1,
   );
+  const progressReadyForWeekly =
+    authReady && (!firebaseUser || progressLoaded || Boolean(progressError));
   const activeWeekOffset = Math.min(
-    Math.max(weekOffset, 0),
+    Math.max(weekOffset ?? nextUnlockedWeek, 0),
     maxAccessibleWeekIdx,
   );
 
   // Weekly preparation schedule (Mon–Fri learn · Sat/Sun assessments).
   // Only rendered on pages that opt in via showWeeklyPlan.
   const weeklyPlan = useMemo(
-    () => (showWeeklyPlan ? buildWeeklyPlan(problems, activeWeekOffset) : null),
-    [showWeeklyPlan, problems, activeWeekOffset],
+    () =>
+      showWeeklyPlan && progressReadyForWeekly
+        ? buildWeeklyPlan(problems, activeWeekOffset)
+        : null,
+    [showWeeklyPlan, progressReadyForWeekly, problems, activeWeekOffset],
   );
 
   const weekSolved = solvedWeekSet.has(activeWeekOffset);
