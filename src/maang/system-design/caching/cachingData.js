@@ -1,4 +1,4 @@
-// ===== Caching — topic data =====
+﻿// ===== Caching â€” topic data =====
 
 import {
   svgRedis,
@@ -103,62 +103,44 @@ export const cachingTopics = [
       "Prevents cache from growing forever",
       "Redis supports all of these",
     ],
-  },  {
+  },
+  {
     id: "STAMPEDE",
-    name: "Cache Stampede",
-    icon: "🐎",
-    tagline: "When everyone misses at once",
-    accent: "#7c3aed",
-    meaning:
-      "A cache stampede (dogpile) happens when a hot key expires and hundreds of concurrent requests all miss simultaneously — all hitting the database for the same data at once, potentially crushing it. Fixes: request coalescing (only one request recomputes), locking, serving stale values while refreshing, and jittered TTLs.",
-    analogy:
-      "A shop's popular item sells out; a restock announcement makes 500 shoppers storm the store at once. Better: one staff member restocks while everyone else calmly waits in line (or is served from the last-known price list).",
-    sql: `# The failure mode
-key expires at T
-  500 concurrent requests at T
-    -> ALL miss cache
-    -> ALL run the expensive DB query
-    -> DB overload / cascading failure
-
-# Fix 1: coalescing (single-flight)
-value = cache.get(k)
-if (miss) {
-  lock(k)          // others wait
-  value = db.query(k)
-  cache.set(k, value, ttl)
-  unlock(k)
-}
-
-# Fix 2: stale-while-revalidate
-# Fix 3: jitter TTLs so keys don't
-# expire simultaneously`,
+    icon: "fa-horse-head",
+    title: "Cache Stampede",
+    sub: "When everyone misses at once",
+    desc: "A hot key expires and hundreds of requests all miss at once, crushing the DB. Fixes: request coalescing, stale-while-revalidate, jittered TTLs.",
+    definition:
+      "A cache stampede (dogpile) happens when a hot key expires and hundreds of concurrent requests all miss simultaneously. Fixes: request coalescing, locking, serving stale values while refreshing, and jittered TTLs.",
+    videoLink: "https://www.youtube.com/watch?v=jgpVdJB2QUk",
+    diagram: svgCacheAside,
+    relation: "Prevent stampedes with single-flight recompute, stale-while-revalidate, and jittered TTLs on hot keys.",
+    points: [
+      "Hot key expires: all requests miss at once",
+      "Every miss runs the expensive DB query",
+      "Fix: coalescing - one request recomputes, others wait",
+      "Fix: serve stale value while refreshing in background",
+      "Fix: jitter TTLs so keys do not expire simultaneously",
+    ],
   },
   {
     id: "HOTKEY",
-    name: "Hot Key",
-    icon: "🔥",
-    tagline: "One key that melts one cache node",
-    accent: "#b45309",
-    meaning:
-      "A hot key is a single cache key receiving disproportionate traffic (a celebrity's profile, a viral product). Sharded caches (Redis cluster) place a key on exactly one node — that node saturates while others idle. Fixes: replicate the key across nodes with random suffixes, add a local in-memory cache layer, and monitor per-key QPS.",
-    analogy:
-      "One ATM in a stadium serving 50,000 people: the queue melts it down while other ATMs stand idle. Solution: stock the same cash in several machines and send people to a random one.",
-    sql: `# Problem
-"product:123" -> hash -> node_7 only
-all reads for the viral product hit
-node_7 -> CPU/NIC maxed, timeouts
-
-# Fix 1: key replication
-key:1, key:2, ... key:N (random pick)
-same value on N nodes, spread load
-
-# Fix 2: L1 local cache (in-app)
-process-level cache with tiny TTL
-in front of Redis -> absorbs spikes
-
-# Fix 3: detect + alert
-monitor per-key QPS; auto-replicate
-when one key exceeds threshold.`,
+    icon: "fa-fire",
+    title: "Hot Key",
+    sub: "One key that melts one cache node",
+    desc: "One cache key gets disproportionate traffic and saturates its shard. Fixes: replicate the key, add a local L1 cache, monitor per-key QPS.",
+    definition:
+      "A hot key is a single cache key receiving disproportionate traffic. Sharded caches place a key on exactly one node, which saturates while others idle. Fixes: replicate the key across nodes, add a local in-memory cache layer, and monitor per-key QPS.",
+    videoLink: "https://www.youtube.com/watch?v=jgpVdJB2QUk",
+    diagram: svgLRULFU,
+    relation: "Spread hot keys with replication plus a tiny-TTL local cache in front of Redis.",
+    points: [
+      "One key gets most of the traffic",
+      "Sharded cache puts it on exactly one node",
+      "Fix: replicate value across N suffixed keys",
+      "Fix: L1 in-app cache with tiny TTL absorbs spikes",
+      "Fix: monitor per-key QPS and auto-replicate past threshold",
+    ],
   },
 
 ];

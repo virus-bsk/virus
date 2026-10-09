@@ -4,7 +4,8 @@ import "./CachingPage.css";
 import { cachingTopics } from "./cachingData";
 
 function CacheCard({ topic, index, isActive, onClick }) {
-  const short = topic.desc.length > 120 ? topic.desc.slice(0, 120) + "..." : topic.desc;
+  const desc = topic.desc || "";
+  const short = desc.length > 120 ? desc.slice(0, 120) + "..." : desc;
   return (
     <article className={`cache-card ${isActive ? "active" : ""}`} onClick={() => onClick(topic.id)}>
       <div className="cache-card-head">
@@ -39,12 +40,16 @@ function CacheDetail({ topic, onClose }) {
           <div className="cache-detail-grid">
             <div className="cache-info-box">
               <h3>Key points</h3>
-              <ul>{topic.points.map((p, i) => <li key={i}>{p}</li>)}</ul>
+              <ul>{(topic.points || []).map((p, i) => <li key={i}>{p}</li>)}</ul>
               <p><strong>Relation: </strong>{topic.relation}</p>
             </div>
             <div className="cache-code-box">
               <h3>Diagram</h3>
-              <div dangerouslySetInnerHTML={{ __html: topic.diagram() }} />
+              {typeof topic.diagram === "function" ? (
+                <div dangerouslySetInnerHTML={{ __html: topic.diagram() }} />
+              ) : (
+                <p>No diagram available.</p>
+              )}
             </div>
           </div>
         </div>
