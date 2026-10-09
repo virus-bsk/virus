@@ -2,7 +2,6 @@
 // 96 unique problems.
 // Arrays: 17 · Strings: 5 · Sliding Window: 3 · Two Pointers: 2 · Prefix Sum: 1 · Binary Search: 11 · Sorting: 10 · Recursion: 5 · Backtracking: 10 · Greedy: 8 · Bit Manipulation: 10 · Math: 14
 export const dsaBasicProblems = [
-
   // ===== Arrays =====
   {
     id: 1,
@@ -65,7 +64,7 @@ export const dsaBasicProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/spiral-matrix/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=FlvgvbPvgxE",
   },
   {
     id: 8,
@@ -101,7 +100,7 @@ export const dsaBasicProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/set-matrix-zeroes/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=mFsoVAfMM0A",
   },
   {
     id: 12,
@@ -110,7 +109,7 @@ export const dsaBasicProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/maximum-subarray/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=06cO3EPoWes",
   },
   {
     id: 13,
@@ -193,7 +192,7 @@ export const dsaBasicProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=liT9Z467sa4",
   },
   {
     id: 22,
@@ -222,7 +221,7 @@ export const dsaBasicProblems = [
     difficulty: "Hard",
     link: "https://leetcode.com/problems/minimum-window-substring/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=sbZ2mhi7aIw",
   },
   {
     id: 25,
@@ -242,7 +241,7 @@ export const dsaBasicProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/container-with-most-water/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=v4HvnH6L_cM",
   },
   {
     id: 27,
@@ -300,7 +299,7 @@ export const dsaBasicProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=vopmtrYOx-s",
   },
   {
     id: 33,
@@ -309,7 +308,7 @@ export const dsaBasicProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/search-in-rotated-sorted-array/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=jbIzK1jZMhc",
   },
   {
     id: 34,
@@ -697,7 +696,7 @@ export const dsaBasicProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/sum-of-two-integers/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=DCCzKeRajdQ",
   },
   {
     id: 76,

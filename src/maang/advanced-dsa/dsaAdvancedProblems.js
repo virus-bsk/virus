@@ -2,7 +2,6 @@
 // 57 unique problems.
 // Stacks: 13 · Linked Lists: 14 · Trees: 17 · Tries: 7 · Heaps: 6
 export const dsaProblems = [
-
   // ===== Stacks =====
   {
     id: 97,
@@ -148,7 +147,7 @@ export const dsaProblems = [
     difficulty: "Easy",
     link: "https://leetcode.com/problems/linked-list-cycle/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=sP78rPvG4XA",
   },
   {
     id: 113,
@@ -157,7 +156,7 @@ export const dsaProblems = [
     difficulty: "Easy",
     link: "https://leetcode.com/problems/reverse-linked-list/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=4M9mXiwOAuM",
   },
   {
     id: 114,
@@ -166,7 +165,7 @@ export const dsaProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/remove-nth-node-from-end-of-list/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=3zYDxGxGjQo",
   },
   {
     id: 115,
@@ -247,7 +246,7 @@ export const dsaProblems = [
     difficulty: "Easy",
     link: "https://leetcode.com/problems/merge-two-sorted-lists/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=jTN4fLXLwlc",
   },
 
   // ===== Trees =====
@@ -285,7 +284,7 @@ export const dsaProblems = [
     difficulty: "Easy",
     link: "https://leetcode.com/problems/maximum-depth-of-binary-tree/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=7fNxSkv508k",
   },
   {
     id: 128,
@@ -312,7 +311,7 @@ export const dsaProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/validate-binary-search-tree/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=rB25y6zqayY",
   },
   {
     id: 131,
@@ -321,7 +320,7 @@ export const dsaProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=I6_DoixraQU",
   },
   {
     id: 132,
@@ -384,7 +383,7 @@ export const dsaProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=M_2IZf-g3qw",
   },
   {
     id: 139,
@@ -402,7 +401,7 @@ export const dsaProblems = [
     difficulty: "Easy",
     link: "https://leetcode.com/problems/invert-binary-tree/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=W0TWj9tr2YY",
   },
 
   // ===== Tries =====
@@ -413,7 +412,7 @@ export const dsaProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/implement-trie-prefix-tree/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=BOoR91es740",
   },
   {
     id: 142,
@@ -431,7 +430,7 @@ export const dsaProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/design-add-and-search-words-data-structure/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=76nfH0pxUWA",
   },
   {
     id: 144,
@@ -478,7 +477,7 @@ export const dsaProblems = [
     difficulty: "Hard",
     link: "https://leetcode.com/problems/find-median-from-data-stream/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=BUH5KXiFtaw",
   },
   {
     id: 149,

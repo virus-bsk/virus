@@ -11,7 +11,7 @@ export const dsaProblems = [
     difficulty: "Easy",
     link: "https://leetcode.com/problems/climbing-stairs/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=UQTvXqWxKvE",
   },
   {
     id: 2,
@@ -20,7 +20,7 @@ export const dsaProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/house-robber/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=k5MRvhAGQ6E",
   },
   {
     id: 3,
@@ -29,7 +29,7 @@ export const dsaProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/house-robber-ii/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=e1c4KThCbUE",
   },
   {
     id: 4,
@@ -58,7 +58,7 @@ export const dsaProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/unique-paths/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=pUt21JEa1Sw",
   },
   {
     id: 7,
@@ -105,7 +105,7 @@ export const dsaProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/decode-ways/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=Ppv0MbzvRcc",
   },
   {
     id: 12,
@@ -125,7 +125,7 @@ export const dsaProblems = [
     difficulty: "Medium",
     link: "https://leetcode.com/problems/coin-change/",
     platform: "leetcode",
-    videoLink: null,
+    videoLink: "https://www.youtube.com/watch?v=R5tnHGLNLD4",
   },
   {
     id: 14,

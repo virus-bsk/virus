@@ -18,9 +18,9 @@ import { dsaProblems as graphProblems } from "../graph/dsaGraphProblems";
  *   Basic DSA ..... 96 problems
  *   Advanced DSA .. 57 problems
  *   DP ............ 21 problems
- *   Graphs ........  4 problems
+ *   Graphs ........ 11 problems
  *   ---------------------------
- *   Total ......... 178 problems in one track
+ *   Total ......... 185 problems in one track
  */
 
 // Tag every problem with a globally-unique id (`uid`) — the source files
