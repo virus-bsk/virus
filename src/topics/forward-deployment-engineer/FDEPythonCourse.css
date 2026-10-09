@@ -138,10 +138,15 @@
   width: 100%;
 }
 
+/* Module workspaces (2-6) share the Module 1 compact layout:
+   same grid, same fixed heights, same sizing — no per-module drift. */
 .fde-module-page-workspace
   .fde-module-lesson-workspace
   .fde-python-course
-  .react-course-workspace {
+  .react-course-workspace,
+.fde-module-page-workspace
+  .fde-module-lesson-workspace
+  .fde-module1-workspace {
   display: grid;
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
   align-items: stretch;
@@ -154,6 +159,10 @@
 .fde-module-page-workspace
   .fde-module-lesson-workspace
   .fde-python-course
+  .react-course-sidebar,
+.fde-module-page-workspace
+  .fde-module-lesson-workspace
+  .fde-module1-course
   .react-course-sidebar {
   position: sticky;
   top: 12px;
@@ -169,11 +178,34 @@
   max-height: none;
 }
 
-.fde-module-page-workspace .fde-module-lesson-workspace .react-course-detail {
+.fde-module-page-workspace
+  .fde-module-lesson-workspace
+  .react-course-detail {
   height: calc(100vh - 250px);
   min-height: 420px;
   overflow-y: auto;
   padding: clamp(22px, 3vw, 44px);
+}
+
+/* Module 1 course root also fills the workspace like the Python course. */
+.fde-module-page-workspace
+  .fde-module-lesson-workspace
+  .fde-module1-course {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.fde-module-page-workspace
+  .fde-module-lesson-workspace
+  .fde-module1-course
+  .react-course-detail
+  h2 {
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
 }
 
 @media (max-width: 800px) {
@@ -189,7 +221,10 @@
   .fde-module-page-workspace
     .fde-module-lesson-workspace
     .fde-python-course
-    .react-course-workspace {
+    .react-course-workspace,
+  .fde-module-page-workspace
+    .fde-module-lesson-workspace
+    .fde-module1-workspace {
     display: flex;
     flex-direction: column;
     flex: initial;
@@ -214,6 +249,12 @@
   .fde-module-page-workspace .fde-module-lesson-workspace .react-course-detail {
     height: auto;
     min-height: 60vh;
+  }
+
+  .fde-module-page-workspace
+    .fde-module-lesson-workspace
+    .react-course-list {
+    max-height: 38vh;
   }
 }
 
