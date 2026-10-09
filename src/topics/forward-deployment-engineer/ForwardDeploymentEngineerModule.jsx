@@ -1,5 +1,9 @@
 import { Link, useParams } from "react-router-dom";
 import { fdeModules } from "../../data/fde/forwardDeploymentEngineerModules";
+import { ragModuleConcepts } from "../../data/fde/ragModuleConcepts";
+import { advancedRagFinetuneConcepts } from "../../data/fde/advancedRagFinetuneConcepts";
+import { agenticAiConcepts } from "../../data/fde/agenticAiConcepts";
+import { llmOpsDeployConcepts } from "../../data/fde/llmOpsDeployConcepts";
 import FDEModule1Course from "./FDEModule1Course";
 import FDEPythonCourse from "./FDEPythonCourse";
 import "./ForwardDeploymentEngineer.css";
@@ -57,7 +61,7 @@ function ForwardDeploymentEngineerModule() {
 
   return (
     <div
-      className={`fde-page fde-module-page${[1, 2].includes(mod.id) ? " fde-module-page-workspace" : ""}`}
+      className={`fde-page fde-module-page${[1, 2, 3, 4, 5, 6].includes(mod.id) ? " fde-module-page-workspace" : ""}`}
     >
       <p className="fde-module-breadcrumb">
         <Link to="/maang">MAANG</Link>
@@ -91,6 +95,34 @@ function ForwardDeploymentEngineerModule() {
           <FDEPythonCourse
             filterCategories={MODULE2_CATEGORIES}
             searchId="fde-module-2-search"
+          />
+        </section>
+      ) : mod.id === 3 ? (
+        <section className="fde-module-lesson-workspace">
+          <FDEPythonCourse
+            concepts={ragModuleConcepts}
+            searchId="fde-module-3-search"
+          />
+        </section>
+      ) : mod.id === 4 ? (
+        <section className="fde-module-lesson-workspace">
+          <FDEPythonCourse
+            concepts={advancedRagFinetuneConcepts}
+            searchId="fde-module-4-search"
+          />
+        </section>
+      ) : mod.id === 5 ? (
+        <section className="fde-module-lesson-workspace">
+          <FDEPythonCourse
+            concepts={agenticAiConcepts}
+            searchId="fde-module-5-search"
+          />
+        </section>
+      ) : mod.id === 6 ? (
+        <section className="fde-module-lesson-workspace">
+          <FDEPythonCourse
+            concepts={llmOpsDeployConcepts}
+            searchId="fde-module-6-search"
           />
         </section>
       ) : (
