@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, Fragment } from "react";
 import { onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 import {
   FaLocationDot,
   FaSquarePhone,
@@ -123,12 +124,14 @@ const getCertName = (cert) =>
 
 function ResumeBuilder({ onClose }) {
   const isModal = typeof onClose === "function";
+  const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const previewRef = useRef(null);
   const [step, setStep] = useState(0);
   const [resume, setResume] = useState(EMPTY_RESUME);
   const [resumeDocPath, setResumeDocPath] = useState("");
   const [resumeReady, setResumeReady] = useState(false);
+  const [hasSavedResume, setHasSavedResume] = useState(false);
   const [resumeSyncMessage, setResumeSyncMessage] = useState(
     "Loading saved resume...",
   );
@@ -148,6 +151,7 @@ function ResumeBuilder({ onClose }) {
       if (!user?.email) {
         setResumeDocPath("");
         setResumeReady(false);
+        setHasSavedResume(false);
         setResume(EMPTY_RESUME);
         setResumeSyncMessage("Sign in to save your resume.");
         return;
@@ -156,6 +160,7 @@ function ResumeBuilder({ onClose }) {
       const path = `resume/${userDocId(user)}`;
       setResumeDocPath(path);
       setResumeReady(false);
+      setHasSavedResume(false);
       setResume(EMPTY_RESUME);
       setResumeSyncMessage("Loading saved resume...");
 
@@ -198,6 +203,7 @@ function ResumeBuilder({ onClose }) {
         : EMPTY_RESUME;
       resumeBaselineRef.current = JSON.stringify(loadedResume);
       setResume(loadedResume);
+      setHasSavedResume(Boolean(stored));
       setStep(stored ? 1 : 0);
       setResumeReady(true);
       setResumeSyncMessage(
@@ -237,6 +243,19 @@ function ResumeBuilder({ onClose }) {
 
     return () => clearTimeout(timeout);
   }, [resume, resumeDocPath, resumeReady]);
+
+  const openSavedResumePreview = () => {
+    setShowPreview(true);
+    setStep(STEPS.length - 1);
+  };
+
+  const exitBuilder = () => {
+    if (isModal) {
+      onClose();
+      return;
+    }
+    navigate("/");
+  };
 
   // Resume upload handler - parses the file and uses AI to auto-fill all fields
   const handleResumeUpload = async (e) => {
@@ -1396,13 +1415,17 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
               </div>
             )}
 
-            <div className="rb-upload-or">
-              <span>OR</span>
-            </div>
+            {resumeReady && !hasSavedResume && (
+              <>
+                <div className="rb-upload-or">
+                  <span>OR</span>
+                </div>
 
-            <button className="rb-upload-skip" onClick={() => setStep(1)}>
-              Start from scratch & fill manually →
-            </button>
+                <button className="rb-upload-skip" onClick={() => setStep(1)}>
+                  Start from scratch & fill manually →
+                </button>
+              </>
+            )}
 
             <p className="rb-upload-hint">
               💡 Supported formats: PDF, TXT, MD. Your file is processed locally
@@ -2065,6 +2088,15 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
               </button>
               <button
                 className="rb-preview-toggle"
+                onClick={() => {
+                  setShowPreview(false);
+                  setStep(1);
+                }}
+              >
+                Edit This Resume
+              </button>
+              <button
+                className="rb-preview-toggle"
                 onClick={() => setShowPreview(!showPreview)}
               >
                 {showPreview ? "Hide Preview" : "Show Preview"}
@@ -2348,24 +2380,57 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
               </p>
             </div>
           </div>
-          {isModal && (
-            <button className="rb-close" onClick={onClose}>
+          <div className="rb-header-actions">
+            {resumeReady && hasSavedResume && (
+              <button
+                className="rb-btn rb-btn-primary rb-saved-resume-btn"
+                onClick={openSavedResumePreview}
+              >
+                Previous Resume
+              </button>
+            )}
+            <button
+              className="rb-close"
+              onClick={exitBuilder}
+              aria-label={
+                isModal ? "Close resume builder" : "Exit resume builder"
+              }
+              title={isModal ? "Close" : "Exit to home"}
+            >
               ✕
             </button>
-          )}
+          </div>
         </div>
 
         <div className="rb-steps">
-          {STEPS.map((s, idx) => (
-            <div
-              key={s.id}
-              className={`rb-step ${idx === step ? "active" : ""} ${idx < step ? "done" : ""}`}
-              onClick={() => idx < step && setStep(idx)}
-            >
-              <span className="rb-step-icon">{s.icon}</span>
-              <span className="rb-step-label">{s.label}</span>
-            </div>
-          ))}
+          {STEPS.map((s, idx) => {
+            const isClickable = hasSavedResume || idx < step;
+            const selectStep = () => {
+              if (!isClickable) return;
+              setStep(idx);
+              setShowPreview(s.id === "preview");
+            };
+
+            return (
+              <div
+                key={s.id}
+                className={`rb-step ${idx === step ? "active" : ""} ${idx < step ? "done" : ""} ${isClickable ? "clickable" : ""}`}
+                role={isClickable ? "button" : undefined}
+                tabIndex={isClickable ? 0 : undefined}
+                aria-current={idx === step ? "step" : undefined}
+                onClick={selectStep}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    selectStep();
+                  }
+                }}
+              >
+                <span className="rb-step-icon">{s.icon}</span>
+                <span className="rb-step-label">{s.label}</span>
+              </div>
+            );
+          })}
         </div>
 
         <div className="rb-body">{renderStep()}</div>

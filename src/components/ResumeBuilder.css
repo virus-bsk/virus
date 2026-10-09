@@ -97,6 +97,18 @@
   gap: 14px;
 }
 
+.rb-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.rb-saved-resume-btn {
+  padding: 9px 12px;
+  white-space: nowrap;
+}
+
 .rb-header h2 {
   font-size: 1.5rem;
   font-weight: 800;
@@ -187,6 +199,15 @@
 
 .rb-step.done:hover {
   background: rgba(52, 211, 153, 0.1);
+}
+
+.rb-step.clickable {
+  cursor: pointer;
+}
+
+.rb-step.clickable:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.8);
+  outline-offset: 2px;
 }
 
 .rb-step-icon {
@@ -993,6 +1014,15 @@
 
   .rb-header p {
     font-size: 0.72rem;
+  }
+
+  .rb-header-actions {
+    gap: 6px;
+  }
+
+  .rb-saved-resume-btn {
+    padding: 8px 9px;
+    font-size: 0.75rem;
   }
 
   /* FIX (mobile): steps bar was stacking/mixing icon above label and the
