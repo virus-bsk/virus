@@ -1,0 +1,222 @@
+.fde-module1-course {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.fde-module1-workspace {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 16px;
+  padding: 14px 0 0;
+}
+
+.fde-module1-course .react-course-sidebar {
+  position: sticky;
+  top: 12px;
+  width: auto;
+  height: calc(100vh - 250px);
+  max-height: calc(100vh - 250px);
+  min-height: 360px;
+}
+
+.fde-module1-course .react-course-list {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+
+.fde-module1-course .react-course-detail {
+  height: calc(100vh - 250px);
+  min-height: 420px;
+  overflow-y: auto;
+  padding: clamp(22px, 3vw, 44px);
+}
+
+.fde-module1-course .react-course-level {
+  color: #052c25;
+  background: #8be0c1;
+}
+
+.fde-module1-diagram {
+  margin: 28px 0 34px;
+  padding: 16px 0 20px;
+  border-top: 1px solid rgba(139, 224, 193, 0.2);
+  border-bottom: 1px solid rgba(139, 224, 193, 0.2);
+}
+
+.fde-module1-diagram-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+  color: #a9c9c3;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+}
+
+.fde-module1-diagram-heading strong {
+  color: #8be0c1;
+  font-size: 0.78rem;
+}
+
+.fde-module1-diagram-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fde-module1-diagram-item {
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+  gap: 8px;
+  min-width: 0;
+}
+
+.fde-module1-diagram-node {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 58px;
+  padding: 10px;
+  color: #dff8ef;
+  background: rgba(17, 49, 45, 0.74);
+  border: 1px solid rgba(139, 224, 193, 0.28);
+  border-radius: 7px;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.fde-module1-diagram-arrow {
+  flex: 0 0 auto;
+  color: #8be0c1;
+  font-size: 1.1rem;
+}
+
+.fde-module1-lesson-section {
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fde-module1-section-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.fde-module1-section-heading > span {
+  color: #8be0c1;
+  font: 700 0.76rem/1.2 var(--mono, monospace);
+}
+
+.fde-module1-section-heading h3 {
+  color: #effaf6;
+  font-size: 1.08rem;
+}
+
+.fde-module1-lesson-section > p,
+.fde-module1-lesson-section li,
+.fde-module1-takeaways li {
+  color: #bed2d8;
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.fde-module1-lesson-section ul,
+.fde-module1-takeaways ul {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding-left: 20px;
+}
+
+.fde-module1-lesson-section li::marker,
+.fde-module1-takeaways li::marker {
+  color: #8be0c1;
+}
+
+.fde-module1-takeaways {
+  margin-top: 20px;
+  padding: 18px 20px;
+  background: rgba(17, 49, 45, 0.44);
+  border-left: 3px solid #8be0c1;
+}
+
+.fde-module1-takeaways h3 {
+  color: #8be0c1;
+  font-size: 0.88rem;
+  text-transform: uppercase;
+}
+
+.fde-module1-detail-footer {
+  display: grid;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.fde-module1-detail-footer > a {
+  justify-self: start;
+  color: #8be0c1;
+  font-size: 0.84rem;
+}
+
+@media (max-width: 800px) {
+  .fde-module1-workspace {
+    display: flex;
+    flex-direction: column;
+    flex: initial;
+    gap: 12px;
+  }
+
+  .fde-module1-workspace .react-course-mobile-toggle {
+    display: inline-flex;
+  }
+
+  .fde-module1-course .react-course-sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+  }
+
+  .fde-module1-course .react-course-list {
+    max-height: 38vh;
+  }
+
+  .fde-module1-course .react-course-detail {
+    height: auto;
+    min-height: 60vh;
+  }
+}
+
+@media (max-width: 600px) {
+  .fde-module1-diagram-steps {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .fde-module1-diagram-item {
+    flex-direction: column;
+  }
+
+  .fde-module1-diagram-node {
+    width: 100%;
+  }
+
+  .fde-module1-diagram-arrow {
+    transform: rotate(90deg);
+  }
+}

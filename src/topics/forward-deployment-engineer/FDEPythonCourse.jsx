@@ -6,8 +6,6 @@ import LLMCourse from "../llm/LLMCourse";
 import "../reactjs/ReactJSCourse.css";
 import "./FDEPythonCourse.css";
 
-const PAGE_SIZE = 10;
-
 const highlightCode = (code, language = "python") =>
   hljs.highlight(code, {
     language,
@@ -45,7 +43,6 @@ function FDEPythonCourse({
     [scopeConcepts],
   );
   const [selectedId, setSelectedId] = useState(() => scopeConcepts[0]?.id ?? 1);
-  const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [showMobileNavigator, setShowMobileNavigator] = useState(true);
@@ -66,20 +63,17 @@ function FDEPythonCourse({
     });
   }, [category, search, scopeConcepts]);
 
-  const pageCount = Math.max(1, Math.ceil(filteredConcepts.length / PAGE_SIZE));
-  const safePage = Math.min(page, pageCount - 1);
-  const pageItems = filteredConcepts.slice(
-    safePage * PAGE_SIZE,
-    safePage * PAGE_SIZE + PAGE_SIZE,
-  );
   const selected =
     filteredConcepts.find((item) => item.id === selectedId) ||
-    pageItems[0] ||
+    filteredConcepts[0] ||
     scopeConcepts[0];
 
   const chooseCategory = (value) => {
     setCategory(value);
-    setPage(0);
+    const firstMatch = scopeConcepts.find(
+      (item) => value === "all" || item.category === value,
+    );
+    if (firstMatch) setSelectedId(firstMatch.id);
   };
 
   const selectedIndex = Math.max(
@@ -97,14 +91,12 @@ function FDEPythonCourse({
     if (!item) return;
     setSelectedId(item.id);
     setShowMobileNavigator(false);
-    const itemPage = Math.floor(
-      filteredConcepts.findIndex((entry) => entry.id === item.id) / PAGE_SIZE,
-    );
-    if (itemPage >= 0) setPage(itemPage);
   };
 
   return (
-    <div className={`react-course-page fde-python-course${mini ? " fde-python-mini" : ""}`}>
+    <div
+      className={`react-course-page fde-python-course${mini ? " fde-python-mini" : ""}`}
+    >
       {headline && <p className="fde-course-headline">{headline}</p>}
       <section className="react-course-workspace">
         <button
@@ -127,7 +119,6 @@ function FDEPythonCourse({
               value={search}
               onChange={(event) => {
                 setSearch(event.target.value);
-                setPage(0);
               }}
               placeholder="Search concepts"
             />
@@ -145,46 +136,23 @@ function FDEPythonCourse({
             ))}
           </div>
           <div className="react-course-list">
-            {pageItems.map((item, listIndex) => (
+            {filteredConcepts.map((item, listIndex) => (
               <button
                 key={item.id}
                 type="button"
                 className={`react-course-nav-item ${selected?.id === item.id ? "selected" : ""}`}
                 onClick={() => chooseItem(item)}
               >
-                <span>
-                  {String(safePage * PAGE_SIZE + listIndex + 1).padStart(2, "0")}
-                </span>
+                <span>{String(listIndex + 1).padStart(2, "0")}</span>
                 <strong>{item.title}</strong>
                 <small>{item.level}</small>
               </button>
             ))}
-            {!pageItems.length && (
+            {!filteredConcepts.length && (
               <p className="react-course-empty">
                 No concepts match that search.
               </p>
             )}
-          </div>
-          <div className="react-course-pagination">
-            <button
-              type="button"
-              disabled={safePage === 0}
-              onClick={() => setPage((value) => Math.max(0, value - 1))}
-            >
-              Previous
-            </button>
-            <span>
-              {safePage + 1} / {pageCount}
-            </span>
-            <button
-              type="button"
-              disabled={safePage === pageCount - 1}
-              onClick={() =>
-                setPage((value) => Math.min(pageCount - 1, value + 1))
-              }
-            >
-              Next
-            </button>
           </div>
         </aside>
 

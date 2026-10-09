@@ -1,18 +1,18 @@
 import { Link, useParams } from "react-router-dom";
 import { fdeModules } from "../../data/fde/forwardDeploymentEngineerModules";
-import { fdeModule1Concepts } from "../../data/fde/fdeModule1Concepts";
+import FDEModule1Course from "./FDEModule1Course";
 import FDEPythonCourse from "./FDEPythonCourse";
 import "./ForwardDeploymentEngineer.css";
 
-const MODULE1_SECTIONS = [
-  "LLM Fundamentals",
-  "Prompt Design",
-  "Advanced Techniques",
-];
-
 const MODULE2_COURSES = {
   "Python Foundations": {
-    filterCategories: ["python", "files-json", "oop-errors", "async", "env-git"],
+    filterCategories: [
+      "python",
+      "files-json",
+      "oop-errors",
+      "async",
+      "env-git",
+    ],
     searchId: "fde-python-search-foundations",
   },
   "APIs & SDKs": {
@@ -20,6 +20,11 @@ const MODULE2_COURSES = {
     searchId: "fde-python-search-apis",
   },
 };
+const MODULE2_CATEGORIES = [
+  ...new Set(
+    Object.values(MODULE2_COURSES).flatMap((course) => course.filterCategories),
+  ),
+];
 
 function ForwardDeploymentEngineerModule() {
   const { moduleId } = useParams();
@@ -33,8 +38,8 @@ function ForwardDeploymentEngineerModule() {
           <span className="fde-module-missing-emoji">🤷</span>
           <h1 className="fde-title">Module Not Found</h1>
           <p>
-            We couldn't find module {moduleId} in the Forward Deployment Engineer
-            curriculum.
+            We couldn't find module {moduleId} in the Forward Deployment
+            Engineer curriculum.
           </p>
           <Link
             to="/maang/forward-deployment-engineer"
@@ -51,7 +56,9 @@ function ForwardDeploymentEngineerModule() {
   const next = index < fdeModules.length - 1 ? fdeModules[index + 1] : null;
 
   return (
-    <div className="fde-page fde-module-page">
+    <div
+      className={`fde-page fde-module-page${[1, 2].includes(mod.id) ? " fde-module-page-workspace" : ""}`}
+    >
       <p className="fde-module-breadcrumb">
         <Link to="/maang">MAANG</Link>
         <span className="fde-module-crumb-sep">/</span>
@@ -75,69 +82,39 @@ function ForwardDeploymentEngineerModule() {
         <p className="fde-module-summary">{mod.summary}</p>
       </section>
 
-      {/* ===== Module 1 + 2: each section card carries its own workspace
-          directly beneath its headline + topic list — navigator on the left,
-          lesson detail on the right (same pattern as Module 2) ===== */}
-      <h2 className="fde-module-section-kicker">What you'll learn</h2>
-      <div className="fde-module-sections">
-        {mod.sections.map((section, i) => (
-          <section
-            key={section.heading}
-                        className={`fde-module-section${
-              (mod.id === 1 && MODULE1_SECTIONS.includes(section.heading)) ||
-              (mod.id === 2 && MODULE2_COURSES[section.heading])
-                ? " fde-module-section-wide"
-                : ""
-            }`}
-          >
-            <div className="fde-module-section-head">
-              <span className="fde-module-section-num">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <h3>{section.heading}</h3>
-            </div>
-            <ul className="fde-module-topic-list">
-              {section.items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            {mod.id === 1 &&
-              MODULE1_SECTIONS.includes(section.heading) && (
-                <FDEPythonCourse
-                  key={`m1-${section.heading}`}
-                  mode="lessons"
-                  concepts={fdeModule1Concepts}
-                  filterIds={[
-                    fdeModule1Concepts.find((c) => c.title === section.heading)
-                      ?.id,
-                  ].filter(Boolean)}
-                  searchId={`fde-m1-search-${i}`}
-                  headline={section.items.join(" · ")}
-                />
-              )}
-            {mod.id === 2 && section.heading === "Python Foundations" && (
-              <FDEPythonCourse
-                key="m2-python-foundations"
-                filterCategories={[
-                  "python",
-                  "files-json",
-                  "oop-errors",
-                  "async",
-                  "env-git",
-                ]}
-                searchId="fde-python-search-foundations"
-              />
-            )}
-            {mod.id === 2 && section.heading === "APIs & SDKs" && (
-              <FDEPythonCourse
-                key="m2-apis-sdks"
-                filterCategories={["apis"]}
-                searchId="fde-python-search-apis"
-              />
-            )}
-          </section>
-        ))}
-      </div>
+      {mod.id === 1 ? (
+        <section className="fde-module-lesson-workspace">
+          <FDEModule1Course />
+        </section>
+      ) : mod.id === 2 ? (
+        <section className="fde-module-lesson-workspace">
+          <FDEPythonCourse
+            filterCategories={MODULE2_CATEGORIES}
+            searchId="fde-module-2-search"
+          />
+        </section>
+      ) : (
+        <>
+          <h2 className="fde-module-section-kicker">What you'll learn</h2>
+          <div className="fde-module-sections">
+            {mod.sections.map((section, i) => (
+              <section key={section.heading} className="fde-module-section">
+                <div className="fde-module-section-head">
+                  <span className="fde-module-section-num">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3>{section.heading}</h3>
+                </div>
+                <ul className="fde-module-topic-list">
+                  {section.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* ===== Capstone ===== */}
       <div className="fde-module-project">
