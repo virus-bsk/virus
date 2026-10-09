@@ -88,11 +88,12 @@ function ForwardDeploymentEngineerModule() {
 
       {mod.id === 1 ? (
         <section className="fde-module-lesson-workspace">
-          <FDEModule1Course />
+          <FDEModule1Course key={mod.id} />
         </section>
       ) : mod.id === 2 ? (
         <section className="fde-module-lesson-workspace">
           <FDEPythonCourse
+            key={mod.id}
             filterCategories={MODULE2_CATEGORIES}
             searchId="fde-module-2-search"
           />
@@ -100,6 +101,7 @@ function ForwardDeploymentEngineerModule() {
       ) : mod.id === 3 ? (
         <section className="fde-module-lesson-workspace">
           <FDEPythonCourse
+            key={mod.id}
             concepts={ragModuleConcepts}
             searchId="fde-module-3-search"
           />
@@ -107,6 +109,7 @@ function ForwardDeploymentEngineerModule() {
       ) : mod.id === 4 ? (
         <section className="fde-module-lesson-workspace">
           <FDEPythonCourse
+            key={mod.id}
             concepts={advancedRagFinetuneConcepts}
             searchId="fde-module-4-search"
           />
@@ -114,6 +117,7 @@ function ForwardDeploymentEngineerModule() {
       ) : mod.id === 5 ? (
         <section className="fde-module-lesson-workspace">
           <FDEPythonCourse
+            key={mod.id}
             concepts={agenticAiConcepts}
             searchId="fde-module-5-search"
           />
@@ -121,6 +125,7 @@ function ForwardDeploymentEngineerModule() {
       ) : mod.id === 6 ? (
         <section className="fde-module-lesson-workspace">
           <FDEPythonCourse
+            key={mod.id}
             concepts={llmOpsDeployConcepts}
             searchId="fde-module-6-search"
           />
