@@ -23,6 +23,8 @@ rules_version = '2';
 //                          customer_phone. Must be exactly 10 digits starting
 //                          with 6-9. Never required for sign-in or paid checks.
 //     date      timestamp  creation time (serverTimestamp), server-owned
+//   weekly/{email-prefix}  e.g. weekly/bharathbsk97
+//     week      map        zero-based week indexes to solved flags, e.g. {"0": true}
 //   pricing/{plan}         e.g. pricing/maang_kit — the fee shown on /payment,
 //                          read-only for clients
 //
@@ -134,6 +136,27 @@ service cloud.firestore {
           )
         );
 
+      allow delete: if false;
+    }
+
+    match /weekly/{userId} {
+      function ownsWeeklyDoc() {
+        return signedIn()
+          && request.auth.token.email is string
+          && userId == userId.lower()
+          && request.auth.token.email.lower().size() > userId.size()
+          && request.auth.token.email.lower()[0:userId.size()] == userId
+          && request.auth.token.email.lower()[userId.size():userId.size() + 1] == "@";
+      }
+
+      function validWeeklyProgress() {
+        return request.resource.data.keys().hasOnly(['week'])
+          && request.resource.data.week is map
+          && request.resource.data.week.size() <= 500;
+      }
+
+      allow read: if ownsWeeklyDoc();
+      allow create, update: if ownsWeeklyDoc() && validWeeklyProgress();
       allow delete: if false;
     }
 

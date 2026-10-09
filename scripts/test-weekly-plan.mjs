@@ -1,14 +1,6 @@
 // Quick verification harness for the weekly plan (run: node scripts/test-weekly-plan.mjs)
 // Simulates: Week 1 (no previous week), Week 2 (mix of prev + this), the Week-1
 // boundary the swipe carousel clamps at, and the swipe-release decision itself.
-const store = new Map();
-globalThis.window = {
-  localStorage: {
-    getItem: (k) => (store.has(k) ? store.get(k) : null),
-    setItem: (k, v) => store.set(k, String(v)),
-  },
-};
-
 const {
   buildWeeklyPlan,
   courseWeekCount,
@@ -20,13 +12,6 @@ const {
   WEEK_SLOTS,
 } = await import("../src/maang/basic-dsa/weeklyPlan.js");
 
-function mondayOf(date) {
-  const d = new Date(date);
-  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
 // Fake bank of 40 problems: Basic(0-9) Advanced(10-19) DP(20-29) Graphs(30-39)
 const bank = Array.from({ length: 40 }, (_, i) => ({
   uid: `p${i}`,
@@ -35,10 +20,7 @@ const bank = Array.from({ length: 40 }, (_, i) => ({
 }));
 
 function weekWithStartOffset(weeksAgo, offset) {
-  const base = mondayOf(new Date());
-  base.setDate(base.getDate() - weeksAgo * 7);
-  store.set("maang-wp-start-monday", String(base.getTime()));
-  return buildWeeklyPlan(bank, offset);
+  return buildWeeklyPlan(bank, weeksAgo + offset);
 }
 
 let failures = 0;
@@ -63,7 +45,9 @@ const thisWeeks10 = w1.days
   .flatMap((d) => d.problems);
 const sun1Titles = sun1.problems.map((p) => p.title);
 const sun1Topics = sun1.problems.map((p) => p.topic);
-console.log(`  Sunday problems: ${sun1Titles.join(", ")} [${sun1Topics.join(", ")}]`);
+console.log(
+  `  Sunday problems: ${sun1Titles.join(", ")} [${sun1Topics.join(", ")}]`,
+);
 check(
   "both Sunday problems come from THIS week's 10",
   sun1.problems.every((p) => thisWeeks10.includes(p)),
@@ -94,8 +78,8 @@ const w2 = weekWithStartOffset(1, 0);
 check("weekNo is 2", w2.weekNo === 2);
 check("can go to prev week", w2.canGoPrev === true);
 const sun2 = w2.days.find((d) => d.key === "sun");
-const w2prev10 = weekWithStartOffset(1, -1).days
-  .filter((d) => d.type === "practice")
+const w2prev10 = weekWithStartOffset(1, -1)
+  .days.filter((d) => d.type === "practice")
   .flatMap((d) => d.problems);
 const w2cur10 = w2.days
   .filter((d) => d.type === "practice")
@@ -131,12 +115,18 @@ console.log("\n=== SWIPE BOUNDARY (clamp at Week 1, never inert) ===");
 // reachable destination, i.e. it clamps to Week 1 instead of being disabled.
 const freshW1 = weekWithStartOffset(0, 0);
 check("fresh learner: minOffset is 0 (Week 1 floor)", freshW1.minOffset === 0);
-check("fresh learner: canGoPrev is false at the floor", freshW1.canGoPrev === false);
+check(
+  "fresh learner: canGoPrev is false at the floor",
+  freshW1.canGoPrev === false,
+);
 const freshClamped = weekWithStartOffset(
   0,
   Math.max(freshW1.minOffset, -1), // component clamp: max(w - 1, minOffset)
 );
-check("fresh learner: clicking back stays on Week 1", freshClamped.weekNo === 1);
+check(
+  "fresh learner: clicking back stays on Week 1",
+  freshClamped.weekNo === 1,
+);
 check(
   "fresh learner: back never shows unreached topics",
   freshClamped.days
@@ -148,19 +138,25 @@ check(
 // Learner 4 weeks in: back must work and still stop at Week 1.
 const week4 = weekWithStartOffset(3, 0);
 check("Week 4: canGoPrev is true", week4.canGoPrev === true);
-check("Week 4: minOffset is -3 (back reaches Week 1)", week4.minOffset === -3);
-const week4Back = weekWithStartOffset(3, week4.minOffset);
+check("Week 4: minOffset is 0 (Week 1 floor)", week4.minOffset === 0);
+const week4Back = buildWeeklyPlan(bank, 0);
 check("Week 4: clamped back reaches Week 1", week4Back.weekNo === 1);
-check("Week 4: Week 1 floor reports canGoPrev false", week4Back.canGoPrev === false);
+check(
+  "Week 4: Week 1 floor reports canGoPrev false",
+  week4Back.canGoPrev === false,
+);
 const week4Mid = weekWithStartOffset(3, -1);
 check("Week 4: one step back is Week 3", week4Mid.weekNo === 3);
-check("Week 4: one step back still allows going back", week4Mid.canGoPrev === true);
+check(
+  "Week 4: one step back still allows going back",
+  week4Mid.canGoPrev === true,
+);
 
 // Offsets below the floor must be prevented by minOffset (they would wrap to
 // the far end of the bank and show topics the learner has never reached).
 check(
-  "offsets below the floor are blocked (minOffset floor = 0 or negative)",
-  week4.minOffset === -3 && freshW1.minOffset === 0,
+  "offsets below Week 1 clamp to Week 1",
+  buildWeeklyPlan(bank, -1).weekNo === 1,
 );
 
 // ---------- Swipe release → which week the carousel lands on ----------
@@ -172,7 +168,10 @@ const MID = 1; // index of the week on screen inside that window
 const THREE = 3;
 
 // A tap (or a vertical scroll) must never change the week.
-check("tap (3px) stays on the same week", resolveSwipeTarget(MID, 3, 0.05, W, THREE) === MID);
+check(
+  "tap (3px) stays on the same week",
+  resolveSwipeTarget(MID, 3, 0.05, W, THREE) === MID,
+);
 check(
   "small nudge (30px) stays on the same week",
   resolveSwipeTarget(MID, -30, 0.2, W, THREE) === MID,
@@ -225,24 +224,24 @@ check(
   "Week 1 floor (2 panes) cannot go before the start",
   resolveSwipeTarget(0, 600, 1, W, 2) === 0,
 );
-check("single pane → nothing to change", resolveSwipeTarget(0, -600, -1, W, 1) === 0);
+check(
+  "single pane → nothing to change",
+  resolveSwipeTarget(0, -600, -1, W, 1) === 0,
+);
 check(
   "swiping forward at Week 1 still works",
   resolveSwipeTarget(0, -600, -1, W, 2) === 1,
 );
 
 // ---------- Week picker (the dropdown in the weekly header) ----------
-// Swiping walks one week at a time, so going back to Week 1 from Week 5 needs
-// four swipes — the picker jumps. What it lists has to satisfy two things:
-//   • every course week the bank can fill (Week 1 → the last week with fresh
-//     material), and
-//   • the week currently on screen, ALWAYS — the plan wraps around after the
-//     last week, and a <select> whose value has no matching <option> renders
-//     blank, which would look broken.
+// The picker lists only weeks already solved and the next active week.
 console.log("\n=== WEEK PICKER (dropdown) ===");
 check("WEEK_SLOTS is 10 (5 learn days × 2 problems)", WEEK_SLOTS === 10);
 check("40-problem bank → 4 course weeks", courseWeekCount(bank) === 4);
-check("exactly 10 problems → 1 full week", courseWeekCount(bank.slice(0, 10)) === 1);
+check(
+  "exactly 10 problems → 1 full week",
+  courseWeekCount(bank.slice(0, 10)) === 1,
+);
 check(
   "11 problems → 2 weeks (last one partial)",
   courseWeekCount(bank.slice(0, 11)) === 2,
@@ -250,69 +249,105 @@ check(
 check("empty bank still offers Week 1", courseWeekCount([]) === 1);
 check("missing bank does not throw", courseWeekCount(undefined) === 1);
 
-// Week number ⇄ plan offset (offset 0 = the week the learner is on).
+// Week number ⇄ absolute, zero-based course index.
 check("fresh learner: Week 1 is offset 0", weekNoForOffset(0, 0) === 1);
-check("Week 5 learner: offset 0 IS Week 5", weekNoForOffset(0, -4) === 5);
-check("Week 5 learner: Week 1 is offset -4", offsetForWeekNo(1, -4) === -4);
+check("Week 5: index 4 is Week 5", weekNoForOffset(4, 0) === 5);
+check("Week 1 has index 0", offsetForWeekNo(1, 0) === 0);
 check(
-  "weekNo ⇄ offset round-trips",
+  "weekNo ⇄ index round-trips",
   Array.from({ length: 12 }, (_, i) =>
-    offsetForWeekNo(weekNoForOffset(i, -4), -4),
+    offsetForWeekNo(weekNoForOffset(i, 0), 0),
   ).every((o, i) => o === i),
 );
 
-// Fresh learner: Week 1 → Week 4, and never anything before Week 1.
+// A new learner sees Week 1 only; the active week caps the picker.
 const freshPick = weekPickerOptions(bank, 0, 0);
 check(
-  "fresh learner is offered Week 1…Week 4",
-  freshPick.map((o) => o.weekNo).join(",") === "1,2,3,4",
+  "new learner is offered Week 1 only",
+  freshPick.map((o) => o.weekNo).join(",") === "1",
   JSON.stringify(freshPick),
 );
 check("fresh learner list starts at the floor", freshPick[0].offset === 0);
 check(
-  "options are unique, ascending and evenly spaced",
+  "unlocked options are unique and ascending",
   freshPick.every((o, i) => o.weekNo === i + 1 && o.offset === i),
 );
-
-// THE bug this guards against: a learner on Week 5 with a 4-week bank has
-// swiped past the end — Week 5 must still be in the list (selected), and Week 1
-// must still be reachable in one tap.
-const pastEnd = weekPickerOptions(bank, -4, 0);
+const unlockedThree = weekPickerOptions(bank, 0, 2);
 check(
-  "Week 5 on a 4-week bank is still listed (no blank <select>)",
-  pastEnd.some((o) => o.weekNo === 5 && o.offset === 0),
-);
-check("…Week 5 list still starts at Week 1 (offset -4)", pastEnd[0].offset === -4);
-check(
-  "…every option is at or above the Week 1 floor",
-  pastEnd.every((o) => o.offset >= -4),
+  "three unlocked course weeks expose only Weeks 1–3",
+  unlockedThree.length === 3,
 );
 
-// The real weekly page bank (all four sheets merged) — 178 problems.
-const realBank = Array.from({ length: 178 }, (_, i) => ({
+// The real weekly page bank (all four sheets merged) — 185 problems.
+const realBank = Array.from({ length: 185 }, (_, i) => ({
   uid: `r${i}`,
   title: `R${i}`,
   topic: ["Basic", "Advanced", "DP", "Graphs"][Math.floor(i / 45)] || "Graphs",
 }));
-check("real 178-problem bank → 18 weeks", courseWeekCount(realBank) === 18);
-check("fresh learner is offered all 18 weeks", weekPickerOptions(realBank, 0, 0).length === 18);
+check(
+  "185-problem bank includes 3 revision weeks",
+  courseWeekCount(realBank) === 22,
+);
+check(
+  "new learner is offered Week 1 only",
+  weekPickerOptions(realBank, 0, 0).length === 1,
+);
 
-// Picker and planner must agree: choosing a week really opens that week.
-const week5Pick = weekPickerOptions(realBank, -4, 0);
-const week5Plan = weekWithStartOffset(4, 0); // learner 4 weeks in ⇒ Week 5
-check("picker floor matches the plan's minOffset", week5Pick[0].offset === week5Plan.minOffset);
-check("Week 5 learner still sees all 18 weeks", week5Pick.length === 18);
+// After the first five weeks are solved, Week 5 is the latest accessible week.
+const week5Pick = weekPickerOptions(realBank, 0, 4);
+const week5Plan = buildWeeklyPlan(realBank, 4);
+check(
+  "Week 5 is the last unlocked picker option",
+  week5Pick.at(-1).offset === week5Plan.weekIdx,
+);
+check("Week 5 learner sees only Weeks 1–5", week5Pick.length === 5);
 check(
   "every listed week opens exactly that week",
-  week5Pick.every((o) => weekWithStartOffset(4, o.offset).weekNo === o.weekNo),
+  week5Pick.every(
+    (o) => buildWeeklyPlan(realBank, o.offset).weekNo === o.weekNo,
+  ),
 );
 check(
   "jumping back to Week 1 lands on Week 1",
-  weekWithStartOffset(4, week5Pick[0].offset).weekNo === 1,
+  buildWeeklyPlan(realBank, week5Pick[0].offset).weekNo === 1,
 );
 check(
-  "…and Week 1 from Week 5 has no earlier week",
-  weekWithStartOffset(4, week5Pick[0].offset).canGoPrev === false,
+  "Week 1 has no earlier week",
+  buildWeeklyPlan(realBank, week5Pick[0].offset).canGoPrev === false,
+);
+
+// Week 6 is a stable unique revision set from the previous five study weeks.
+const reviewBank = Array.from({ length: 60 }, (_, i) => ({
+  uid: `review-${i}`,
+  title: `Review ${i}`,
+}));
+const reviewPlan = buildWeeklyPlan(reviewBank, 5);
+const reviewQuestions = reviewPlan.days
+  .filter((day) => day.type === "practice")
+  .flatMap((day) => day.problems);
+check(
+  "six study weeks add a Week 6 revision week",
+  courseWeekCount(reviewBank) === 7,
+);
+check("Week 6 is marked as a revision week", reviewPlan.isRevision === true);
+check("revision questions are unique", new Set(reviewQuestions).size === 10);
+check(
+  "revision draws from the previous five study weeks",
+  reviewQuestions.every((problem) => Number(problem.uid.split("-")[1]) < 50),
+);
+check(
+  "revision questions are stable across rebuilds",
+  JSON.stringify(reviewQuestions.map((problem) => problem.uid)) ===
+    JSON.stringify(
+      buildWeeklyPlan(reviewBank, 5)
+        .days.filter((day) => day.type === "practice")
+        .flatMap((day) => day.problems)
+        .map((problem) => problem.uid),
+    ),
+);
+check(
+  "Week 7 resumes with new material",
+  buildWeeklyPlan(reviewBank, 6).days[0].problems[0].uid === "review-50",
 );
 
 console.log(

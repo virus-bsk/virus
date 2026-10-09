@@ -1,4 +1,5 @@
 ﻿import {
+  useEffect,
   memo,
   useCallback,
   useLayoutEffect,
@@ -7,10 +8,15 @@
   useState,
 } from "react";
 import { Link } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebase";
 import VideoPlayerModal from "../../components/VideoPlayerModal";
+import { setDocument, subscribeDocument } from "../../utils/firestore";
+import { userDocId } from "../../utils/userProfile";
 import { dsaBasicProblems as BASIC_PROBLEMS } from "./dsaBasicProblems";
 import {
   buildWeeklyPlan,
+  courseWeekCount,
   resolveSwipeTarget,
   saturdayAssessment,
   sundayAssessment,
@@ -70,26 +76,27 @@ const ProblemCard = memo(function ProblemCard({
     problem.description ||
     "Practice this problem and build stronger algorithmic thinking with a focused DSA approach.";
 
-  const difficultyLong = problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1);
+  const difficultyLong =
+    problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1);
   const difficultyLabel = difficultyLong === "Hard" ? "HARD" : difficultyLong;
   const platformColors =
     problem.platform === "leetcode"
       ? { bg: "linear-gradient(135deg,#f59e0b,#d97706)", text: "#ffffff" }
       : problem.platform === "gfg"
-      ? { bg: "linear-gradient(135deg,#22c55e,#16a34a)", text: "#ffffff" }
-      : { bg: "linear-gradient(135deg,#ef4444,#dc2626)", text: "#ffffff" };
+        ? { bg: "linear-gradient(135deg,#22c55e,#16a34a)", text: "#ffffff" }
+        : { bg: "linear-gradient(135deg,#ef4444,#dc2626)", text: "#ffffff" };
   const platformLabel =
     problem.platform === "leetcode"
       ? "LeetCode"
       : problem.platform === "gfg"
-      ? "GFG"
-      : "YouTube";
+        ? "GFG"
+        : "YouTube";
   const platformLogo =
     problem.platform === "leetcode"
       ? leetcodeLogo
       : problem.platform === "gfg"
-      ? gfgLogo
-      : youtubeLogo;
+        ? gfgLogo
+        : youtubeLogo;
 
   return (
     <div
@@ -137,11 +144,7 @@ const ProblemCard = memo(function ProblemCard({
               onOpen(problem);
             }}
           >
-            <img
-              className="mdsa-video-logo"
-              src={youtubeLogo}
-              alt="YouTube"
-            />
+            <img className="mdsa-video-logo" src={youtubeLogo} alt="YouTube" />
             <span className="mdsa-solve-text">YouTube</span>
           </button>
         ) : (
@@ -150,11 +153,7 @@ const ProblemCard = memo(function ProblemCard({
             title="Video coming soon"
             aria-disabled="true"
           >
-            <img
-              className="mdsa-video-logo"
-              src={youtubeLogo}
-              alt="YouTube"
-            />
+            <img className="mdsa-video-logo" src={youtubeLogo} alt="YouTube" />
             <span className="mdsa-solve-text">Soon</span>
           </span>
         )}
@@ -210,6 +209,13 @@ const WeekPane = memo(function WeekPane({
   isCurrent,
 }) {
   const todayJsDay = new Date().getDay();
+  const assessmentBank = plan.isRevision
+    ? plan.days
+        .filter((day) => day.type === "practice")
+        .flatMap((day) => day.problems)
+        .filter(Boolean)
+    : problems;
+  const assessmentWeekIdx = plan.isRevision ? 0 : plan.studyWeekIdx;
 
   return (
     <div className="mdsa-wp-pane" inert={isCurrent ? undefined : true}>
@@ -231,11 +237,15 @@ const WeekPane = memo(function WeekPane({
         } else if (!shown) {
           dayProblems = [];
         } else if (day.key === "sat") {
-          dayProblems = saturdayAssessment(problems, plan.weekIdx, revealInfo.nonce);
+          dayProblems = saturdayAssessment(
+            assessmentBank,
+            assessmentWeekIdx,
+            revealInfo.nonce,
+          );
         } else {
           dayProblems = sundayAssessment(
-            problems,
-            plan.weekIdx,
+            assessmentBank,
+            assessmentWeekIdx,
             revealInfo.nonce,
           ).problems;
         }
@@ -243,7 +253,9 @@ const WeekPane = memo(function WeekPane({
         return (
           <article
             key={day.key}
-            className={`mdsa-wp-day ${day.type}${isToday ? " today" : ""}${
+            className={`mdsa-wp-day ${day.type}${
+              plan.isRevision && day.type === "practice" ? " revision" : ""
+            }${isToday ? " today" : ""}${
               isAssessment ? " mdsa-wp-day-assess" : ""
             }`}
           >
@@ -252,7 +264,9 @@ const WeekPane = memo(function WeekPane({
               <h3 className="mdsa-wp-day-name">{day.name}</h3>
               <span className={`mdsa-wp-tag ${day.type}`}>
                 {day.type === "practice"
-                  ? "Learn · 2 new"
+                  ? plan.isRevision
+                    ? "Review · 2 random"
+                    : "Learn · 2 new"
                   : day.type === "test-week"
                     ? "Assessment · this week"
                     : "Assessment · prev + this"}
@@ -361,6 +375,70 @@ function DsaSheetPage({
   const [selectedTopic, setSelectedTopic] = useState("All");
   const [selectedDifficulty, setSelectedDifficulty] = useState("All");
   const [weekOffset, setWeekOffset] = useState(0);
+  const [firebaseUser, setFirebaseUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [solvedWeeks, setSolvedWeeks] = useState([]);
+  const [progressLoaded, setProgressLoaded] = useState(false);
+  const [progressError, setProgressError] = useState("");
+  const [savingWeek, setSavingWeek] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
+      setAuthReady(true);
+      setSolvedWeeks([]);
+      const hasEmail = Boolean(user?.email?.includes("@"));
+      setProgressError(
+        user && !hasEmail
+          ? "Your account needs an email address to save progress."
+          : "",
+      );
+      setProgressLoaded(!user || !hasEmail);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!showWeeklyPlan || !authReady || !firebaseUser) return undefined;
+
+    const userId = userDocId(firebaseUser);
+    if (!userId || !firebaseUser.email?.includes("@")) return undefined;
+
+    let active = true;
+    const unsubscribe = subscribeDocument(
+      `weekly/${userId}`,
+      (document, error) => {
+        if (!active) return;
+        if (error) {
+          setSolvedWeeks([]);
+          setProgressError(
+            "Weekly progress could not be loaded from Firebase.",
+          );
+        } else {
+          const weeks = Array.isArray(document?.week)
+            ? document.week.filter(
+                (week) => Number.isSafeInteger(week) && week >= 0,
+              )
+            : document?.week && typeof document.week === "object"
+              ? Object.entries(document.week)
+                  .filter(
+                    ([week, solved]) =>
+                      solved === true && /^(0|[1-9]\d*)$/.test(week),
+                  )
+                  .map(([week]) => Number(week))
+              : [];
+          setSolvedWeeks(weeks);
+          setProgressError("");
+        }
+        setProgressLoaded(true);
+      },
+    );
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [showWeeklyPlan, authReady, firebaseUser]);
 
   // Saturday/Sunday assessment questions are HIDDEN by default and only shown
   // when the learner taps the reveal button. Each reveal/"get new questions"
@@ -449,12 +527,70 @@ function DsaSheetPage({
     setSelectedKey((prev) => (prev === key ? null : key));
   }, []);
 
+  const solvedWeekSet = new Set(solvedWeeks);
+  let nextUnlockedWeek = 0;
+  while (solvedWeekSet.has(nextUnlockedWeek)) nextUnlockedWeek += 1;
+  const maxAccessibleWeekIdx = Math.min(
+    nextUnlockedWeek,
+    courseWeekCount(problems) - 1,
+  );
+  const activeWeekOffset = Math.min(
+    Math.max(weekOffset, 0),
+    maxAccessibleWeekIdx,
+  );
+
   // Weekly preparation schedule (Mon–Fri learn · Sat/Sun assessments).
   // Only rendered on pages that opt in via showWeeklyPlan.
   const weeklyPlan = useMemo(
-    () => (showWeeklyPlan ? buildWeeklyPlan(problems, weekOffset) : null),
-    [showWeeklyPlan, problems, weekOffset],
+    () => (showWeeklyPlan ? buildWeeklyPlan(problems, activeWeekOffset) : null),
+    [showWeeklyPlan, problems, activeWeekOffset],
   );
+
+  const weekSolved = solvedWeekSet.has(activeWeekOffset);
+
+  const toggleWeekSolved = useCallback(async () => {
+    if (!firebaseUser || !progressLoaded || progressError || savingWeek) return;
+
+    const userId = userDocId(firebaseUser);
+    if (!userId || !firebaseUser.email?.includes("@")) return;
+
+    setSavingWeek(true);
+    setProgressError("");
+    const result = await setDocument(
+      `weekly/${userId}`,
+      { week: { [activeWeekOffset]: !weekSolved } },
+      { merge: true },
+    );
+
+    if (!result.ok) {
+      setProgressError("Weekly progress could not be saved to Firebase.");
+      setSavingWeek(false);
+      return;
+    }
+
+    setSolvedWeeks((current) =>
+      weekSolved
+        ? current.filter((week) => week !== activeWeekOffset)
+        : [...new Set([...current, activeWeekOffset])].sort((a, b) => a - b),
+    );
+    if (
+      !weekSolved &&
+      activeWeekOffset === maxAccessibleWeekIdx &&
+      activeWeekOffset < courseWeekCount(problems) - 1
+    ) {
+      setWeekOffset(activeWeekOffset + 1);
+    }
+    setSavingWeek(false);
+  }, [
+    firebaseUser,
+    progressLoaded,
+    progressError,
+    savingWeek,
+    weekSolved,
+    activeWeekOffset,
+    maxAccessibleWeekIdx,
+    problems,
+  ]);
 
   // Reveal / re-roll one assessment day of one week. The nonce is fresh on every
   // tap so the questions change while the RULES stay identical. The week index
@@ -471,21 +607,21 @@ function DsaSheetPage({
     });
   }, []);
 
-  // Week 1 is the floor — the earliest week the carousel may land on. It is a
-  // clamp rather than a `disabled` control, so a swipe (or ←) at Week 1 simply
-  // stays put instead of hitting a dead, unclickable button.
+  // Navigation includes solved history and the next active week only.
   const planMinOffset = weeklyPlan ? weeklyPlan.minOffset : 0;
+  const planMaxOffset = weeklyPlan ? maxAccessibleWeekIdx : 0;
 
   // Panes = the week on screen plus one neighbour on each side (2 panes at the
   // floor). Rendering the neighbours is what lets the next/previous week slide
   // into view while the finger is still moving.
   const paneOffsets = useMemo(() => {
     if (!weeklyPlan) return [];
-    const first = Math.max(planMinOffset, weekOffset - 1);
+    const first = Math.max(planMinOffset, activeWeekOffset - 1);
+    const last = Math.min(planMaxOffset, activeWeekOffset + 1);
     const offsets = [];
-    for (let o = first; o <= weekOffset + 1; o += 1) offsets.push(o);
+    for (let o = first; o <= last; o += 1) offsets.push(o);
     return offsets;
-  }, [weeklyPlan, weekOffset, planMinOffset]);
+  }, [weeklyPlan, activeWeekOffset, planMinOffset, planMaxOffset]);
 
   const panePlans = useMemo(() => {
     if (!weeklyPlan) return [];
@@ -493,44 +629,47 @@ function DsaSheetPage({
       offset,
       // The week on screen reuses the plan memoised above; neighbours are built
       // on demand (buildWeeklyPlan is deterministic and cheap).
-      plan: offset === weekOffset ? weeklyPlan : buildWeeklyPlan(problems, offset),
+      plan:
+        offset === activeWeekOffset
+          ? weeklyPlan
+          : buildWeeklyPlan(problems, offset),
     }));
-  }, [weeklyPlan, paneOffsets, weekOffset, problems]);
+  }, [weeklyPlan, paneOffsets, activeWeekOffset, problems]);
 
   // Where the week on screen sits among the rendered panes.
-  const currentPaneIndex = Math.max(0, paneOffsets.indexOf(weekOffset));
+  const currentPaneIndex = Math.max(0, paneOffsets.indexOf(activeWeekOffset));
 
-  // The week dropdown: every course week the bank can fill (Week 1 → the last
-  // week with new material), plus the week on screen if the learner has swiped
-  // past that point — the plan wraps there and a <select> whose value has no
-  // option would render blank. Swiping walks one week at a time; this jumps.
+  // The week picker offers solved weeks and the next active week.
   const weekChoices = useMemo(
     () =>
-      weeklyPlan ? weekPickerOptions(problems, planMinOffset, weekOffset) : [],
-    [weeklyPlan, problems, planMinOffset, weekOffset],
+      weeklyPlan
+        ? weekPickerOptions(problems, planMinOffset, planMaxOffset)
+        : [],
+    [weeklyPlan, problems, planMinOffset, planMaxOffset],
   );
 
-  // Jump to an absolute week offset (clamped at Week 1) — used by the keyboard.
+  // Jump to an absolute course week within the unlocked range.
   const goToWeek = useCallback(
-    (offset) => setWeekOffset(Math.max(offset, planMinOffset)),
-    [planMinOffset],
+    (offset) =>
+      setWeekOffset(Math.min(Math.max(offset, planMinOffset), planMaxOffset)),
+    [planMinOffset, planMaxOffset],
   );
 
-  // Keyboard parity with the swipe: ← / → change week, Home returns to today.
+  // Keyboard parity with the swipe: ← / → change week, Home returns to Week 1.
   const onCarouselKeyDown = useCallback(
     (e) => {
       if (e.key === "ArrowLeft") {
         e.preventDefault();
-        goToWeek(weekOffset - 1);
+        goToWeek(activeWeekOffset - 1);
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
-        goToWeek(weekOffset + 1);
+        goToWeek(activeWeekOffset + 1);
       } else if (e.key === "Home") {
         e.preventDefault();
         goToWeek(0);
       }
     },
-    [goToWeek, weekOffset],
+    [goToWeek, activeWeekOffset],
   );
 
   // Keep the measured pane width fresh (resize, rotation, zoom).
@@ -609,7 +748,7 @@ function DsaSheetPage({
           const offset = paneOffsets[targetIndex];
           // Changing the week re-renders the panes; the layout effect above
           // then re-centres the rail on the new middle pane without animating.
-          if (offset !== undefined && offset !== weekOffset) {
+          if (offset !== undefined && offset !== activeWeekOffset) {
             setWeekOffset(offset);
           }
         };
@@ -656,7 +795,8 @@ function DsaSheetPage({
         if (!gesture.moved) {
           // Only take the gesture over once it is clearly a horizontal drag, so
           // taps and vertical page scrolling keep behaving exactly as before.
-          if (Math.abs(dx) < DRAG_START_PX || Math.abs(dx) <= Math.abs(dy)) return;
+          if (Math.abs(dx) < DRAG_START_PX || Math.abs(dx) <= Math.abs(dy))
+            return;
           gesture.moved = true;
           suppressClickRef.current = true;
           setIsDragging(true);
@@ -672,7 +812,8 @@ function DsaSheetPage({
 
         // Rubber-band when there is no week in that direction (Week 1 floor),
         // so the boundary is felt instead of looking broken.
-        const hasNeighbour = dx < 0 ? index < paneOffsets.length - 1 : index > 0;
+        const hasNeighbour =
+          dx < 0 ? index < paneOffsets.length - 1 : index > 0;
         place(-index * paneWidth + (hasNeighbour ? dx : dx * OVERDRAG_DAMPING));
       };
 
@@ -726,7 +867,7 @@ function DsaSheetPage({
       window.addEventListener("pointercancel", onCancel);
       window.addEventListener("blur", onWindowBlur);
     },
-    [currentPaneIndex, paneOffsets, paneWidth, weekOffset],
+    [currentPaneIndex, paneOffsets, paneWidth, activeWeekOffset],
   );
 
   // Swallow the click a finished drag would otherwise fire on the card beneath.
@@ -753,22 +894,32 @@ function DsaSheetPage({
         </Link>
 
         {/* Horizontal stats line */}
-        <div className="mdsa-stats-line" role="list" aria-label="Course statistics">
+        <div
+          className="mdsa-stats-line"
+          role="list"
+          aria-label="Course statistics"
+        >
           <span className="mdsa-stat-item" role="listitem">
             <span className="mdsa-stat-num">{total}</span>
             <span className="mdsa-stat-label">Total</span>
           </span>
-          <span className="mdsa-stats-separator" aria-hidden="true">•</span>
+          <span className="mdsa-stats-separator" aria-hidden="true">
+            •
+          </span>
           <span className="mdsa-stat-item" role="listitem">
             <span className="mdsa-stat-num mdsa-stat-easy">{easy}</span>
             <span className="mdsa-stat-label">Easy</span>
           </span>
-          <span className="mdsa-stats-separator" aria-hidden="true">•</span>
+          <span className="mdsa-stats-separator" aria-hidden="true">
+            •
+          </span>
           <span className="mdsa-stat-item" role="listitem">
             <span className="mdsa-stat-num mdsa-stat-medium">{medium}</span>
             <span className="mdsa-stat-label">Medium</span>
           </span>
-          <span className="mdsa-stats-separator" aria-hidden="true">•</span>
+          <span className="mdsa-stats-separator" aria-hidden="true">
+            •
+          </span>
           <span className="mdsa-stat-item" role="listitem">
             <span className="mdsa-stat-num mdsa-stat-hard">{hard}</span>
             <span className="mdsa-stat-label">Hard</span>
@@ -791,19 +942,46 @@ function DsaSheetPage({
       {weeklyPlan && (
         <section className="mdsa-wp">
           <div className="mdsa-wp-header">
-            <h2 className="mdsa-section-title" aria-live="polite">
-              Week {weeklyPlan.weekNo}
-            </h2>
-            {/* Explicit week picker. The plan is still the selector (drag it
-                sideways), but swiping walks one week at a time — going back to
-                Week 1 from Week 5 would take four swipes, so this jumps
-                straight to any week. The pill is only decoration: the control
-                is an invisible <select> stretched over all of it (see
-                `.mdsa-wp-week-select-input`), so a click ANYWHERE on the pill
-                opens the list. NOT a <label> wrapping the <select> — clicking a
-                label merely focuses a select, it never opens it, so the list
-                only appeared when the pointer hit the few pixels of select
-                text. */}
+            <div className="mdsa-wp-title-row">
+              <h2 className="mdsa-section-title" aria-live="polite">
+                Week {weeklyPlan.weekNo}
+                {weeklyPlan.isRevision ? " · Revision" : ""}
+              </h2>
+              <button
+                type="button"
+                className={`mdsa-wp-progress-toggle${weekSolved ? " is-solved" : ""}`}
+                aria-pressed={weekSolved}
+                aria-label={
+                  weekSolved ? "Mark week not solved" : "Mark week solved"
+                }
+                disabled={
+                  !authReady ||
+                  !firebaseUser ||
+                  !progressLoaded ||
+                  Boolean(progressError) ||
+                  savingWeek
+                }
+                onClick={toggleWeekSolved}
+              >
+                {!authReady || (firebaseUser && !progressLoaded)
+                  ? "Loading status…"
+                  : savingWeek
+                    ? "Saving…"
+                    : weekSolved
+                      ? "✓ Solved"
+                      : "Not solved"}
+              </button>
+            </div>
+            {!firebaseUser && authReady && (
+              <Link className="mdsa-wp-sign-in" to="/login">
+                Sign in to save weekly progress
+              </Link>
+            )}
+            {progressError && (
+              <p className="mdsa-wp-progress-error" role="alert">
+                {progressError}
+              </p>
+            )}
             {weekChoices.length > 1 && (
               <div className="mdsa-wp-week-select">
                 <span className="mdsa-wp-week-select-label" aria-hidden="true">
@@ -812,13 +990,17 @@ function DsaSheetPage({
                 <select
                   className="mdsa-wp-week-select-input"
                   aria-label={`Jump to week — currently week ${weeklyPlan.weekNo}`}
-                  value={weekOffset}
+                  value={activeWeekOffset}
                   onChange={(e) => goToWeek(Number(e.target.value))}
                 >
                   {weekChoices.map(({ weekNo, offset }) => (
                     <option key={weekNo} value={offset}>
                       Week {weekNo}
-                      {offset === 0 ? " · this week" : ""}
+                      {offset === activeWeekOffset
+                        ? " · current"
+                        : solvedWeekSet.has(offset)
+                          ? " · solved"
+                          : " · next"}
                     </option>
                   ))}
                 </select>
@@ -852,16 +1034,15 @@ function DsaSheetPage({
                   selectedKey={selectedKey}
                   onSelect={selectCard}
                   onReveal={rollAssessment}
-                  isCurrent={offset === weekOffset}
+                  isCurrent={offset === activeWeekOffset}
                 />
               ))}
             </div>
           </div>
-          {weekOffset !== 0 && (
+          {activeWeekOffset !== 0 && (
             <p className="mdsa-wp-note">
-              You're viewing a different week — pick any week from the list
-              above, or drag the plan to the right (← / Home) to walk back to
-              today.
+              You're viewing a different course week. Return to the current week
+              with the picker above or press Home.
             </p>
           )}
         </section>

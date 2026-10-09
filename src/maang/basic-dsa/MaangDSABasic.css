@@ -167,7 +167,9 @@
   transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 0, 0, 0.45);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 0, 0, 0.25);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 0, 0, 0.25);
   filter: none;
 }
 .mdsa-intro-logo {
@@ -196,7 +198,9 @@
 .mdsa-video-arrow {
   font-size: 1.1rem;
   color: rgba(240, 244, 255, 0.5);
-  transition: transform 0.25s ease, color 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    color 0.25s ease;
   margin-left: 4px;
 }
 .mdsa-intro-video:hover .mdsa-video-arrow {
@@ -1246,6 +1250,63 @@ html[data-theme="dark"] .mdsa-solve-btn[data-platform="youtube"] {
   margin: 0;
 }
 
+.mdsa-wp-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.mdsa-wp-progress-toggle {
+  min-height: 38px;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid #d97706;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.mdsa-wp-progress-toggle:hover:not(:disabled) {
+  background: #fef3c7;
+}
+
+.mdsa-wp-progress-toggle.is-solved {
+  border-color: #059669;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.mdsa-wp-progress-toggle.is-solved:hover:not(:disabled) {
+  background: #d1fae5;
+}
+
+.mdsa-wp-progress-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.mdsa-wp-sign-in {
+  color: #075985;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.mdsa-wp-progress-error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 /* ===== Swipe / drag week carousel =======================================
    The plan ITSELF is the week selector now: the day cards follow the mouse,
    finger or pen, and the rail snaps to the nearest week when you let go.
@@ -1460,6 +1521,10 @@ html[data-theme="dark"] .mdsa-solve-btn[data-platform="youtube"] {
   box-shadow: none;
 }
 
+.mdsa-wp-day.revision {
+  --day-accent: #0891b2;
+}
+
 /* Day content sits directly on the page (no layers needed anymore) */
 .mdsa-wp-day-head,
 .mdsa-wp-day-problems {
@@ -1542,6 +1607,12 @@ html[data-theme="dark"] .mdsa-solve-btn[data-platform="youtube"] {
   background: color-mix(in srgb, var(--day-accent, #7dd3fc) 18%, transparent);
   border: 1px solid
     color-mix(in srgb, var(--day-accent, #7dd3fc) 45%, transparent);
+}
+
+.mdsa-wp-tag.practice.revision {
+  color: #0e7490;
+  background: rgba(8, 145, 178, 0.12);
+  border-color: rgba(8, 145, 178, 0.45);
 }
 /* Saturday assessment on this week's material — amber */
 .mdsa-wp-tag.test-week {
@@ -1846,4 +1917,3 @@ button.mdsa-video-btn:focus-visible {
   padding-left: 1.5rem;
   padding-right: 1.5rem;
 }
-

@@ -9,6 +9,7 @@
 //                   (on Week 1 there is no last week — Sunday then tests
 //                    2 problems from THIS week instead of wrapping to the
 //                    end of the bank, which would show unreached topics)
+//   • Every 5 study weeks, one revision week randomly revisits those 5 weeks
 // Same course week number ⇒ exact same schedule (stable, no flicker on
 // re-render, safe across builds/servers).
 
@@ -47,52 +48,17 @@ export function seededPick(items, count, seedStr) {
   return arr.slice(0, Math.max(0, count));
 }
 
-/** Monday 00:00 (local) of the week containing `date`. */
-function mondayOf(date) {
-  const d = new Date(date);
-  d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); // Mon=0 … Sun=6
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
 // ---------------------------------------------------------------------------
 // Course-style week numbering ("Week 1", "Week 2", …)
 //
-// We deliberately do NOT show real calendar dates/ISO week numbers — those
-// feel wrong for a self-paced plan (someone logging in after a month would
-// see "Week 42 · Oct 12 – Oct 18" which means nothing to them).
-//
-// Instead, the very first visit records the user's start Monday in
-// localStorage and every week afterwards is numbered relative to that:
-//   first visit .......... Week 1
-//   following Monday ..... Week 2   (and so on, forever)
-// Navigation (swiping the plan sideways, ← / → , or picking a week from the
-// week dropdown) simply moves within the same numbering, and Week 1 is a hard
-// floor — nothing before the start. The dropdown is what makes a jump of more
-// than one week possible: it lists every course week the bank can fill.
+// These are self-paced course weeks, so completion status controls which
+// indexes are unlocked rather than calendar dates.
 // ---------------------------------------------------------------------------
-
-const START_WEEK_KEY = "maang-wp-start-monday";
-const DAY_MS_LOCAL = 24 * 60 * 60 * 1000;
 
 /** Problems handed out per course week (5 learn days × 2 problems). */
 export const WEEK_SLOTS = 10;
-
-function startMonday() {
-  try {
-    const stored = window.localStorage.getItem(START_WEEK_KEY);
-    if (stored && !Number.isNaN(Number(stored))) {
-      return mondayOf(new Date(Number(stored)));
-    }
-    // First visit — anchor the course to the current week.
-    const first = mondayOf(new Date());
-    window.localStorage.setItem(START_WEEK_KEY, String(first.getTime()));
-    return first;
-  } catch {
-    // Storage unavailable (private mode etc.) — fall back to current week.
-    return mondayOf(new Date());
-  }
-}
+export const REVIEW_INTERVAL_WEEKS = 5;
+const TIMELINE_CYCLE_WEEKS = REVIEW_INTERVAL_WEEKS + 1;
 
 /**
  * The 10 problem slots assigned to the given course week index. Slots are
@@ -107,6 +73,37 @@ function slotsForWeek(order, weekIdx) {
     out.push(order[idx]);
   }
   return out;
+}
+
+function isRevisionWeek(weekIdx) {
+  return weekIdx > 0 && (weekIdx + 1) % TIMELINE_CYCLE_WEEKS === 0;
+}
+
+function studyWeekIndex(weekIdx) {
+  return weekIdx - Math.floor(weekIdx / TIMELINE_CYCLE_WEEKS);
+}
+
+function revisionProblems(order, weekIdx) {
+  const revisionCycle = Math.floor(weekIdx / TIMELINE_CYCLE_WEEKS);
+  const firstStudyWeek = (revisionCycle + 1) * REVIEW_INTERVAL_WEEKS;
+  const pool = [];
+  for (
+    let studyIdx = firstStudyWeek - REVIEW_INTERVAL_WEEKS;
+    studyIdx < firstStudyWeek;
+    studyIdx += 1
+  ) {
+    pool.push(...slotsForWeek(order, studyIdx));
+  }
+
+  const unique = [
+    ...new Map(
+      pool.map((problem, index) => [
+        problem.uid ?? problem.id ?? `${problem.title}-${index}`,
+        problem,
+      ]),
+    ).values(),
+  ];
+  return seededPick(unique, WEEK_SLOTS, `revision-${weekIdx}-${order.length}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -125,11 +122,7 @@ function slotsForWeek(order, weekIdx) {
 export function saturdayAssessment(bank, weekIdx, nonce = 0) {
   const current = slotsForWeek(bank, weekIdx);
   const seedTail = nonce ? `-${nonce}` : "";
-  return seededPick(
-    current,
-    2,
-    `sat-${weekIdx}-${bank.length}${seedTail}`,
-  );
+  return seededPick(current, 2, `sat-${weekIdx}-${bank.length}${seedTail}`);
 }
 
 /**
@@ -159,16 +152,6 @@ export function sundayAssessment(bank, weekIdx, nonce = 0) {
 
 // ---------------------------------------------------------------------------
 // Swipe / drag carousel — deciding which week to land on
-//
-// The weekly plan is a horizontal carousel: the day cards follow the finger or
-// mouse, and on release the rail snaps to the nearest week. That release
-// decision is pure arithmetic, so it lives here (and is unit-tested in
-// scripts/test-weekly-plan.mjs) instead of hiding inside the component.
-//
-//   index ..... 0-based pane the gesture STARTED on
-//   dx ........ horizontal travel in px (negative = content moved LEFT)
-//   velocity .. px per ms at release (negative = moving left)
-//   width ..... carousel viewport width in px
 //   paneCount . panes currently rendered (2 at Week 1, otherwise 3)
 //
 // Returns the pane index to snap to — always inside the rendered panes, so a
@@ -219,39 +202,30 @@ export function offsetForWeekNo(weekNo, minOffset) {
   return minOffset + weekNo - 1;
 }
 
-/**
- * How many distinct course weeks the bank can fill. After this many weeks the
- * 10 slots per week start repeating earlier problems (see slotsForWeek), so
- * this is also the last week worth offering in the picker.
- */
+/** Number of course weeks including revision weeks. */
 export function courseWeekCount(bank) {
   if (!bank || bank.length === 0) return 1;
-  return Math.max(1, Math.ceil(bank.length / WEEK_SLOTS));
+  const studyWeeks = Math.max(1, Math.ceil(bank.length / WEEK_SLOTS));
+  return studyWeeks + Math.floor((studyWeeks - 1) / REVIEW_INTERVAL_WEEKS);
 }
 
-/**
- * The weeks the picker offers, ascending: [{ weekNo, offset }, …].
- *
- * Lists every distinct course week (Week 1 → the bank's last week) and ALWAYS
- * includes the week currently on screen, even if the learner has browsed past
- * the end of the bank: the plan wraps around there, and a <select> whose value
- * has no matching option renders blank.
- */
-export function weekPickerOptions(bank, minOffset, currentOffset = 0) {
-  const lastWeekNo = Math.max(
-    courseWeekCount(bank),
-    weekNoForOffset(currentOffset, minOffset),
+/** Return the course weeks allowed by the learner's progress. */
+export function weekPickerOptions(bank, minOffset = 0, maxOffset = 0) {
+  const lastOffset = Math.min(
+    courseWeekCount(bank) - 1,
+    Math.max(minOffset, maxOffset),
   );
   const options = [];
-  for (let weekNo = 1; weekNo <= lastWeekNo; weekNo += 1) {
+  for (let offset = minOffset; offset <= lastOffset; offset += 1) {
+    const weekNo = weekNoForOffset(offset, minOffset);
     options.push({ weekNo, offset: offsetForWeekNo(weekNo, minOffset) });
   }
   return options;
 }
 
 /**
- * Build the plan for `offset` weeks relative to the user's CURRENT course
- * week (0 = this week, -1 = last week, +1 = next week …).
+ * Build the plan for a zero-based course-week index. Firestore progress
+ * determines which week indexes the page allows the learner to open.
  *
  * Returns { weekNo, weekIdx, minOffset, canGoPrev, days[] } where each day is
  * { key, name, jsDay, type, problems[2] } and type is one of:
@@ -264,25 +238,22 @@ export function buildWeeklyPlan(bank, offset = 0, nonce = 0) {
   // Basic → Advanced → DP → Graphs (each sheet in its own sequence), so
   // practice moves through the course week by week in a sensible order.
   const order = bank;
-  const base = startMonday(); // Week 1 Monday (first-ever visit)
-  const thisMonday = mondayOf(new Date());
+  const minOffset = 0;
+  const maxIdx = courseWeekCount(order) - 1;
+  const targetIdx = Math.min(Math.max(Math.floor(offset), minOffset), maxIdx);
+  const revision = isRevisionWeek(targetIdx);
+  const studyIdx = revision ? null : studyWeekIndex(targetIdx);
+  const current = revision
+    ? revisionProblems(order, targetIdx)
+    : slotsForWeek(order, studyIdx);
 
-  // Whole weeks elapsed since the course started (round guards DST drift).
-  const currentIdx = Math.round((thisMonday.getTime() - base.getTime()) / (7 * DAY_MS_LOCAL));
-  const targetIdx = currentIdx + offset;
-
-  // Earliest week the learner may browse back to. Week 1 (the course start) is
-  // the floor, so the week-selector's back button always has a real
-  // destination: it CLAMPS here instead of rendering as an inert `disabled`
-  // button that ignores taps and looks broken. `currentIdx` is negative only
-  // when the stored start Monday sits in the future (clock/DST oddities) —
-  // then the floor is the week the learner is on, never before the course
-  // began (no wrap-around to unreached topics).
-  const minOffset = -Math.max(currentIdx, 0);
-
-  const current = slotsForWeek(order, targetIdx);
-
-  const PRACTICE_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  const PRACTICE_DAYS = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+  ];
   const days = PRACTICE_DAYS.map((name, i) => ({
     key: `p-${i}`,
     name,
@@ -291,22 +262,24 @@ export function buildWeeklyPlan(bank, offset = 0, nonce = 0) {
     problems: [current[i * 2], current[i * 2 + 1]],
   }));
 
-  // Saturday — assessment on THIS week's practice material (randomized per
-  // nonce; rules unchanged: 2 problems taken from this week's 10).
+  const assessmentBank = revision ? current : order;
+  const assessmentWeekIdx = revision ? 0 : studyIdx;
+
+  // Saturday — assessment on THIS week's practice material.
   days.push({
     key: "sat",
     name: "Saturday",
     jsDay: 6,
     type: "test-week",
-    problems: saturdayAssessment(order, targetIdx, nonce),
+    problems: saturdayAssessment(assessmentBank, assessmentWeekIdx, nonce),
   });
 
   // Sunday — retention test mixing LAST week + THIS week (randomized per
   // nonce; rules unchanged). Week 1 has no previous week so it falls back to
   // two problems from THIS week — no wrap-around to unreached topics.
   const { hasPrevWeek, problems: sunProblems } = sundayAssessment(
-    order,
-    targetIdx,
+    assessmentBank,
+    assessmentWeekIdx,
     nonce,
   );
   days.push({
@@ -314,15 +287,18 @@ export function buildWeeklyPlan(bank, offset = 0, nonce = 0) {
     name: "Sunday",
     jsDay: 0,
     type: "test-mixed",
-    hasPrevWeek,
+    hasPrevWeek: revision || hasPrevWeek,
     problems: sunProblems,
   });
 
   return {
-    weekNo: Math.max(1, targetIdx + 1), // course-style: starts at Week 1
-    weekIdx: targetIdx,                 // 0-based index for the assessment builders
-    minOffset,                          // earliest offset (Week 1) — clamp nav here
-    canGoPrev: offset > minOffset,      // nothing before Week 1
+    weekNo: targetIdx + 1,
+    weekIdx: targetIdx,
+    isRevision: revision,
+    studyWeekIdx: studyIdx,
+    minOffset,
+    maxOffset: maxIdx,
+    canGoPrev: targetIdx > minOffset,
     days,
   };
 }

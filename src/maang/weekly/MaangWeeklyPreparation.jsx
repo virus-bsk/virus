@@ -13,6 +13,7 @@ import { dsaProblems as graphProblems } from "../graph/dsaGraphProblems";
  *       – Sat     : assessment on THIS week's material (2 questions)
  *       – Sun     : retention test mixing LAST week + THIS week (2 questions;
  *                   on Week 1 both come from THIS week — no wrap-around)
+ *       – Every 5 study weeks: one randomized revision week from that block
  *   • Full browsable Problem Library (grouped by topic)
  *
  *   Basic DSA ..... 96 problems
@@ -20,7 +21,7 @@ import { dsaProblems as graphProblems } from "../graph/dsaGraphProblems";
  *   DP ............ 21 problems
  *   Graphs ........ 11 problems
  *   ---------------------------
- *   Total ......... 185 problems in one track
+ *   Total ......... 185 problems across 19 study + 3 revision weeks
  */
 
 // Tag every problem with a globally-unique id (`uid`) — the source files
