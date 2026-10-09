@@ -78,11 +78,14 @@
   overflow-x: auto;
 }
 
-/* Module 2 uses a single, full-width course workspace. */
+/* Module workspaces: centered fixed container like other course pages —
+   NOT full-bleed. Middle content caps at 1200px so top/bottom don't
+   stretch edge-to-edge while navbar stays untouched. */
 .fde-module-page-workspace {
   width: 100%;
-  max-width: none;
-  min-height: calc(100vh - 72px);
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 0;
   padding: 16px 24px 28px;
   display: flex;
   flex-direction: column;
@@ -167,9 +170,9 @@
   position: sticky;
   top: 12px;
   width: auto;
-  height: calc(100vh - 250px);
-  max-height: calc(100vh - 250px);
-  min-height: 360px;
+  height: auto;
+  max-height: 78vh;
+  min-height: 0;
 }
 
 .fde-module-page-workspace .fde-module-lesson-workspace .react-course-list {
@@ -181,8 +184,9 @@
 .fde-module-page-workspace
   .fde-module-lesson-workspace
   .react-course-detail {
-  height: calc(100vh - 250px);
-  min-height: 420px;
+  height: auto;
+  max-height: 78vh;
+  min-height: 0;
   overflow-y: auto;
   padding: clamp(22px, 3vw, 44px);
 }
