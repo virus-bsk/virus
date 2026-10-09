@@ -1,9 +1,11 @@
-// ===== Load Balancing — topic data =====
+﻿// ===== Load Balancing â€” topic data =====
 
 import {
   svgLoadBalancer,
   svgRoundRobin,
   svgLeastConnections,
+  svgForwardProxy,
+  svgReverseProxy,
 } from "./loadBalancingDiagrams";
 
 export const loadBalancingTopics = [
@@ -63,54 +65,43 @@ export const loadBalancingTopics = [
       "Still needs health checks",
       "Common default in many production LBs",
     ],
-  },  {
+  },
+  {
     id: "FWDPROXY",
-    name: "Forward Proxy",
-    icon: "🕵️",
-    tagline: "Sits in front of clients",
-    accent: "#1d4ed8",
-    meaning:
+    icon: "fa-user-secret",
+    title: "Forward Proxy",
+    sub: "Sits in front of clients",
+    desc: "A forward proxy sits between clients and the internet, forwarding requests on their behalf. Uses: content filtering, shared caching, anonymity, corporate egress control.",
+    definition:
       "A forward proxy sits between clients and the internet, forwarding client requests on their behalf. The server sees the proxy, not the client. Uses: content filtering, shared caching for many clients, anonymity, and corporate egress control.",
-    analogy:
-      "A personal assistant who makes all your phone calls: the other side talks to the assistant, never knowing who the real caller is. The assistant can also block certain numbers for you.",
-    sql: `Client -> Forward Proxy -> Internet
-(1..N)    (proxy IP seen)   (origin)
-
-# Who it serves?  CLIENTS
-# Who knows about it? clients
-
-# Uses
-- corporate egress: block sites,
-  log outbound traffic
-- shared caching for many clients
-- hide internal client identity
-# Examples: Squid, VPN/privacy proxies`,
+    videoLink: "https://www.youtube.com/watch?v=yzKnTtAD1WU",
+    diagram: svgForwardProxy,
+    relation: "Use a forward proxy to control and cache outbound client traffic.",
+    points: [
+      "Sits between clients and the internet",
+      "Server sees the proxy IP, not the client",
+      "Corporate egress: block sites, log outbound traffic",
+      "Shared caching for many clients",
+      "Examples: Squid, VPN and privacy proxies",
+    ],
   },
   {
     id: "REVPROXY",
-    name: "Reverse Proxy",
-    icon: "🛡️",
-    tagline: "Sits in front of servers",
-    accent: "#c2410c",
-    meaning:
-      "A reverse proxy sits in front of your servers and accepts all client traffic on their behalf. The client thinks it's talking to your app; actually the proxy terminates TLS, load-balances across backends, caches, compresses, rate-limits and shields servers from direct exposure. It's the standard first box in almost every system design.",
-    analogy:
-      "A company's front desk: visitors only know the company's main number (public address). The receptionist routes them to the right department, handles security checks, and never exposes employees' direct numbers.",
-    sql: `Internet -> Reverse Proxy -> backend1
-                            backend2
-                            backend3
-
-# Who it serves?  SERVERS
-# Client sees one public endpoint.
-
-# Responsibilities
-- TLS termination (certs in one place)
-- load balancing + health checks
-- caching & compression
-- rate limiting / WAF / DDoS shield
-- hide internal topology
-# Examples: Nginx, HAProxy, Envoy,
-  AWS ALB, Cloudflare`,
+    icon: "fa-shield-alt",
+    title: "Reverse Proxy",
+    sub: "Sits in front of servers",
+    desc: "A reverse proxy accepts all client traffic on behalf of your servers: TLS termination, load balancing, caching, compression, rate limiting and shielding backends.",
+    definition:
+      "A reverse proxy sits in front of your servers and accepts all client traffic on their behalf. The client thinks it is talking to your app; actually the proxy terminates TLS, load-balances across backends, caches, compresses, rate-limits and shields servers from direct exposure.",
+    videoLink: "https://www.youtube.com/watch?v=yzKnTtAD1WU",
+    diagram: svgReverseProxy,
+    relation: "Put a reverse proxy (NGINX, HAProxy, Envoy, ALB) in front of every public service.",
+    points: [
+      "Single public endpoint for clients",
+      "TLS termination in one place",
+      "Load balancing plus health checks",
+      "Caching, compression, rate limiting and WAF",
+      "Hides internal topology from the internet",
+    ],
   },
-
 ];

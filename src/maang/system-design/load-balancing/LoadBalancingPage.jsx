@@ -4,7 +4,8 @@ import "./LoadBalancingPage.css";
 import { loadBalancingTopics } from "./loadBalancingData";
 
 function LbCard({ topic, index, isActive, onClick }) {
-  const short = topic.desc.length > 120 ? topic.desc.slice(0, 120) + "..." : topic.desc;
+  const desc = topic.desc || "";
+  const short = desc.length > 120 ? desc.slice(0, 120) + "..." : desc;
   return (
     <article className={`lb-card ${isActive ? "active" : ""}`} onClick={() => onClick(topic.id)}>
       <div className="lb-card-head">
@@ -39,12 +40,16 @@ function LbDetail({ topic, onClose }) {
           <div className="lb-detail-grid">
             <div className="lb-info-box">
               <h3>Key points</h3>
-              <ul>{topic.points.map((p, i) => <li key={i}>{p}</li>)}</ul>
+              <ul>{(topic.points || []).map((p, i) => <li key={i}>{p}</li>)}</ul>
               <p><strong>Relation: </strong>{topic.relation}</p>
             </div>
             <div className="lb-code-box">
               <h3>Diagram</h3>
-              <div dangerouslySetInnerHTML={{ __html: topic.diagram() }} />
+              {typeof topic.diagram === "function" ? (
+                <div dangerouslySetInnerHTML={{ __html: topic.diagram() }} />
+              ) : (
+                <p>No diagram available.</p>
+              )}
             </div>
           </div>
         </div>
