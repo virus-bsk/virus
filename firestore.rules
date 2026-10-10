@@ -41,6 +41,13 @@ service cloud.firestore {
       return signedIn() ? request.auth.token.email : "";
     }
 
+    // The single admin account. Matched case-insensitively; used for the
+    // hidden admin console (list users, edit any user, change pricing).
+    function isAdmin() {
+      return signedIn()
+        && authEmail().lower() == 'bharathbsk97@gmail.com';
+    }
+
     match /users/{userId} {
       // NOTE: `read` (not just `get`) so single-document onSnapshot listeners
       // are allowed. The doc id is the caller's lowercased email prefix
@@ -63,7 +70,7 @@ service cloud.firestore {
       // squat) another account's document id — the email-field check is the
       // second layer for documents created before this binding existed.
       allow read: if ownsDoc() && (resource == null || (resource.data.email is string
-        && resource.data.email.lower() == authEmail().lower()));
+        && resource.data.email.lower() == authEmail().lower())) || isAdmin();
 
       // First sign-in (or the first /profile save): the client may create ONLY
       // its own document id, with the known profile fields and
@@ -137,6 +144,11 @@ service cloud.firestore {
         );
 
       allow delete: if false;
+
+      // Admin console: the single admin account may edit ANY user's fields
+      // (userName, mobileNumber, isPaid, orderId, paymentId) from the hidden
+      // console. Owner-only rules above still govern everyone else.
+      allow update: if isAdmin();
     }
 
     match /weekly/{userId} {
@@ -186,7 +198,9 @@ service cloud.firestore {
 
     match /pricing/{planId} {
       allow read: if signedIn();
-      allow write: if false;
+      // Only the admin may change pricing (label/amount/currency) from the
+      // hidden console; every other account is read-only here.
+      allow write: if isAdmin();
     }
   }
 }

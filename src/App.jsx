@@ -4,6 +4,7 @@ import "./App.css";
 import NavBar from "./components/NavBar";
 import ConfigBanner from "./components/ConfigBanner";
 import RequireAuth from "./components/RequireAuth";
+import RequireAdmin from "./components/RequireAdmin";
 import RequirePaid from "./components/RequirePaid";
 import ChangePasswordModal from "./components/ChangePasswordModal";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -211,6 +212,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Payment = lazy(() => import("./pages/Payment"));
 const ResumeBuilderPage = lazy(() => import("./pages/ResumeBuilderPage"));
 const FeaturesPage = lazy(() => import("./pages/FeaturesPage"));
+const Admin = lazy(() => import("./pages/Admin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Restores the original route after GitHub Pages 404 redirect.
@@ -759,6 +761,15 @@ function App() {
                     <RequirePaid>
                       <ResumeBuilderPage />
                     </RequirePaid>
+                  }
+                />
+                {/* Hidden admin console: unlinked, admin-email only (see RequireAdmin). */}
+                <Route
+                  path="/bsk-admin-97"
+                  element={
+                    <RequireAdmin>
+                      <Admin />
+                    </RequireAdmin>
                   }
                 />
                 {/* 404 */}

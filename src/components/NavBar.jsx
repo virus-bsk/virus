@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { getCurrentUser, logout } from "../utils/auth";
 import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { isAdminEmail } from "../utils/admin";
 import ColoredMaangText from "./ColoredMaangText";
 import bskimg from "../assets/bskimg.svg";
 
@@ -326,6 +327,22 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
                       <span className="profile-item-icon">🔒</span>
                       <span>Change Password</span>
                     </button>
+
+                    {isAdminEmail(user.email) && (
+                      <>
+                        <div className="profile-dropdown-divider" />
+                        <button
+                          className="profile-dropdown-item"
+                          onClick={() => {
+                            setProfileOpen(false);
+                            navigate("/bsk-admin-97");
+                          }}
+                        >
+                          <span className="profile-item-icon">🛡️</span>
+                          <span>Admin console</span>
+                        </button>
+                      </>
+                    )}
 
                     <div className="profile-dropdown-divider" />
 
