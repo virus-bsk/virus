@@ -4,13 +4,9 @@ import { getCurrentUser, logout } from "../utils/auth";
 import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { isAdminEmail } from "../utils/admin";
-import ColoredMaangText from "./ColoredMaangText";
 import bskimg from "../assets/bskimg.svg";
 
 const CURRENT_USER_KEY = "bsk_current_user";
-
-// Same vibrant per-character palette the MAANG brand uses across the app.
-const MAANG_COLORS = ["#FF5733", "#FFBD33", "#33FF57", "#33A1FF", "#A133FF"];
 
 function NavBar({ onOpenChangePassword, onOpenFounder }) {
   const [user, setUser] = useState(getCurrentUser());
@@ -18,9 +14,7 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
   const [scrolled, setScrolled] = useState(false);
   const [glowColor, setGlowColor] = useState("blue");
   const [profileOpen, setProfileOpen] = useState(false);
-  const [featuresOpen, setFeaturesOpen] = useState(false);
   const profileRef = useRef(null);
-  const featuresRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -56,18 +50,6 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
     };
   }, []);
 
-  // Close the MAANG Kit dropdown when clicking outside of it
-  useEffect(() => {
-    if (!featuresOpen) return;
-    const onOutsideClick = (e) => {
-      if (featuresRef.current && !featuresRef.current.contains(e.target)) {
-        setFeaturesOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onOutsideClick);
-    return () => document.removeEventListener("mousedown", onOutsideClick);
-  }, [featuresOpen]);
-
   // Close the profile dropdown when clicking outside of it
   useEffect(() => {
     if (!profileOpen) return;
@@ -100,7 +82,6 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
     const id = requestAnimationFrame(() => {
       setProfileOpen(false);
       setMenuOpen(false);
-      setFeaturesOpen(false);
     });
     return () => cancelAnimationFrame(id);
   }, [location.pathname]);
@@ -124,7 +105,6 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
   const closeMenu = () => {
     setMenuOpen(false);
     setProfileOpen(false);
-    setFeaturesOpen(false);
   };
 
   // Toggle profile dropdown
@@ -175,56 +155,6 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
           <NavLink to="/contact" className="nav-link" onClick={closeMenu}>
             <span>Contact</span>
           </NavLink>
-          {/* MAANG Kit dropdown — clicking the button opens quick links to
-              the two premium features: MAANG Preparation + Resume Builder */}
-          <div className="nav-dropdown" ref={featuresRef}>
-            <button
-              type="button"
-              className={`nav-link nav-dropdown-trigger${
-                location.pathname === "/maang" ||
-                location.pathname === "/resume-builder"
-                  ? " active"
-                  : ""
-              }`}
-              onClick={() => setFeaturesOpen(!featuresOpen)}
-              aria-haspopup="true"
-              aria-expanded={featuresOpen}
-            >
-              <span className="nav-dropdown-fire">🔥</span>
-              <span className="maang-letters-glued nav-maang-kit-text">
-                <ColoredMaangText text="MAANG" colors={MAANG_COLORS} />
-                <span className="maang-word-gap" aria-hidden="true" />
-                <ColoredMaangText text="Kit" colors={MAANG_COLORS} color="#33FF57" />
-              </span>
-              <span className="nav-dropdown-caret-icon">▾</span>
-            </button>
-            {featuresOpen && (
-              <div className="nav-dropdown-menu">
-                <NavLink
-                  to="/maang"
-                  className="nav-dropdown-item"
-                  onClick={closeMenu}
-                >
-                  <span className="nav-dropdown-item-icon">🏆</span>
-                  <span className="maang-letters-glued">
-                    <ColoredMaangText text="MAANG" colors={MAANG_COLORS} />
-                    <span className="maang-word-gap" aria-hidden="true" />
-                    <ColoredMaangText text="Preparation" colors={MAANG_COLORS} color="#33FF57" />
-                  </span>
-                  {!user && <span className="nav-dropdown-item-lock">🔒</span>}
-                </NavLink>
-                <NavLink
-                  to="/resume-builder"
-                  className="nav-dropdown-item nav-dropdown-item-resume"
-                  onClick={closeMenu}
-                >
-                  <span className="nav-dropdown-item-icon">📄</span>
-                  <span>Resume Builder</span>
-                  {!user && <span className="nav-dropdown-item-lock">🔒</span>}
-                </NavLink>
-              </div>
-            )}
-          </div>
           <a
             href="https://topmate.io/venkatesh_bharath"
             target="_blank"

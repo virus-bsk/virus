@@ -1,11 +1,39 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { skills } from "../data/skills";
 import SkillCard from "../components/SkillCard";
 import EmailContactModal from "../components/EmailContactModal";
+import ColoredMaangText from "../components/ColoredMaangText";
+import { getCurrentUser } from "../utils/auth";
+import "./HomeMaangKit.css";
+
+const MAANG_COLORS = ["#FF6B6B", "#FFB703", "#F6E05E", "#2EC4B6", "#4CC9F0"];
 
 function Home() {
+  const isLoggedIn = !!getCurrentUser();
   const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [maangKitOpen, setMaangKitOpen] = useState(false);
+  const maangKitRef = useRef(null);
+
+  useEffect(() => {
+    if (!maangKitOpen) return;
+
+    const closeOnOutsideClick = (event) => {
+      if (!maangKitRef.current?.contains(event.target)) {
+        setMaangKitOpen(false);
+      }
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setMaangKitOpen(false);
+    };
+
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [maangKitOpen]);
 
   const linkFor = (id) => {
     if (id === "90-day-job-roadmap") return "/roadmap";
@@ -60,6 +88,74 @@ function Home() {
           </div>
         </div>
       </section>
+
+      <div className="home-maang-kit" ref={maangKitRef}>
+        <button
+          type="button"
+          className="home-maang-toggle"
+          onClick={() => setMaangKitOpen((open) => !open)}
+          aria-label="Toggle MAANG Kit links"
+          aria-expanded={maangKitOpen}
+          aria-controls="home-maang-menu"
+        >
+          <span className="home-maang-label">
+            <span className="home-maang-icon" aria-hidden="true">
+              🔥
+            </span>
+            <span className="home-maang-word">
+              <ColoredMaangText text="MAANG" colors={MAANG_COLORS} />
+            </span>
+            <span className="home-maang-kit-name">Kit</span>
+          </span>
+          <span className="home-maang-caret" aria-hidden="true">
+            {maangKitOpen ? "▴" : "▾"}
+          </span>
+        </button>
+        {maangKitOpen && (
+          <div className="home-maang-menu" id="home-maang-menu">
+            <Link
+              to="/maang"
+              className="home-maang-link"
+              onClick={() => setMaangKitOpen(false)}
+            >
+              <span aria-hidden="true">🎓</span>
+              <span>
+                <ColoredMaangText text="MAANG" colors={MAANG_COLORS} />
+                <span className="maang-word-gap" aria-hidden="true" />
+                <ColoredMaangText
+                  text="Preparation"
+                  colors={MAANG_COLORS}
+                  color="#2EC4B6"
+                />
+              </span>
+              {!isLoggedIn && (
+                <span
+                  className="home-maang-link-lock"
+                  aria-label="Login required"
+                >
+                  🔒
+                </span>
+              )}
+            </Link>
+            <Link
+              to="/resume-builder"
+              className="home-maang-link"
+              onClick={() => setMaangKitOpen(false)}
+            >
+              <span aria-hidden="true">📄</span>
+              <span>Resume Preparation</span>
+              {!isLoggedIn && (
+                <span
+                  className="home-maang-link-lock"
+                  aria-label="Login required"
+                >
+                  🔒
+                </span>
+              )}
+            </Link>
+          </div>
+        )}
+      </div>
 
       {/* Skills Grid with Sub-grids */}
       <section className="skills-section">
