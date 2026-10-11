@@ -3177,6 +3177,21 @@
   font-size: 0.9rem;
 }
 
+/* The LinkedIn card's link. The global `a` rule drops the underline, which
+   is right for nav links but makes this read as plain grey body text inside
+   an already-grey paragraph — so restore the underline and colour it to match
+   the card's green accent (:nth-child(3) h2 is #34d399). */
+.contact-card p a {
+  color: #34d399;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.contact-card p a:hover {
+  color: #6ee7b7;
+}
+
 @media (max-width: 768px) {
   .contact-grid {
     grid-template-columns: 1fr;

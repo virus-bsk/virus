@@ -19,8 +19,22 @@ function Contact() {
             <p>support@bskcoding.com</p>
           </div>
           <div className="contact-card">
-            <h2>Office</h2>
-            <p>Kuppam, Chittoor, Andhra Pradesh</p>
+            <h2>Location</h2>
+            <p>Virtual — based in Kuppam, Chittoor, Andhra Pradesh</p>
+          </div>
+          {/* Third card — reuses the existing .contact-card:nth-child(3)
+              accent (green) that was already in App.css and unused. */}
+          <div className="contact-card">
+            <h2>LinkedIn</h2>
+            <p>
+              <a
+                href="https://www.linkedin.com/company/bsk-coding/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                BSK Coding
+              </a>
+            </p>
           </div>
         </div>
       </section>
