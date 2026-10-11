@@ -10,6 +10,7 @@ import ChangePasswordModal from "./components/ChangePasswordModal";
 import ErrorBoundary from "./components/ErrorBoundary";
 import YouTubeLinkHandler from "./components/YouTubeLinkHandler";
 import FounderProfileModal from "./components/FounderProfileModal";
+import LogoLoader from "./components/LogoLoader";
 import { BASENAME } from "./utils/basePath";
 
 // Route-level code splitting: each page is loaded on demand, so the main
@@ -239,11 +240,7 @@ function RouteRestorer() {
 }
 
 function PageLoader() {
-  return (
-    <div className="page-loader">
-      <div className="loader-spinner" />
-    </div>
-  );
+  return <LogoLoader />;
 }
 
 function ScrollToTop() {

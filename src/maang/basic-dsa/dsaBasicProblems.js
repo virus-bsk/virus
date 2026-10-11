@@ -392,15 +392,6 @@ export const dsaBasicProblems = [
   },
   {
     id: 42,
-    title: "Merge Sorted Array",
-    topic: "Sorting",
-    difficulty: "Easy",
-    link: "https://leetcode.com/problems/merge-sorted-array/",
-    platform: "leetcode",
-    videoLink: null,
-  },
-  {
-    id: 43,
     title: "Sort Array By Parity",
     topic: "Sorting",
     difficulty: "Easy",
@@ -409,7 +400,7 @@ export const dsaBasicProblems = [
     videoLink: null,
   },
   {
-    id: 44,
+    id: 43,
     title: "Minimum Absolute Difference",
     topic: "Sorting",
     difficulty: "Easy",
@@ -418,7 +409,7 @@ export const dsaBasicProblems = [
     videoLink: null,
   },
   {
-    id: 45,
+    id: 44,
     title: "Sort an Array",
     topic: "Sorting",
     difficulty: "Medium",
@@ -427,7 +418,7 @@ export const dsaBasicProblems = [
     videoLink: null,
   },
   {
-    id: 46,
+    id: 45,
     title: "Sort Colors",
     topic: "Sorting",
     difficulty: "Medium",
@@ -436,7 +427,7 @@ export const dsaBasicProblems = [
     videoLink: null,
   },
   {
-    id: 47,
+    id: 46,
     title: "Quick Sort",
     topic: "Sorting",
     difficulty: "Medium",
@@ -445,7 +436,7 @@ export const dsaBasicProblems = [
     videoLink: null,
   },
   {
-    id: 48,
+    id: 47,
     title: "Count Inversions",
     topic: "Sorting",
     difficulty: "Medium",
@@ -454,11 +445,23 @@ export const dsaBasicProblems = [
     videoLink: null,
   },
   {
-    id: 49,
+    id: 48,
     title: "K Closest Points to Origin",
     topic: "Sorting",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/k-closest-points-to-origin/",
+    platform: "leetcode",
+    videoLink: null,
+  },
+  {
+    // Brought over from the 75 LeetCode bank (categorised "Heap" there);
+    // filed under Sorting here because the sheet has no Heap topic and the
+    // problem is fundamentally "sort by frequency".
+    id: 49,
+    title: "Top K Frequent Elements",
+    topic: "Sorting",
+    difficulty: "Medium",
+    link: "https://leetcode.com/problems/top-k-frequent-elements/",
     platform: "leetcode",
     videoLink: null,
   },
