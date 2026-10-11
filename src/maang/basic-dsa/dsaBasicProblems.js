@@ -374,11 +374,11 @@ export const dsaBasicProblems = [
   // at a learner before the basics.
   {
     id: 40,
-    title: "Merge Two Sorted Arrays",
+    title: "Merge Sorted Array",
     topic: "Sorting",
     difficulty: "Easy",
-    link: "https://www.geeksforgeeks.org/merge-two-sorted-arrays/",
-    platform: "gfg",
+    link: "https://leetcode.com/problems/merge-sorted-array/",
+    platform: "leetcode",
     videoLink: null,
   },
   {
