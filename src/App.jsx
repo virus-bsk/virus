@@ -9,7 +9,6 @@ import RequirePaid from "./components/RequirePaid";
 import ErrorBoundary from "./components/ErrorBoundary";
 import YouTubeLinkHandler from "./components/YouTubeLinkHandler";
 import FounderProfileModal from "./components/FounderProfileModal";
-import LogoLoader from "./components/LogoLoader";
 import { BASENAME } from "./utils/basePath";
 
 // The password modal imports utils/firebaseAuth (=> the whole Firebase SDK),
@@ -243,10 +242,6 @@ function RouteRestorer() {
   return null;
 }
 
-function PageLoader() {
-  return <LogoLoader />;
-}
-
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -274,7 +269,7 @@ function App() {
             />
           </div>
           <main className="page-container">
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <Routes>
                 {/* Public routes */}
                 <Route path="/login" element={<Login />} />
