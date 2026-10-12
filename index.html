@@ -12,13 +12,104 @@
 
     <!-- Theme Color -->
     <meta name="theme-color" content="#863bff" />
-    <script type="module" crossorigin src="/assets/index-Dka5w6n9.js"></script>
+
+    <!--
+      Pre-paint loader.
+
+      App.jsx lazy-loads every route, so <LogoLoader /> can only render AFTER
+      the JS bundle is downloaded and parsed. On a slow connection that leaves
+      a blank white screen for a moment, which reads as a broken page.
+
+      This block is plain HTML+CSS inside #root: it paints on the very first
+      frame with no JavaScript and no image request, then React replaces it
+      with the real app. Kept in sync with src/components/LogoLoader.css.
+    -->
+    <style>
+      #bsk-boot {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        background: #000;
+      }
+      #bsk-boot .bsk-ring {
+        position: relative;
+        /* Keep identical to .logo-loader-ring in LogoLoader.css so the
+           hand-off from this pre-paint loader to React is seamless. */
+        width: min(52vw, 180px);
+        aspect-ratio: 1;
+        display: grid;
+        place-items: center;
+      }
+      #bsk-boot .bsk-ring::before {
+        content: "";
+        position: absolute;
+        inset: 5%;
+        border-radius: 50%;
+        background: conic-gradient(
+          from 0deg,
+          transparent 0deg,
+          #062c65 35deg,
+          #087bff 95deg,
+          #00eaff 155deg,
+          transparent 190deg,
+          transparent 230deg,
+          #06458d 265deg,
+          #00dfff 320deg,
+          transparent 345deg
+        );
+        -webkit-mask: radial-gradient(
+          farthest-side,
+          transparent calc(100% - 7px),
+          #000 calc(100% - 6px)
+        );
+        mask: radial-gradient(
+          farthest-side,
+          transparent calc(100% - 7px),
+          #000 calc(100% - 6px)
+        );
+        filter: drop-shadow(0 0 8px #008cff);
+        animation: bsk-spin 1.4s linear infinite;
+      }
+      #bsk-boot .bsk-ring::after {
+        content: "";
+        position: absolute;
+        inset: 5%;
+        border: 1px solid rgba(0, 190, 255, 0.12);
+        border-radius: 50%;
+      }
+      #bsk-boot .bsk-caption {
+        color: #80dfff;
+        font-size: 12px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+      }
+      @keyframes bsk-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #bsk-boot .bsk-ring::before {
+          animation-duration: 6s;
+        }
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-BjSszV1C.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-QTnfLwEv.js">
-    <link rel="modulepreload" crossorigin href="/assets/firestore-DtvR6UU1.js">
-    <link rel="modulepreload" crossorigin href="/assets/userProfile-jzaJv8Ew.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-CoMn8dx_.css">
+    <link rel="modulepreload" crossorigin href="/assets/react-CZI7_Jkm.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-QKRMkSsI.css">
   </head>
   <body>
+    <!-- Pre-paint loader; React removes it on mount (see src/main.jsx). -->
+    <div id="bsk-boot" aria-hidden="true">
+      <div class="bsk-ring"></div>
+      <p class="bsk-caption">Loading</p>
+    </div>
     <div id="root"></div>
   </body>
 </html>
