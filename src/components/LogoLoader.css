@@ -1,5 +1,6 @@
-/* Branded lazy-loading indicator — spinning ring around the BSK Coding logo.
-   Used as the <Suspense> fallback while a lazily-imported route chunk loads.
+/* Branded lazy-loading indicator — spinning ring around a pure-CSS text
+   wordmark. Used as the <Suspense> fallback while a lazily-imported route
+   chunk loads. Deliberately image-free (no logo download to delay it).
    Kept in sync with the pre-paint loader in index.html. */
 
 .logo-loader {
@@ -66,14 +67,35 @@
   border-radius: 50%;
 }
 
-.logo-loader-ring img {
+.logo-loader-word {
   position: relative;
   z-index: 1;
-  width: 72%;
-  height: auto;
-  max-height: 72%;
-  object-fit: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.05;
+  user-select: none;
   filter: drop-shadow(0 0 8px rgba(0, 110, 255, 0.28));
+}
+
+.logo-loader-word-top {
+  font-size: clamp(26px, 8vw, 40px);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  background: linear-gradient(180deg, #eaf6ff 30%, #00eaff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.logo-loader-word-sub {
+  font-size: clamp(11px, 3.4vw, 14px);
+  font-weight: 600;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+  text-transform: uppercase;
+  color: #80dfff;
 }
 
 .logo-loader-caption {

@@ -82,6 +82,34 @@
         border: 1px solid rgba(0, 190, 255, 0.12);
         border-radius: 50%;
       }
+      #bsk-boot .bsk-word {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        line-height: 1.05;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        filter: drop-shadow(0 0 8px rgba(0, 110, 255, 0.28));
+      }
+      #bsk-boot .bsk-word-top {
+        font-size: 40px;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-indent: 0.14em;
+        background: linear-gradient(180deg, #eaf6ff 30%, #00eaff 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      #bsk-boot .bsk-word-sub {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.5em;
+        text-indent: 0.5em;
+        text-transform: uppercase;
+        color: #80dfff;
+      }
       #bsk-boot .bsk-caption {
         color: #80dfff;
         font-size: 12px;
@@ -103,7 +131,12 @@
   <body>
     <!-- Pre-paint loader; React removes it on mount (see src/main.jsx). -->
     <div id="bsk-boot" aria-hidden="true">
-      <div class="bsk-ring"></div>
+      <div class="bsk-ring">
+        <span class="bsk-word">
+          <span class="bsk-word-top">BSK</span>
+          <span class="bsk-word-sub">Coding</span>
+        </span>
+      </div>
       <p class="bsk-caption">Loading</p>
     </div>
     <div id="root"></div>

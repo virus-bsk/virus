@@ -5,20 +5,19 @@ import "./LogoLoader.css";
  * chunk is being fetched and evaluated. Every page in App.jsx is lazy-loaded,
  * so this is what the user sees during the first paint of any navigation.
  *
- * The logo lives in public/ so it is referenced through BASE_URL — that keeps
- * it working on both the custom domain (base "/") and GitHub Pages
- * (base "/<repo>"), same convention as the favicon links in index.html.
+ * Deliberately image-free: the center mark is pure CSS text, so the loader
+ * never waits on a logo download (which made it appear late on slow
+ * connections). Kept in sync with the pre-paint #bsk-boot block in
+ * index.html so the hand-off from static HTML to React is seamless.
  */
 function LogoLoader({ caption = "Loading" }) {
-  const logoSrc = `${import.meta.env.BASE_URL}bskcodingimg1.png`;
-
   return (
     <div className="logo-loader" role="status" aria-live="polite">
       <div className="logo-loader-ring">
-        {/* width/height are the real pixel size of the asset — declaring them
-            lets the browser reserve space and avoids a layout shift while the
-            image loads. CSS still scales it down to fit the ring. */}
-        <img src={logoSrc} alt="BSK Coding" width="420" height="182" />
+        <span className="logo-loader-word" aria-hidden="true">
+          <span className="logo-loader-word-top">BSK</span>
+          <span className="logo-loader-word-sub">Coding</span>
+        </span>
       </div>
       <p className="logo-loader-caption">{caption}</p>
     </div>
