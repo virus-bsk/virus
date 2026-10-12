@@ -1,0 +1,1 @@
+import{r as e}from"./index-DCrc1KQY.js";import{DsaSheetPage as t}from"./MaangDSABasic-W92XbJuH.js";import{t as n}from"./dsaAdvancedProblems-C2oYNpY5.js";var r=e();function i(){return(0,r.jsx)(t,{sheetTitle:`Advanced DSA`,titleAccent:`Part 2`,problems:n,pageTheme:`advanced`})}export{i as default};

@@ -7,142 +7,18 @@
 
     <!-- Favicon (relative paths work on both custom domain and GitHub Pages sub-path) -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <link rel="icon" type="image/svg+xml" href="bskimg.svg" />
-    <link rel="apple-touch-icon" sizes="180x180" href="bskimg.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon.svg" />
 
     <!-- Theme Color -->
     <meta name="theme-color" content="#863bff" />
-
-    <!--
-      Pre-paint loader.
-
-      App.jsx lazy-loads every route, so <LogoLoader /> can only render AFTER
-      the JS bundle is downloaded and parsed. On a slow connection that leaves
-      a blank white screen for a moment, which reads as a broken page.
-
-      This block is plain HTML+CSS inside #root: it paints on the very first
-      frame with no JavaScript and no image request, then React replaces it
-      with the real app. Kept in sync with src/components/LogoLoader.css.
-    -->
-    <style>
-      #bsk-boot {
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 16px;
-        background: #000;
-      }
-      #bsk-boot .bsk-ring {
-        position: relative;
-        /* Keep identical to .logo-loader-ring in LogoLoader.css so the
-           hand-off from this pre-paint loader to React is seamless. */
-        width: min(52vw, 180px);
-        aspect-ratio: 1;
-        display: grid;
-        place-items: center;
-      }
-      #bsk-boot .bsk-ring::before {
-        content: "";
-        position: absolute;
-        inset: 5%;
-        border-radius: 50%;
-        background: conic-gradient(
-          from 0deg,
-          transparent 0deg,
-          #062c65 35deg,
-          #087bff 95deg,
-          #00eaff 155deg,
-          transparent 190deg,
-          transparent 230deg,
-          #06458d 265deg,
-          #00dfff 320deg,
-          transparent 345deg
-        );
-        -webkit-mask: radial-gradient(
-          farthest-side,
-          transparent calc(100% - 7px),
-          #000 calc(100% - 6px)
-        );
-        mask: radial-gradient(
-          farthest-side,
-          transparent calc(100% - 7px),
-          #000 calc(100% - 6px)
-        );
-        filter: drop-shadow(0 0 8px #008cff);
-        animation: bsk-spin 1.4s linear infinite;
-      }
-      #bsk-boot .bsk-ring::after {
-        content: "";
-        position: absolute;
-        inset: 5%;
-        border: 1px solid rgba(0, 190, 255, 0.12);
-        border-radius: 50%;
-      }
-      #bsk-boot .bsk-word {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        line-height: 1.05;
-        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-        filter: drop-shadow(0 0 8px rgba(0, 110, 255, 0.28));
-      }
-      #bsk-boot .bsk-word-top {
-        font-size: 40px;
-        font-weight: 800;
-        letter-spacing: 0.14em;
-        text-indent: 0.14em;
-        background: linear-gradient(180deg, #eaf6ff 30%, #00eaff 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-      }
-      #bsk-boot .bsk-word-sub {
-        font-size: 14px;
-        font-weight: 600;
-        letter-spacing: 0.5em;
-        text-indent: 0.5em;
-        text-transform: uppercase;
-        color: #80dfff;
-      }
-      #bsk-boot .bsk-caption {
-        color: #80dfff;
-        font-size: 12px;
-        letter-spacing: 0.22em;
-        text-transform: uppercase;
-      }
-      @keyframes bsk-spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        #bsk-boot .bsk-ring::before {
-          animation-duration: 6s;
-        }
-      }
-    </style>
-    <script type="module" crossorigin src="/assets/index-yz2jrTMK.js"></script>
+    <script type="module" crossorigin src="/assets/index-DCrc1KQY.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-QTnfLwEv.js">
     <link rel="modulepreload" crossorigin href="/assets/react-CZI7_Jkm.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-CdFhSRid.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-BxtIpbRN.css">
   </head>
   <body>
-    <!-- Pre-paint loader; React removes it on mount (see src/main.jsx). -->
-    <div id="bsk-boot" aria-hidden="true">
-      <div class="bsk-ring">
-        <span class="bsk-word">
-          <span class="bsk-word-top">BSK</span>
-          <span class="bsk-word-sub">Coding</span>
-        </span>
-      </div>
-      <p class="bsk-caption">Loading</p>
-    </div>
     <div id="root"></div>
+  </body>
+</html>    <div id="root"></div>
   </body>
 </html>
