@@ -1,1 +1,0 @@
-import{r as e}from"./index-BjSszV1C.js";import{DsaSheetPage as t}from"./MaangDSABasic-ObDq3C4V.js";import{t as n}from"./dsaDpProblems-F9dtGP9P.js";var r=e();function i(){return(0,r.jsx)(t,{sheetTitle:`Dynamic Programming`,titleAccent:`DP Patterns`,problems:n,pageTheme:`dp`})}export{i as default};
