@@ -13,29 +13,63 @@
     <meta name="theme-color" content="#863bff" />
 
     <!--
-      Pre-paint brand logo.
+      Pre-paint brand loader.
 
       App.jsx lazy-loads every route, so the app can only render AFTER the JS
       bundle downloads and parses. On a slow connection that leaves a blank
       white screen for a moment, which reads as a broken page.
 
-      This block is the BSK Coding wordmark — pure HTML + CSS, no image and no
-      JavaScript — so it paints on the very first frame, before any bundle
-      arrives. React then swaps it for the real app. There is intentionally no
-      spinner/ring here: the brand itself is the loading state.
+      This block is the BSK Coding wordmark inside a glowing ring — pure HTML +
+      CSS, no image and no JavaScript — so it paints on the very first frame,
+      before any bundle arrives. React then swaps it for the real app.
+
+      NOTE: deliberately no image tag. The logo is drawn with text + gradients so it
+      costs zero extra network requests; inlining a PNG here would add load time
+      and defeat the point of showing something instantly.
     -->
     <style>
       #bsk-boot {
         position: fixed;
         inset: 0;
         z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        display: grid;
+        place-items: center;
         background: #000;
       }
+      #bsk-boot .bsk-loader {
+        width: min(78vw, 300px);
+        aspect-ratio: 1;
+        position: relative;
+        display: grid;
+        place-items: center;
+      }
+      /* The rotating glow ring (a masked conic-gradient, not an image). */
+      #bsk-boot .bsk-loader::before {
+        content: "";
+        position: absolute;
+        inset: 5%;
+        border-radius: 50%;
+        background: conic-gradient(
+          from 0deg,
+          transparent 0deg, #062c65 35deg, #087bff 95deg,
+          #00eaff 155deg, transparent 190deg, transparent 230deg,
+          #06458d 265deg, #00dfff 320deg, transparent 345deg);
+        -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+        mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+        filter: drop-shadow(0 0 8px #008cff);
+        animation: bsk-spin 1.4s linear infinite;
+      }
+      /* Faint static inner circle so the ring reads as a dial. */
+      #bsk-boot .bsk-loader::after {
+        content: "";
+        position: absolute;
+        inset: 5%;
+        border: 1px solid rgba(0, 190, 255, 0.12);
+        border-radius: 50%;
+      }
       #bsk-boot .bsk-word {
+        position: relative;
+        z-index: 1;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -62,6 +96,12 @@
         text-transform: uppercase;
         color: #80dfff;
       }
+      @keyframes bsk-spin {
+        to { transform: rotate(360deg); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #bsk-boot .bsk-loader::before { animation-duration: 6s; }
+      }
     </style>
   </head>
   <body>
@@ -70,11 +110,13 @@
         Painted before any JS runs. main.jsx removes it the moment React
         mounts, so there is never a frame with both visible.
       -->
-      <div id="bsk-boot" role="img" aria-label="BSK Coding">
-        <span class="bsk-word">
-          <span class="bsk-word-top">BSK</span>
-          <span class="bsk-word-sub">Coding</span>
-        </span>
+      <div id="bsk-boot" role="status" aria-label="Loading BSK Coding">
+        <div class="bsk-loader">
+          <span class="bsk-word">
+            <span class="bsk-word-top">BSK</span>
+            <span class="bsk-word-sub">Coding</span>
+          </span>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>
