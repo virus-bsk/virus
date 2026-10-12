@@ -7,8 +7,7 @@
 
     <!-- Favicon (relative paths work on both custom domain and GitHub Pages sub-path) -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <link rel="icon" type="image/svg+xml" href="bskimg.svg" />
-    <link rel="apple-touch-icon" sizes="180x180" href="bskimg.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon.svg" />
 
     <!-- Theme Color -->
     <meta name="theme-color" content="#863bff" />
@@ -33,14 +32,14 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 16px;
+        gap: 12px;
         background: #000;
       }
       #bsk-boot .bsk-ring {
         position: relative;
         /* Keep identical to .logo-loader-ring in LogoLoader.css so the
            hand-off from this pre-paint loader to React is seamless. */
-        width: min(52vw, 180px);
+        width: min(36vw, 120px);
         aspect-ratio: 1;
         display: grid;
         place-items: center;
@@ -93,7 +92,7 @@
         filter: drop-shadow(0 0 8px rgba(0, 110, 255, 0.28));
       }
       #bsk-boot .bsk-word-top {
-        font-size: 40px;
+        font-size: 26px;
         font-weight: 800;
         letter-spacing: 0.14em;
         text-indent: 0.14em;
@@ -103,7 +102,7 @@
         color: transparent;
       }
       #bsk-boot .bsk-word-sub {
-        font-size: 14px;
+        font-size: 10px;
         font-weight: 600;
         letter-spacing: 0.5em;
         text-indent: 0.5em;
@@ -112,7 +111,7 @@
       }
       #bsk-boot .bsk-caption {
         color: #80dfff;
-        font-size: 12px;
+        font-size: 11px;
         letter-spacing: 0.22em;
         text-transform: uppercase;
       }

@@ -226,7 +226,7 @@
 
 /* Logo wrapper - simple, no border */
 .nav-logo-wrapper {
-  width: 72px;
+  min-width: 72px;
   height: 72px;
   display: flex;
   align-items: center;
@@ -260,10 +260,42 @@
 }
 
 .nav-logo {
-  width: 72px;
-  height: 72px;
-  object-fit: contain;
-  filter: brightness(1.2) contrast(1.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  user-select: none;
+  /* Pure-CSS wordmark — replaced the 364 kB SVG so the brand paints instantly
+     with first paint instead of popping in after the asset downloads. */
+  filter: brightness(1.2);
+}
+
+.nav-logo-word {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.05;
+}
+
+.nav-logo-word-top {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-indent: 0.12em;
+  background: linear-gradient(180deg, #eaf6ff 30%, #00eaff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 8px rgba(0, 110, 255, 0.28));
+}
+
+.nav-logo-word-sub {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.48em;
+  text-indent: 0.48em;
+  text-transform: uppercase;
+  color: #80dfff;
 }
 
 .nav-brand-text {
@@ -3252,11 +3284,33 @@
 }
 
 .auth-logo {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.05;
   margin: 0 auto 16px;
-  width: 56px;
-  height: 56px;
-  object-fit: contain;
+  user-select: none;
+}
+
+.auth-logo-top {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-indent: 0.12em;
+  background: linear-gradient(180deg, #eaf6ff 30%, #00eaff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 8px rgba(0, 110, 255, 0.28));
+}
+
+.auth-logo-sub {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.48em;
+  text-indent: 0.48em;
+  text-transform: uppercase;
+  color: #80dfff;
 }
 
 .auth-title {

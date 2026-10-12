@@ -2,7 +2,6 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { getCurrentUser, logout } from "../utils/auth";
 import { isAdminEmail } from "../utils/admin";
-import bskimg from "../assets/bskimg.svg";
 
 const CURRENT_USER_KEY = "bsk_current_user";
 
@@ -136,8 +135,13 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
           <div
             className={`nav-logo-wrapper${glowColor === "green" ? " green-glow" : ""}`}
             onClick={handleGlowClick}
+            role="img"
+            aria-label="BSK Coding"
           >
-            <img src={bskimg} alt="BSK Coding" className="nav-logo" />
+            <span className="nav-logo-word" aria-hidden="true">
+              <span className="nav-logo-word-top">BSK</span>
+              <span className="nav-logo-word-sub">Coding</span>
+            </span>
           </div>
         </NavLink>
 
