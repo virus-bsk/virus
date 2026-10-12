@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import hljs from "highlight.js";
+import hljs from "../../../utils/hljs";
 import "highlight.js/styles/atom-one-dark.css";
 import "./LibraryLot.css";
 import { JAVA_A } from "./lb1";

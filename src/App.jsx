@@ -6,12 +6,16 @@ import ConfigBanner from "./components/ConfigBanner";
 import RequireAuth from "./components/RequireAuth";
 import RequireAdmin from "./components/RequireAdmin";
 import RequirePaid from "./components/RequirePaid";
-import ChangePasswordModal from "./components/ChangePasswordModal";
 import ErrorBoundary from "./components/ErrorBoundary";
 import YouTubeLinkHandler from "./components/YouTubeLinkHandler";
 import FounderProfileModal from "./components/FounderProfileModal";
 import LogoLoader from "./components/LogoLoader";
 import { BASENAME } from "./utils/basePath";
+
+// The password modal imports utils/firebaseAuth (=> the whole Firebase SDK),
+// so it is kept out of the startup bundle and only loads when the user
+// actually opens it.
+const ChangePasswordModal = lazy(() => import("./components/ChangePasswordModal"));
 
 // Route-level code splitting: each page is loaded on demand, so the main
 // bundle stays small and large pages (interview/topic pages) are only
@@ -775,10 +779,14 @@ function App() {
             </Suspense>
           </main>
 
-          <ChangePasswordModal
-            isOpen={showChangePassword}
-            onClose={() => setShowChangePassword(false)}
-          />
+          <Suspense fallback={null}>
+            {showChangePassword && (
+              <ChangePasswordModal
+                isOpen={showChangePassword}
+                onClose={() => setShowChangePassword(false)}
+              />
+            )}
+          </Suspense>
 
           <FounderProfileModal
             isOpen={founderOpen}

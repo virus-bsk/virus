@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import hljs from "highlight.js";
+import hljs from "../../utils/hljs";
 import "highlight.js/styles/atom-one-dark.css";
 import "./JavaScriptInterview.css";
 import { javascriptInterviewPart1 } from "../../data/javascript/javascriptInterviewPart1";

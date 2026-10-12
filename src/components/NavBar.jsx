@@ -1,8 +1,6 @@
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { getCurrentUser, logout } from "../utils/auth";
-import { auth } from "../firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import { isAdminEmail } from "../utils/admin";
 import bskimg from "../assets/bskimg.svg";
 
@@ -20,22 +18,36 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
 
   useEffect(() => {
     const handler = () => setUser(getCurrentUser());
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        const userData = {
-          id: currentUser.uid,
-          name:
-            currentUser.displayName || currentUser.email?.split("@")[0] || "",
-          email: currentUser.email,
-        };
-        setUser(userData);
-        // Save to localStorage for RequireAuth check
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userData));
-      } else {
-        setUser(null);
-        localStorage.removeItem(CURRENT_USER_KEY);
-      }
-    });
+
+    // Firebase (auth + firestore + analytics ≈ 700 kB) is loaded on demand
+    // instead of at startup: the NavBar only needs the auth listener to keep
+    // the localStorage session in sync, so the SDK chunk is fetched here in
+    // the background, well after first paint.
+    let cancelled = false;
+    let unsubscribe = () => {};
+    Promise.all([import("../firebase"), import("firebase/auth")])
+      .then(([{ auth }, { onAuthStateChanged }]) => {
+        if (cancelled) return;
+        unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+          if (currentUser) {
+            const userData = {
+              id: currentUser.uid,
+              name:
+                currentUser.displayName ||
+                currentUser.email?.split("@")[0] ||
+                "",
+              email: currentUser.email,
+            };
+            setUser(userData);
+            // Save to localStorage for RequireAuth check
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userData));
+          } else {
+            setUser(null);
+            localStorage.removeItem(CURRENT_USER_KEY);
+          }
+        });
+      })
+      .catch((err) => console.error("Firebase auth init failed:", err));
 
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -44,6 +56,7 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
     window.addEventListener("storage", handler);
     window.addEventListener("scroll", handleScroll);
     return () => {
+      cancelled = true;
       unsubscribe();
       window.removeEventListener("storage", handler);
       window.removeEventListener("scroll", handleScroll);

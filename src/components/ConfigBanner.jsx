@@ -1,19 +1,29 @@
 import { useEffect, useState } from "react";
-import { validateFirebaseConfig } from "../utils/firebaseAuth";
 
 export default function ConfigBanner() {
   const [info, setInfo] = useState(null);
 
   useEffect(() => {
+    let cancelled = false;
     const checkConfig = async () => {
       try {
+        // firebaseAuth pulls in the whole Firebase SDK; load it lazily so the
+        // banner (rendered on every page) never blocks the startup bundle.
+        const { validateFirebaseConfig } = await import(
+          "../utils/firebaseAuth"
+        );
+        if (cancelled) return;
         const res = validateFirebaseConfig();
         setInfo(res);
       } catch (err) {
+        if (cancelled) return;
         setInfo({ ok: false, error: err.message || String(err) });
       }
     };
     checkConfig();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (!info) return null;
