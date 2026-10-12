@@ -3252,33 +3252,11 @@
 }
 
 .auth-logo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.05;
+  display: block;
   margin: 0 auto 16px;
-  user-select: none;
-}
-
-.auth-logo-top {
-  font-size: 30px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-indent: 0.12em;
-  background: linear-gradient(180deg, #eaf6ff 30%, #00eaff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 8px rgba(0, 110, 255, 0.28));
-}
-
-.auth-logo-sub {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.48em;
-  text-indent: 0.48em;
-  text-transform: uppercase;
-  color: #80dfff;
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
 }
 
 .auth-title {
