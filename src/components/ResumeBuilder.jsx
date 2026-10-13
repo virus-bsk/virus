@@ -122,6 +122,54 @@ const EMPTY_RESUME = {
 const getCertName = (cert) =>
   (typeof cert === "string" ? cert : cert?.name || "").trim();
 
+// Counts the form fields the user has actually filled in (arrays and nested
+// objects are walked). EMPTY_RESUME scores 0, a couple of typed characters
+// score 1-2, and an uploaded/AI-autofilled resume scores many. The first-save
+// guard uses this to tell "user just started typing into the blank form"
+// apart from "user deliberately created resume content".
+const countFilledLeafFields = (value) => {
+  if (Array.isArray(value)) {
+    return value.reduce((total, item) => total + countFilledLeafFields(item), 0);
+  }
+  if (value && typeof value === "object") {
+    return Object.values(value).reduce(
+      (total, item) => total + countFilledLeafFields(item),
+      0,
+    );
+  }
+  return typeof value === "string" && value.trim() ? 1 : 0;
+};
+
+// Normalizes whatever is stored in Firestore into a complete resume object:
+// every known top-level field exists, arrays really are arrays, and the
+// skills object always carries all category keys. Shared by the on-demand
+// load ("Previous Resume") and the first-save guard.
+const normalizeStoredResume = (stored) => {
+  const storedResume = Object.fromEntries(
+    Object.entries(EMPTY_RESUME).map(([field, defaultValue]) => [
+      field,
+      stored[field] ?? defaultValue,
+    ]),
+  );
+  return {
+    ...EMPTY_RESUME,
+    ...storedResume,
+    experience: Array.isArray(storedResume.experience)
+      ? storedResume.experience
+      : EMPTY_RESUME.experience,
+    projects: Array.isArray(storedResume.projects)
+      ? storedResume.projects
+      : EMPTY_RESUME.projects,
+    skills: { ...EMPTY_RESUME.skills, ...(storedResume.skills || {}) },
+    education: Array.isArray(storedResume.education)
+      ? storedResume.education
+      : EMPTY_RESUME.education,
+    certificates: Array.isArray(storedResume.certificates)
+      ? storedResume.certificates
+      : EMPTY_RESUME.certificates,
+  };
+};
+
 function ResumeBuilder({ onClose }) {
   const isModal = typeof onClose === "function";
   const navigate = useNavigate();
@@ -133,10 +181,15 @@ function ResumeBuilder({ onClose }) {
   const [resumeReady, setResumeReady] = useState(false);
   const [hasSavedResume, setHasSavedResume] = useState(false);
   const [resumeSyncMessage, setResumeSyncMessage] = useState(
-    "Loading saved resume...",
+    "Changes save automatically.",
   );
   const resumeBaselineRef = useRef(JSON.stringify(EMPTY_RESUME));
   const resumeLoadGenerationRef = useRef(0);
+  // The builder opens blank and never fetches on mount. This tracks whether
+  // the server copy has been consulted yet (via the "Previous Resume" load or
+  // the first-save guard) so auto-save knows when a server check is required.
+  const resumeHydratedRef = useRef(false);
+  const [savedResumeLoading, setSavedResumeLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiMessage, setAiMessage] = useState("");
@@ -146,69 +199,32 @@ function ResumeBuilder({ onClose }) {
 
   useEffect(() => {
     let active = true;
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      const generation = ++resumeLoadGenerationRef.current;
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!active) return;
+      // Any in-flight resume load was started for the previous auth state.
+      resumeLoadGenerationRef.current += 1;
       if (!user?.email) {
         setResumeDocPath("");
         setResumeReady(false);
         setHasSavedResume(false);
+        resumeHydratedRef.current = false;
+        resumeBaselineRef.current = JSON.stringify(EMPTY_RESUME);
         setResume(EMPTY_RESUME);
+        setStep(0);
+        setShowPreview(false);
         setResumeSyncMessage("Sign in to save your resume.");
         return;
       }
 
-      const path = `resume/${userDocId(user)}`;
-      setResumeDocPath(path);
-      setResumeReady(false);
+      // Deliberately NO Firestore fetch here: the builder opens blank and
+      // only loads the saved resume when the user asks for it ("Previous
+      // Resume") or via the first-save guard below. This is what keeps the
+      // page from loading the resume on every single visit.
+      setResumeDocPath(`resume/${userDocId(user)}`);
+      resumeHydratedRef.current = false;
       setHasSavedResume(false);
-      setResume(EMPTY_RESUME);
-      setResumeSyncMessage("Loading saved resume...");
-
-      const result = await getDocument(path);
-      if (!active || generation !== resumeLoadGenerationRef.current) return;
-      if (!result.ok) {
-        setResumeSyncMessage(
-          `Could not load saved resume: ${result.error?.message || "Please try again."}`,
-        );
-        return;
-      }
-
-      const stored = result.exists ? result.value : null;
-      const storedResume = stored
-        ? Object.fromEntries(
-            Object.entries(EMPTY_RESUME).map(([field, defaultValue]) => [
-              field,
-              stored[field] ?? defaultValue,
-            ]),
-          )
-        : EMPTY_RESUME;
-      const loadedResume = stored
-        ? {
-            ...EMPTY_RESUME,
-            ...storedResume,
-            experience: Array.isArray(storedResume.experience)
-              ? storedResume.experience
-              : EMPTY_RESUME.experience,
-            projects: Array.isArray(storedResume.projects)
-              ? storedResume.projects
-              : EMPTY_RESUME.projects,
-            skills: { ...EMPTY_RESUME.skills, ...(storedResume.skills || {}) },
-            education: Array.isArray(storedResume.education)
-              ? storedResume.education
-              : EMPTY_RESUME.education,
-            certificates: Array.isArray(storedResume.certificates)
-              ? storedResume.certificates
-              : EMPTY_RESUME.certificates,
-          }
-        : EMPTY_RESUME;
-      resumeBaselineRef.current = JSON.stringify(loadedResume);
-      setResume(loadedResume);
-      setHasSavedResume(Boolean(stored));
-      setStep(stored ? 1 : 0);
       setResumeReady(true);
-      setResumeSyncMessage(
-        stored ? "Saved resume loaded." : "Changes save automatically.",
-      );
+      setResumeSyncMessage("Changes save automatically.");
     });
 
     return () => {
@@ -225,6 +241,38 @@ function ResumeBuilder({ onClose }) {
     if (serializedResume === resumeBaselineRef.current) return undefined;
 
     const timeout = setTimeout(async () => {
+      // The builder never loads the saved resume on mount, so before the very
+      // first save of a session we ask the server what is actually stored. If
+      // a saved resume exists and the user has barely started typing, load
+      // that copy instead of overwriting it. Substantial content (uploaded
+      // file / AI autofill / several filled sections) is treated as
+      // deliberate and is allowed to replace the saved copy.
+      if (!resumeHydratedRef.current) {
+        const check = await getDocument(resumeDocPath);
+        if (!check.ok) {
+          setResumeSyncMessage(
+            `Could not save resume: ${check.error?.message || "Please try again."}`,
+          );
+          return;
+        }
+
+        const stored = check.exists ? check.value : null;
+        if (stored && countFilledLeafFields(resume) <= 2) {
+          const loadedResume = normalizeStoredResume(stored);
+          resumeBaselineRef.current = JSON.stringify(loadedResume);
+          setResume(loadedResume);
+          setHasSavedResume(true);
+          resumeHydratedRef.current = true;
+          setResumeSyncMessage(
+            "Your saved resume was loaded — editing it saves automatically.",
+          );
+          return;
+        }
+
+        resumeHydratedRef.current = true;
+        setHasSavedResume(Boolean(stored));
+      }
+
       setResumeSyncMessage("Saving resume...");
       const result = await setDocument(resumeDocPath, {
         ...resume,
@@ -244,9 +292,50 @@ function ResumeBuilder({ onClose }) {
     return () => clearTimeout(timeout);
   }, [resume, resumeDocPath, resumeReady]);
 
-  const openSavedResumePreview = () => {
+  // Loads the saved resume from the server ON DEMAND — only ever triggered by
+  // the user's "Previous Resume" click, never on mount. On success it hydrates
+  // the form and jumps to the preview step; otherwise the sync message already
+  // explains what happened.
+  const openSavedResumePreview = async () => {
+    if (!resumeDocPath) {
+      setResumeSyncMessage("Sign in to save your resume.");
+      return { ok: false, exists: false };
+    }
+
+    const generation = ++resumeLoadGenerationRef.current;
+    setSavedResumeLoading(true);
+    setResumeSyncMessage("Loading saved resume...");
+
+    const result = await getDocument(resumeDocPath);
+    if (generation !== resumeLoadGenerationRef.current) {
+      setSavedResumeLoading(false);
+      return { ok: false, exists: false };
+    }
+    setSavedResumeLoading(false);
+
+    if (!result.ok) {
+      setResumeSyncMessage(
+        `Could not load saved resume: ${result.error?.message || "Please try again."}`,
+      );
+      return { ok: false, exists: false };
+    }
+
+    if (!result.exists) {
+      resumeHydratedRef.current = true;
+      setHasSavedResume(false);
+      setResumeSyncMessage("No saved resume found yet.");
+      return { ok: true, exists: false };
+    }
+
+    const loadedResume = normalizeStoredResume(result.value);
+    resumeBaselineRef.current = JSON.stringify(loadedResume);
+    setResume(loadedResume);
+    setHasSavedResume(true);
+    resumeHydratedRef.current = true;
+    setResumeSyncMessage("Saved resume loaded.");
     setShowPreview(true);
     setStep(STEPS.length - 1);
+    return { ok: true, exists: true };
   };
 
   const exitBuilder = () => {
@@ -2381,12 +2470,13 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
             </div>
           </div>
           <div className="rb-header-actions">
-            {resumeReady && hasSavedResume && (
+            {resumeReady && resumeDocPath && (
               <button
                 className="rb-btn rb-btn-primary rb-saved-resume-btn"
                 onClick={openSavedResumePreview}
+                disabled={savedResumeLoading}
               >
-                Previous Resume
+                {savedResumeLoading ? "Loading..." : "Previous Resume"}
               </button>
             )}
             <button
