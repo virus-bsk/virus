@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import hljs from "../../utils/hljs";
+import { scrollActiveQuestionIntoView } from "../../utils/scrollQuestion";
 import "highlight.js/styles/atom-one-dark.css";
 import "./ReactJSInterview.css";
 import { reactjsInterviewPart1 } from "../../data/reactjs/reactjsInterviewPart1";
@@ -183,6 +184,13 @@ function ReactJSInterview() {
   const toggleQuestion = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
+
+  // When a question expands, bring its header to the top of the viewport so
+  // the answer always starts in view instead of staying scrolled mid-page.
+  useEffect(() => {
+    if (expandedId === null) return;
+    scrollActiveQuestionIntoView(".question-item-vertical", ".question-item-header");
+  }, [expandedId]);
 
   return (
     <div className="react-interview-page">

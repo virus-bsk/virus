@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import hljs from "../utils/hljs";
+import { scrollActiveQuestionIntoView } from "../utils/scrollQuestion";
 import "highlight.js/styles/atom-one-dark.css";
 import { companies, totalCompanyQuestions } from "../data/companyInterviews";
 import "./CompanyInterview.css";
@@ -157,6 +158,13 @@ function CompanyInterview() {
   const toggleQuestion = (uid) => {
     setExpandedId(expandedId === uid ? null : uid);
   };
+
+  // When a question expands, bring its header to the top of the viewport so
+  // the answer always starts in view instead of staying scrolled mid-page.
+  useEffect(() => {
+    if (expandedId === null) return;
+    scrollActiveQuestionIntoView(".ci-question", ".ci-question-header");
+  }, [expandedId]);
 
   const backToList = () => {
     setSelectedCompanyId(null);
