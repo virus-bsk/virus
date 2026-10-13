@@ -70,7 +70,7 @@
 
 .brand-loader-ring {
   position: relative;
-  width: min(72vw, 270px);
+  width: min(40vw, 140px);
   aspect-ratio: 1;
   display: grid;
   place-items: center;
@@ -104,7 +104,7 @@
 .brand-loader-logo {
   position: relative;
   z-index: 1;
-  width: min(40vw, 150px);
+  width: min(20vw, 75px);
   height: auto;
   filter: brightness(1.15) drop-shadow(0 0 14px rgba(0, 140, 255, 0.35));
 }
