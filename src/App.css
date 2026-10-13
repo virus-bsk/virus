@@ -104,7 +104,7 @@
 .brand-loader-logo {
   position: relative;
   z-index: 1;
-  width: min(54vw, 215px);
+  width: min(40vw, 150px);
   height: auto;
   filter: brightness(1.15) drop-shadow(0 0 14px rgba(0, 140, 255, 0.35));
 }
