@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { FaBolt, FaCode, FaDatabase, FaGlobe, FaHandshake, FaJava, FaLinkedin, FaNetworkWired, FaSitemap, FaYoutube } from "react-icons/fa";
+import { SiSpringboot } from "react-icons/si";
 
 /**
  * FounderProfileModal
@@ -217,39 +219,123 @@ function FounderProfileModal({ isOpen, onClose }) {
             ) : (
               <div className="founder-expanded">
                 <p className="founder-bio">
-                  Venkatesh Bharath is a passionate Technical Specialist with 5
-                  years of hands-on experience in Java, Spring Boot, and backend
-                  development. He created this platform to help fellow
-                  developers navigate their career journey through structured
-                  roadmaps, hands-on learning paths, and real-world interview
-                  preparation.
+                  <span className="founder-bio-lead">Venkatesh Bharath</span> is
+                  a passionate <strong>Technical Specialist</strong> with{" "}
+                  <strong>5+ years</strong> of hands-on experience in{" "}
+                  <strong>Java</strong>, <strong>Spring Boot</strong>, and
+                  backend development.
+                </p>
+                <p className="founder-bio founder-bio-mission">
+                  <span className="founder-mission-tag">Why BSK Coding</span> He
+                  created this platform to help fellow developers navigate their
+                  career journey through{" "}
+                  <strong>structured roadmaps</strong>,{" "}
+                  <strong>hands-on learning paths</strong>, and{" "}
+                  <strong>real-world interview preparation</strong>.
                 </p>
 
+                <h3 className="founder-section-label">Core Expertise</h3>
                 <div className="founder-badges">
-                  <span className="founder-badge">Java</span>
-                  <span className="founder-badge">Spring Boot</span>
-                  <span className="founder-badge">Microservices</span>
-                  <span className="founder-badge">SQL</span>
-                  <span className="founder-badge">DSA</span>
-                  <span className="founder-badge">System Design</span>
+                  <span className="founder-badge">
+                    <FaJava className="founder-badge-icon" style={{ color: "#f89820" }} aria-hidden="true" />
+                    Java
+                  </span>
+                  <span className="founder-badge">
+                    <SiSpringboot className="founder-badge-icon" style={{ color: "#6DB33F" }} aria-hidden="true" />
+                    Spring Boot
+                  </span>
+                  <span className="founder-badge">
+                    <FaNetworkWired className="founder-badge-icon" style={{ color: "#a78bfa" }} aria-hidden="true" />
+                    Microservices
+                  </span>
+                  <span className="founder-badge">
+                    <FaDatabase className="founder-badge-icon" style={{ color: "#38bdf8" }} aria-hidden="true" />
+                    SQL
+                  </span>
+                  <span className="founder-badge">
+                    <FaCode className="founder-badge-icon" style={{ color: "#fbbf24" }} aria-hidden="true" />
+                    DSA
+                  </span>
+                  <span className="founder-badge">
+                    <FaSitemap className="founder-badge-icon" style={{ color: "#67e8f9" }} aria-hidden="true" />
+                    System Design
+                  </span>
+                  <span className="founder-badge">
+                    <FaBolt className="founder-badge-icon" style={{ color: "#f472b6" }} aria-hidden="true" />
+                    Reactive Programming
+                  </span>
                 </div>
+
+                <h3 className="founder-section-label">What you get here</h3>
+                <ul className="founder-highlights">
+                  <li>
+                    Clear, structured roadmaps — always know what to learn next
+                  </li>
+                  <li>
+                    Hands-on learning paths built from real production
+                    experience
+                  </li>
+                  <li>
+                    Interview prep with real company questions &amp; answers
+                  </li>
+                </ul>
 
                 <div className="founder-socials">
                   <a
                     href="https://www.youtube.com/@bskcoding"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="founder-social"
+                    className="founder-social founder-social-youtube"
                   >
-                    ▶ YouTube
+                    <span className="founder-social-icon" aria-hidden="true">
+                      <FaYoutube />
+                    </span>
+                    <span>
+                      YouTube
+                      <small>Free video lessons</small>
+                    </span>
                   </a>
                   <a
                     href="https://topmate.io/venkatesh_bharath"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="founder-social"
+                    className="founder-social founder-social-topmate"
                   >
-                    🤝 1:1 Call
+                    <span className="founder-social-icon" aria-hidden="true">
+                      <FaHandshake />
+                    </span>
+                    <span>
+                      1:1 Call
+                      <small>Career mentorship</small>
+                    </span>
+                  </a>
+                  <a
+                    href="https://www.linkedin.com/company/bsk-coding/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="founder-social founder-social-linkedin"
+                  >
+                    <span className="founder-social-icon" aria-hidden="true">
+                      <FaLinkedin />
+                    </span>
+                    <span>
+                      LinkedIn
+                      <small>Connect &amp; follow</small>
+                    </span>
+                  </a>
+                  <a
+                    href="https://bskcoding.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="founder-social founder-social-website"
+                  >
+                    <span className="founder-social-icon" aria-hidden="true">
+                      <FaGlobe />
+                    </span>
+                    <span>
+                      Website
+                      <small>Explore BSK Coding</small>
+                    </span>
                   </a>
                 </div>
               </div>

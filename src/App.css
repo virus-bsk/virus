@@ -2583,7 +2583,20 @@
   font-weight: 600;
   padding: 5px 12px;
   border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   transition: all 0.2s ease;
+}
+
+.founder-badge-icon {
+  font-size: 1.05rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.45));
+}
+
+.founder-badge:hover .founder-badge-icon {
+  transform: scale(1.18) rotate(-6deg);
 }
 
 .founder-badge:hover {
@@ -2716,10 +2729,22 @@
   animation-delay: 0.05s;
 }
 .founder-expanded > *:nth-child(2) {
-  animation-delay: 0.15s;
+  animation-delay: 0.12s;
 }
 .founder-expanded > *:nth-child(3) {
-  animation-delay: 0.25s;
+  animation-delay: 0.19s;
+}
+.founder-expanded > *:nth-child(4) {
+  animation-delay: 0.26s;
+}
+.founder-expanded > *:nth-child(5) {
+  animation-delay: 0.33s;
+}
+.founder-expanded > *:nth-child(6) {
+  animation-delay: 0.4s;
+}
+.founder-expanded > *:nth-child(7) {
+  animation-delay: 0.47s;
 }
 
 @keyframes founderRiseIn {
@@ -2733,40 +2758,210 @@
   }
 }
 
+/* Bio reads as a quote card with a gold accent edge instead of flat text */
 .founder-expanded .founder-bio {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   text-align: left;
   color: #cbd5e1;
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.08),
+    rgba(245, 158, 11, 0.02)
+  );
+  border: 1px solid rgba(245, 158, 11, 0.16);
+  border-left: 3px solid #f59e0b;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 0.92rem;
+}
+
+.founder-bio-lead {
+  background: linear-gradient(90deg, #fcd34d, #f59e0b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 800;
+}
+
+.founder-expanded .founder-bio strong {
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.founder-mission-tag {
+  display: inline-block;
+  font-size: 0.64rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0b1020;
+  background: linear-gradient(135deg, #fcd34d, #f59e0b);
+  border-radius: 999px;
+  padding: 3px 10px;
+  margin-right: 8px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* Thin gold section dividers: CORE EXPERTISE ————— */
+.founder-section-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 10px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fbbf24;
+}
+
+.founder-section-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.45), transparent);
+}
+
+/* Cyan check-list: the concrete value of the platform */
+.founder-highlights {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.founder-highlights li {
+  position: relative;
+  padding: 9px 12px 9px 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.founder-highlights li::before {
+  content: "✓";
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #67e8f9;
+  font-weight: 800;
+}
+
+.founder-highlights li:hover {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.06);
+  transform: translateX(3px);
 }
 
 .founder-socials {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   justify-content: flex-start;
+  margin-top: 16px;
   margin-bottom: 4px;
 }
 
+/* CTA cards instead of flat pills: icon tile + title + caption */
 .founder-social {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  gap: 10px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.28);
   color: #fcd34d;
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: 14px;
   text-decoration: none;
   transition: all 0.2s ease;
 }
 
+.founder-social small {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #94a3b8;
+  margin-top: 1px;
+  transition: color 0.2s ease;
+}
+
+.founder-social-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.15);
+  font-size: 1.1rem;
+}
+
+.founder-social-icon svg {
+  display: block;
+}
+
 .founder-social:hover {
-  background: rgba(245, 158, 11, 0.2);
+  background: rgba(245, 158, 11, 0.16);
   border-color: rgba(245, 158, 11, 0.5);
   color: #fff;
   transform: translateY(-2px);
+}
+
+.founder-social:hover small {
+  color: #cbd5e1;
+}
+
+/* Platform-flavoured glows on hover */
+.founder-social-youtube .founder-social-icon {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+}
+
+.founder-social-youtube:hover {
+  border-color: rgba(248, 113, 113, 0.55);
+  box-shadow: 0 8px 22px rgba(239, 68, 68, 0.18);
+}
+
+.founder-social-topmate .founder-social-icon {
+  background: rgba(103, 232, 249, 0.12);
+  color: #67e8f9;
+}
+
+.founder-social-topmate:hover {
+  border-color: rgba(103, 232, 249, 0.5);
+  box-shadow: 0 8px 22px rgba(103, 232, 249, 0.15);
+}
+
+.founder-social-linkedin .founder-social-icon {
+  background: rgba(10, 102, 194, 0.2);
+  color: #60a5fa;
+}
+
+.founder-social-linkedin:hover {
+  border-color: rgba(96, 165, 250, 0.55);
+  box-shadow: 0 8px 22px rgba(10, 102, 194, 0.25);
+}
+
+.founder-social-website .founder-social-icon {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+}
+
+.founder-social-website:hover {
+  border-color: rgba(251, 191, 36, 0.55);
+  box-shadow: 0 8px 22px rgba(245, 158, 11, 0.2);
 }
 
 /* Small screens: keep the About card fully visible, nothing clipping */
@@ -2809,6 +3004,16 @@
 
   .founder-headline-stat span {
     font-size: 0.64rem;
+  }
+
+  /* Stack the YouTube / 1:1 Call CTAs full-width on phones */
+  .founder-socials {
+    grid-template-columns: 1fr;
+  }
+
+  .founder-expanded .founder-bio {
+    font-size: 0.87rem;
+    padding: 12px 14px;
   }
 }
 
