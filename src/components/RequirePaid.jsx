@@ -1,5 +1,6 @@
 import { Link, Navigate, useLocation } from "react-router-dom";
 import useMembership from "../hooks/useMembership";
+import BrandLoader from "./BrandLoader";
 
 /**
  * Gate for paid content (the MAANG kit and the Resume Builder).
@@ -16,12 +17,9 @@ export default function RequirePaid({ children }) {
     useMembership();
 
   if (!authReady) {
-    return (
-      <div className="gate-screen" role="status">
-        <span className="gate-spinner" aria-hidden="true" />
-        <p className="gate-text">Checking your login…</p>
-      </div>
-    );
+    // Branded gate: the BSK logo ring stays visible while Firebase loads, so
+    // the boot loader hands off seamlessly instead of a bare spinner.
+    return <BrandLoader label="Checking your login…" />;
   }
 
   if (!user) {
@@ -29,12 +27,7 @@ export default function RequirePaid({ children }) {
   }
 
   if (loading) {
-    return (
-      <div className="gate-screen" role="status">
-        <span className="gate-spinner" aria-hidden="true" />
-        <p className="gate-text">Checking your membership…</p>
-      </div>
-    );
+    return <BrandLoader label="Checking your membership…" />;
   }
 
   if (error) {

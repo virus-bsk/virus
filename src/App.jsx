@@ -6,6 +6,7 @@ import ConfigBanner from "./components/ConfigBanner";
 import RequireAuth from "./components/RequireAuth";
 import RequireAdmin from "./components/RequireAdmin";
 import RequirePaid from "./components/RequirePaid";
+import BrandLoader from "./components/BrandLoader";
 import ErrorBoundary from "./components/ErrorBoundary";
 import YouTubeLinkHandler from "./components/YouTubeLinkHandler";
 import FounderProfileModal from "./components/FounderProfileModal";
@@ -269,7 +270,9 @@ function App() {
             />
           </div>
           <main className="page-container">
-            <Suspense fallback={null}>
+            {/* Branded fallback: while a lazy route chunk downloads, keep the
+                BSK logo + ring on screen (fallback={null} left a blank page). */}
+            <Suspense fallback={<BrandLoader />}>
               <Routes>
                 {/* Public routes */}
                 <Route path="/login" element={<Login />} />

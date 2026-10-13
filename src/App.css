@@ -53,6 +53,74 @@
   }
 }
 
+/* Branded loading state: the same BSK logo + rotating cyan/electric-blue ring
+   as the pre-paint boot loader (inline in index.html). Reused by the
+   route-level Suspense fallback and the auth/membership gates so the logo is
+   visible during every loading state, not just the first page load. */
+.brand-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 55vh;
+  padding: 32px 20px;
+  text-align: center;
+}
+
+.brand-loader-ring {
+  position: relative;
+  width: min(72vw, 270px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.brand-loader-ring::before {
+  content: "";
+  position: absolute;
+  inset: 5%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg, #062c65 35deg, #087bff 95deg,
+    #00eaff 155deg, transparent 190deg, transparent 230deg,
+    #06458d 265deg, #00dfff 320deg, transparent 345deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+  filter: drop-shadow(0 0 8px #008cff);
+  animation: loader-spin 1.4s linear infinite;
+}
+
+.brand-loader-ring::after {
+  content: "";
+  position: absolute;
+  inset: 5%;
+  border: 1px solid rgba(0, 190, 255, 0.12);
+  border-radius: 50%;
+}
+
+.brand-loader-logo {
+  position: relative;
+  z-index: 1;
+  width: min(54vw, 215px);
+  height: auto;
+  filter: brightness(1.15) drop-shadow(0 0 14px rgba(0, 140, 255, 0.35));
+}
+
+.brand-loader-label {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-loader-ring::before {
+    animation: none;
+  }
+}
+
 /* Error boundary fallback */
 .error-boundary {
   display: flex;

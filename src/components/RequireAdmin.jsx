@@ -1,10 +1,12 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { isAdminEmail } from "../utils/admin";
+import BrandLoader from "./BrandLoader";
 
 // Invisible gate: non-admins are bounced to home (not to /login, so the
 // route's existence is not advertised). Nothing links here except an
-// admin-only NavBar entry.
+// admin-only NavBar entry. While Firebase auth initializes, the branded
+// BSK loader is shown instead of a blank frame.
 export default function RequireAdmin({ children }) {
   const location = useLocation();
   const [state, setState] = useState({ ready: false, admin: false });
@@ -31,7 +33,7 @@ export default function RequireAdmin({ children }) {
     };
   }, []);
 
-  if (!state.ready) return null;
+  if (!state.ready) return <BrandLoader />;
   if (!state.admin) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
