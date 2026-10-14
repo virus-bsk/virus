@@ -129,7 +129,10 @@ const getCertName = (cert) =>
 // apart from "user deliberately created resume content".
 const countFilledLeafFields = (value) => {
   if (Array.isArray(value)) {
-    return value.reduce((total, item) => total + countFilledLeafFields(item), 0);
+    return value.reduce(
+      (total, item) => total + countFilledLeafFields(item),
+      0,
+    );
   }
   if (value && typeof value === "object") {
     return Object.values(value).reduce(
@@ -868,6 +871,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
       // pixel for pixel.
       const canvas = await html2canvas(element, {
         scale: 2,
+        windowWidth: 1024,
         useCORS: true,
         logging: false,
         backgroundColor: "#ffffff",
@@ -881,10 +885,8 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
             clonedEl.style.overflowX = "visible";
             // FIX (mobile): capture at desktop width so the top headline /
             // contact row never stacks into a column in the exported PDF.
-            // NOTE: html2canvas clones <style> tags into an iframe whose
-            // viewport is still the mobile width, so width alone does NOT
-            // beat @media (max-width: 768px / 420px) rules — the row layout
-            // must also be forced inline on the cloned document.
+            // Use a desktop-sized clone viewport so responsive mobile rules
+            // cannot change the exported page layout.
             clonedEl.style.width = "780px";
             clonedEl.style.maxWidth = "780px";
             clonedEl.style.minWidth = "780px";
