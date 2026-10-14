@@ -25,6 +25,8 @@ const subtopicRoutes = {
   "📅 Weekly DSA Preparation": "/maang/weekly-preparation",
   "🏗️ System Design - Basics": "/maang/system-design-basics",
   "🌐 Advanced System Design": "/maang/system-design/advanced",
+  "⚡ Reactive Deep Dive": "/maang/reactive-deep-dive",
+  "🤖 AI/ML Fundamentals": "/maang/ai-ml-fundamentals",
   "🚀 Forward Deployment Engineer": "/maang/forward-deployment-engineer",
 };
 

@@ -66,6 +66,12 @@ const DistributedSystemsPage = lazy(
 const MessagingPage = lazy(
   () => import("./maang/system-design/messaging/MessagingPage"),
 );
+const ReactiveDeepDivePage = lazy(
+  () => import("./maang/reactive/ReactiveDeepDivePage"),
+);
+const AiMlFundamentalsPage = lazy(
+  () => import("./maang/ai-ml/AiMlFundamentalsPage"),
+);
 const MicroservicesPage = lazy(
   () => import("./maang/system-design/microservices/MicroservicesPage"),
 );
@@ -493,6 +499,22 @@ function App() {
                   element={
                     <RequirePaid>
                       <MessagingPage />
+                    </RequirePaid>
+                  }
+                />
+                <Route
+                  path="/maang/reactive-deep-dive"
+                  element={
+                    <RequirePaid>
+                      <ReactiveDeepDivePage />
+                    </RequirePaid>
+                  }
+                />
+                <Route
+                  path="/maang/ai-ml-fundamentals"
+                  element={
+                    <RequirePaid>
+                      <AiMlFundamentalsPage />
                     </RequirePaid>
                   }
                 />
