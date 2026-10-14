@@ -490,7 +490,7 @@ function ReactiveDeepDivePage() {
         </p>
 
         <div className="acid-chip-row">
-          <span className="acid-chip">🧩 11 core concepts</span>
+          <span className="acid-chip">🧩 12 core concepts</span>
           <span className="acid-chip">⚡ Design &amp; working only</span>
           <span className="acid-chip">🔥 Real-world analogies</span>
         </div>
@@ -515,7 +515,7 @@ function ReactiveDeepDivePage() {
 
       {/* ===== TOPIC CARDS ===== */}
       <section className="acid-props">
-        <h2 className="acid-section-title">The 11 Reactive Concepts</h2>
+        <h2 className="acid-section-title">The 12 Reactive Concepts</h2>
         <p className="acid-section-sub">
           Click any card to open the full explanation with a real-world analogy
           and an ASCII architecture diagram of how it works.
