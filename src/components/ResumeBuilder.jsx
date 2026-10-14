@@ -857,38 +857,11 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
       // prettier-ignore
       void element.offsetHeight;
 
-      // Measure preview dimensions and link positions relative to the
-      // preview container (in CSS pixels). These will be scaled to PDF
-      // mm coordinates after the html2canvas capture.
-      const previewRect = element.getBoundingClientRect();
-      const previewWidthPx = previewRect.width;
-      const linkElements = element.querySelectorAll(".rb-preview-link");
-      const linkPositions = Array.from(linkElements)
-        .map((link) => {
-          const rect = link.getBoundingClientRect();
-          return {
-            left: rect.left - previewRect.left,
-            top: rect.top - previewRect.top,
-            width: rect.width,
-            height: rect.height,
-            url: link.href,
-          };
-        })
-        .filter((pos) => {
-          // Keep mailto and well-formed HTTP(S) URLs that have a dot
-          // in the hostname — filters out entries like "https://Linkdin".
-          if (!pos.url) return false;
-          if (pos.url.startsWith("mailto:")) return true;
-          if (pos.url.startsWith("tel:")) return true;
-          if (pos.url.startsWith("https://") || pos.url.startsWith("http://")) {
-            try {
-              return new URL(pos.url).hostname.includes(".");
-            } catch {
-              return false;
-            }
-          }
-          return false;
-        });
+      // Measured from the CLONED desktop-width layout inside onclone
+      // (live DOM on mobile is narrow/column-stacked, so measuring it
+      // would misplace the tappable link overlays in the PDF).
+      let previewWidthPx = element.getBoundingClientRect().width || 780;
+      let linkPositions = [];
 
       // Use html2canvas to capture the EXACT preview HTML as an image,
       // guaranteeing the downloaded PDF matches the on-screen preview
@@ -905,11 +878,111 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
             clonedEl.style.maxHeight = "none";
             clonedEl.style.overflow = "visible";
             clonedEl.style.overflowY = "visible";
+            clonedEl.style.overflowX = "visible";
             // FIX (mobile): capture at desktop width so the top headline /
-            // contact row never mixes/overlaps in the exported PDF.
+            // contact row never stacks into a column in the exported PDF.
+            // NOTE: html2canvas clones <style> tags into an iframe whose
+            // viewport is still the mobile width, so width alone does NOT
+            // beat @media (max-width: 768px / 420px) rules — the row layout
+            // must also be forced inline on the cloned document.
             clonedEl.style.width = "780px";
             clonedEl.style.maxWidth = "780px";
             clonedEl.style.minWidth = "780px";
+            clonedEl.style.padding = "32px";
+            clonedEl.style.wordBreak = "normal";
+            clonedEl.style.overflowWrap = "normal";
+            // Contact row: desktop row layout (row + wrap + center).
+            const clonedContact = clonedEl.querySelector(".rb-preview-contact");
+            if (clonedContact) {
+              clonedContact.style.display = "flex";
+              clonedContact.style.flexDirection = "row";
+              clonedContact.style.flexWrap = "wrap";
+              clonedContact.style.justifyContent = "center";
+              clonedContact.style.alignItems = "center";
+              clonedContact.style.gap = "4px 16px";
+              clonedContact.style.fontSize = "0.85rem";
+              clonedContact.style.maxWidth = "100%";
+              clonedContact.style.wordBreak = "normal";
+              clonedContact.style.overflowWrap = "normal";
+            }
+            clonedEl
+              .querySelectorAll(".rb-preview-contact-item")
+              .forEach((item) => {
+                item.style.display = "inline-flex";
+                item.style.flexDirection = "row";
+                item.style.flexWrap = "nowrap";
+                item.style.alignItems = "center";
+                item.style.whiteSpace = "nowrap";
+                item.style.fontSize = "0.85rem";
+                item.style.lineHeight = "1.5";
+                item.style.maxWidth = "none";
+                item.style.wordBreak = "normal";
+                item.style.overflowWrap = "normal";
+              });
+            // Headline: desktop sizes.
+            const clonedName = clonedEl.querySelector(".rb-preview-header h2");
+            if (clonedName) {
+              clonedName.style.fontSize = "1.6rem";
+              clonedName.style.lineHeight = "1.2";
+              clonedName.style.wordBreak = "normal";
+              clonedName.style.overflowWrap = "normal";
+            }
+            // Job headers + skills grid: desktop row/grid layout.
+            clonedEl
+              .querySelectorAll(".rb-preview-item-header")
+              .forEach((h) => {
+                h.style.display = "flex";
+                h.style.flexDirection = "row";
+                h.style.justifyContent = "space-between";
+                h.style.alignItems = "baseline";
+                h.style.gap = "12px";
+                h.style.flexWrap = "wrap";
+              });
+            clonedEl
+              .querySelectorAll(".rb-preview-skills-grid")
+              .forEach((g) => {
+                g.style.display = "grid";
+                g.style.gridTemplateColumns = "140px auto 1fr";
+                g.style.gap = "4px 12px";
+                g.style.fontSize = "0.85rem";
+              });
+            // Measure preview width + link positions from THIS cloned
+            // desktop-width layout (in CSS pixels) — the live DOM on mobile
+            // is narrow/column-stacked and would misplace the PDF links.
+            const clonedRect = clonedEl.getBoundingClientRect();
+            if (clonedRect.width > 0) previewWidthPx = clonedRect.width;
+            linkPositions = Array.from(
+              clonedEl.querySelectorAll(".rb-preview-link"),
+            )
+              .map((link) => {
+                const rect = link.getBoundingClientRect();
+                return {
+                  left: rect.left - clonedRect.left,
+                  top: rect.top - clonedRect.top,
+                  width: rect.width,
+                  height: rect.height,
+                  url: link.href,
+                };
+              })
+              .filter((pos) => {
+                // Keep mailto and well-formed HTTP(S) URLs that have a dot
+                // in the hostname — filters out entries like
+                // "https://Linkdin".
+                if (!pos.url) return false;
+                if (pos.url.startsWith("mailto:")) return true;
+                if (pos.url.startsWith("tel:")) return true;
+                if (
+                  pos.url.startsWith("https://") ||
+                  pos.url.startsWith("http://")
+                ) {
+                  try {
+                    return new URL(pos.url).hostname.includes(".");
+                  } catch {
+                    return false;
+                  }
+                }
+                return false;
+              });
           }
           clonedDoc.querySelectorAll(constraintSelectors).forEach((p) => {
             p.style.maxHeight = "none";
