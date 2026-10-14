@@ -1823,14 +1823,31 @@ html[data-theme="dark"] .mdsa-solve-btn[data-platform="youtube"] {
   }
 }
 
-/* On small screens the stats line stacks and centers. */
+/* Keep the course totals compact and scannable on small screens. */
 @media (max-width: 768px) {
   .mdsa-stats-line {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.6rem 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.25rem;
+    padding: 0.65rem 0.5rem;
     margin: 0 0 1rem 0;
+  }
+
+  .mdsa-stats-separator {
+    display: none;
+  }
+
+  .mdsa-stat-item {
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.1rem;
+    font-size: 0.72rem;
+    text-align: center;
+  }
+
+  .mdsa-stat-num {
+    min-width: 0;
+    font-size: 0.95rem;
   }
 }
 

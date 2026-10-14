@@ -42,9 +42,12 @@ function QuestionPopup({
   // Handlers are read through refs so pages can pass plain callbacks
   // without re-subscribing the listener on every render.
   const closeRef = useRef(onClose);
-  closeRef.current = onClose;
   const moveRef = useRef(onMove);
-  moveRef.current = onMove;
+  useEffect(() => {
+    closeRef.current = onClose;
+    moveRef.current = onMove;
+  }, [onClose, onMove]);
+
   useEffect(() => {
     if (!question) return undefined;
     const onKey = (e) => {
@@ -99,7 +102,8 @@ function QuestionPopup({
               {question.category ? ` · ${question.category}` : ""}
             </span>
             <h3 className="qp-q">
-              <span className="qp-qnum">Q{question.id}</span> {question.question}
+              <span className="qp-qnum">Q{question.id}</span>{" "}
+              {question.question}
             </h3>
           </div>
           <button
