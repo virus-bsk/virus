@@ -107,7 +107,6 @@ export default function AdminUsers() {
               <td>
                 <span className="admin-user-cell">
                   <strong>{u.userName || "—"}</strong>
-                  <code className="admin-id" title={u.id}>{u.id}</code>
                 </span>
               </td>
               <td><span className={`admin-badge${u.isPaid === true ? " admin-badge-paid" : ""}`}>{u.isPaid === true ? "Paid" : "Not paid"}</span></td>
