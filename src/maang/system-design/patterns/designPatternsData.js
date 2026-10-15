@@ -18,11 +18,11 @@ export const designPatternsTopics = [
     id: "singleton",
     icon: "fa-infinity",
     title: "Singleton",
-    sub: "Creational · one instance",
+    sub: "Making objects · only one shared copy",
     category: "creational",
-    desc: "Ensures a class has only one instance and provides a global point of access.",
+    desc: "Make sure only ONE copy of something exists in the whole app, and everyone shares that same one.",
     definition:
-      "Singleton restricts instantiation to a single object with a private constructor and a static getInstance() method. Thread-safe (double-checked locking) variant included.",
+      "Think of your country's President — there is only one, no matter how many times people ask. Singleton means a class can create only ONE object, and everyone who asks gets the exact same one. We use it for things like a single database connection or one settings file, so the whole app shares one copy instead of wasting memory making many. It also keeps everything in one place.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ===== SINGLETON PATTERN =====
 
@@ -66,12 +66,12 @@ public class Main {
     }
 }`,
     diagram: svgSingleton,
-    relation: "🔂 One instance throughout the app — global access point",
+    relation: "🔂 Only one copy is ever made — everyone uses the same shared one",
     points: [
-      "Private constructor",
-      "Static getInstance() with double-checked locking",
-      "Thread-safe (volatile field)",
-      "Used for DB pools, config, logging",
+      "Only ONE object is created for the whole app",
+      "Every part of the code gets the SAME copy",
+      "Great for: a single database connection, one settings file, one logger",
+      "Saves memory and keeps everything in one shared place",
     ],
   },
 
@@ -80,11 +80,11 @@ public class Main {
     id: "factory",
     icon: "fa-industry",
     title: "Factory Method",
-    sub: "Creational · object creation",
+    sub: "Making objects · a factory builds it for you",
     category: "creational",
-    desc: "Defines an interface for creating objects but lets subclasses decide which class to instantiate.",
+    desc: "You ask for what you want, and a factory builds the right object for you — you never build it yourself.",
     definition:
-      "Factory Method moves the instantiation logic away from the client into a factory. The client depends on the interface, and the factory decides the concrete type — perfect for OCP.",
+      "Imagine a pizza shop: you say 'I want a veg pizza' and they make it. You don't cook it yourself. A Factory works the same way. You tell the factory WHAT you want (like 'email' or 'sms'), and it creates the right object and hands it to you. Your main code stays clean because it never has to know HOW each object is built — it just asks for one by name and uses it.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ===== FACTORY METHOD PATTERN =====
 
@@ -133,12 +133,12 @@ public class Main {
     }
 }`,
     diagram: svgFactory,
-    relation: "🏭 Factory decides the concrete object — client hides 'new'",
+    relation: "🏭 The factory builds the object — your code just asks for it",
     points: [
-      "Client depends on the interface",
-      "Factory encapsulates creation logic",
-      "Easy to add new product types (OCP)",
-      "Reduces tight coupling",
+      "Your code only says WHAT it wants, not HOW to build it",
+      "All the building happens in one place (the factory)",
+      "Adding a new type is easy — you just add it inside the factory",
+      "Keeps your main code clean and less tightly tied to details",
     ],
   },
 
@@ -147,11 +147,11 @@ public class Main {
     id: "builder",
     icon: "fa-layer-group",
     title: "Builder",
-    sub: "Creational · complex objects",
+    sub: "Making objects · build step by step",
     category: "creational",
-    desc: "Separates object construction from its representation, step by step.",
+    desc: "Build a big object step by step, adding only the pieces you actually need.",
     definition:
-      "Builder lets you construct complex objects piece by piece with a fluent API. Useful when an object has many optional parameters or an awkward constructor.",
+      "Think of ordering a burger at a custom counter — you add patty, then cheese, skip the onions, add sauce, one step at a time, then say 'done'. Builder works the same way for objects. When an object has lots of optional parts, instead of one giant confusing setup with 15 settings you mostly leave empty, you set only what you need, piece by piece, and press 'build' at the end. Much easier to read and no mistakes with the wrong order of settings.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ===== BUILDER PATTERN =====
 
@@ -203,12 +203,12 @@ public class Main {
     }
 }`,
     diagram: svgBuilder,
-    relation: "🧱 Fluent step-by-step construction — optional params without megaconstructors",
+    relation: "🧱 Set the pieces one by one, then build — no giant confusing setup",
     points: [
-      "Fluent chained setters",
-      "Immutability after build",
-      "Handles many optional parameters",
-      "Improves readability",
+      "Add settings one step at a time, like filling a form",
+      "Only set the parts you need — skip the rest",
+      "Perfect when an object has many optional pieces",
+      "Easy to read, and the finished object can't be changed by accident",
     ],
   },
 
@@ -217,11 +217,11 @@ public class Main {
     id: "observer",
     icon: "fa-bell",
     title: "Observer",
-    sub: "Behavioural · publish-subscribe",
+    sub: "How pieces talk · tell everyone on change",
     category: "behavioral",
-    desc: "Define a one-to-many dependency so when one object changes, its dependents are notified.",
+    desc: "When one thing changes, everyone who signed up to hear about it gets told automatically.",
     definition:
-      "Observer (publish/subscribe): a Subject maintains a list of Observers and notifies them of state changes. Decouples producer from consumers — new observers can be added without touching the subject.",
+      "Think of a YouTube channel. When it posts a new video, everyone who subscribed gets a notification — they don't have to keep checking the channel all day. Observer works the same way. One object (the channel) keeps a list of people who subscribed (the watchers). When something changes, it tells ALL of them at once. That's how notifications, live feeds, and 'subscribe' buttons work.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ===== OBSERVER PATTERN =====
 import java.util.*;
@@ -279,12 +279,12 @@ public class Main {
     }
 }`,
     diagram: svgObserver,
-    relation: "🔔 Subject notifies observers on change — publish/subscribe",
+    relation: "🔔 One thing changes → everyone subscribed gets told at once",
     points: [
-      "One-to-many dependency",
-      "Observer decoupled from subject",
-      "New observers added without subject change",
-      "Event-driven design",
+      "Many people can listen to one thing at the same time",
+      "Listeners don't have to keep checking for updates",
+      "Add or remove listeners anytime without changing the main thing",
+      "This is how notifications and live updates work",
     ],
   },
 
@@ -293,11 +293,11 @@ public class Main {
     id: "strategy",
     icon: "fa-bullseye",
     title: "Strategy",
-    sub: "Behavioural · interchangeable algorithms",
+    sub: "How pieces talk · swap the method anytime",
     category: "behavioral",
-    desc: "Define a family of algorithms, encapsulate each, and make them interchangeable at runtime.",
+    desc: "Pick HOW to do something, and swap the method anytime — without changing the rest of your code.",
     definition:
-      "Strategy pattern lets you swap algorithms at runtime by encapsulating them behind an interface. The context delegates to the current strategy — no if/else chains for behavior selection.",
+      "Think of paying at a shop. You can pay by card, by UPI, or by cash. The goal (paying) is the same, but the method is different, and you can switch on the spot. Strategy works the same way. Each way of doing a job is kept in its own box, and your code just picks one and uses it. Want a new payment method later? Just add a new box — no need to rewrite the old ones. No messy if-else.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ===== STRATEGY PATTERN =====
 
@@ -351,12 +351,12 @@ public class Main {
     }
 }`,
     diagram: svgStrategy,
-    relation: "🎯 Swap algorithms at runtime — no if/else for behavior",
+    relation: "🎯 Choose the method you want — swap it anytime, no if/else mess",
     points: [
-      "Encapsulated interchangeable algorithms",
-      "Runtime strategy switching",
-      "Follows OCP (add strategy, don't modify)",
-      "Delegation to current strategy",
+      "Each way of doing the job sits in its own separate box",
+      "You can switch the method while the app is running",
+      "Add a new method without touching the old ones",
+      "No long if-else chains to pick what to do",
     ],
   },
 
@@ -365,11 +365,11 @@ public class Main {
     id: "proxy",
     icon: "fa-shield-halved",
     title: "Proxy",
-    sub: "Structural · controlled access",
+    sub: "Fitting together · a guard controls access",
     category: "structural",
-    desc: "Provide a placeholder or surrogate for another object to control access to it.",
+    desc: "A stand-in that guards the real object — it can check permission, load lazily, or remember results.",
     definition:
-      "Proxy provides a surrogate/placeholder for another object to control access. Common types: Virtual (lazy loading), Protection (auth checks), Remote (network), Caching (memoize). Same interface as the real object.",
+      "Think of a celebrity's manager. Fans don't reach the star directly — they go through the manager, who decides who gets through, when, and how. A Proxy is that manager for an object. It looks and works exactly like the real thing from the outside, but quietly does extra jobs: it can wait and load the real thing only when needed (to save time), check that you're allowed in (security), or remember an old answer instead of asking again (caching).",
     videoLink: CHANNEL_UPLOADS,
     code: `// ===== PROXY PATTERN =====
 // Proxy controls access to a real object.
@@ -431,12 +431,12 @@ public class Main {
     }
 }`,
     diagram: svgProxy,
-    relation: "🛡️ Proxy controls access to real subject — lazy load / cache / auth / remote",
+    relation: "🛡️ A guard stands in front — controls access, saves time, remembers results",
     points: [
-      "Same interface as the real object",
-      "Virtual proxy = lazy initialization",
-      "Protection proxy = access control / auth",
-      "Caching & remote proxies are common",
+      "It looks and acts just like the real object",
+      "Can load the real thing only when needed (saves time)",
+      "Can check permission before letting you in (security)",
+      "Can remember an old answer instead of doing the work again (caching)",
     ],
   },
 
@@ -445,11 +445,11 @@ public class Main {
     id: "chain",
     icon: "fa-link",
     title: "Chain of Responsibility",
-    sub: "Behavioural · pass the request",
+    sub: "How pieces talk · pass it until someone handles it",
     category: "behavioral",
-    desc: "Pass a request along a chain of handlers until one of them handles it.",
+    desc: "Pass a request from one handler to the next until someone can actually handle it.",
     definition:
-      "Chain of Responsibility decouples sender from receiver by giving multiple objects a chance to handle the request. Each handler holds a reference to the next; if it can't handle, it forwards. Common in logging, auth, approval flows, middleware.",
+      "Think of calling customer support. First a robot tries to help. If it can't, it passes you to a human agent. If that agent can't fix it, they pass you to a manager. The request keeps moving along the line until the right person handles it. Chain of Responsibility works the same way: each handler gets a turn, decides 'can I handle this?', and if not, passes it to the next one in line.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ===== CHAIN OF RESPONSIBILITY PATTERN =====
 // A support ticket flows through handlers until one resolves it.
@@ -526,12 +526,12 @@ public class Main {
     }
 }`,
     diagram: svgChainOfResponsibility,
-    relation: "🔗 Request flows through handlers until one processes it",
+    relation: "🔗 The request passes along until the right handler takes care of it",
     points: [
-      "Decouples sender from receiver",
-      "Each handler decides: handle or pass on",
-      "Easy to add / remove handlers at runtime",
-      "Used in: middleware, auth, logging, approvals",
+      "You don't need to know WHO will handle it — you just send it",
+      "Each handler either fixes it or passes it to the next",
+      "Easy to add or remove handlers anytime",
+      "Used in: customer support, approvals, logins, and app middleware",
     ],
   },
 ];

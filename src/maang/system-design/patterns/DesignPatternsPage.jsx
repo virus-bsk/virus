@@ -200,8 +200,8 @@ export default function DesignPatternsPage() {
             <li>
               <i className="fas fa-check-circle" />
               <span>
-                <b>Loose coupling</b> — components interact via interfaces, easy
-                to swap
+                <b>Parts stay independent</b> — you can swap one piece out
+                without breaking the rest
               </span>
             </li>
             <li>
@@ -221,8 +221,9 @@ export default function DesignPatternsPage() {
             <li>
               <i className="fas fa-check-circle" />
               <span>
-                <b>3 categories</b> — Creational (how to create), Structural
-                (how to compose), Behavioural (how to communicate)
+                <b>3 simple groups</b> — Creational (making objects),
+                Structural (fitting pieces together), Behavioural (how pieces
+                talk)
               </span>
             </li>
           </ul>
@@ -244,21 +245,21 @@ export default function DesignPatternsPage() {
         {
           key: "creational",
           label: "Creational Patterns",
-          sub: "How objects are created",
+          sub: "About making new objects the smart way",
           icon: "fa-cubes",
           color: "#ff6b6b",
         },
         {
           key: "structural",
           label: "Structural Patterns",
-          sub: "How classes & objects are composed",
+          sub: "About fitting pieces together cleanly",
           icon: "fa-shapes",
           color: "#4ecdc4",
         },
         {
           key: "behavioral",
           label: "Behavioural Patterns",
-          sub: "How objects communicate & assign responsibility",
+          sub: "About how pieces talk and share work",
           icon: "fa-people-arrows",
           color: "#a78bfa",
         },
