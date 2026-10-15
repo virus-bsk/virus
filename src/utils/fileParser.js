@@ -108,19 +108,12 @@ Extract every detail you can find:
 10. **projects** - Array of projects with: name, techStack, and points (array of contribution bullets)
 11. **skills** - Object with categories: languages, frameworks, frontend, databases, devops, testing, cloud, messaging, concepts
 12. **education** - Array of education entries with: degree, institution, cgpa, startYear, endYear, location
-13. **certificates** - Array of certification names
+  13. **certificates** - Array of certification objects with name, issuer, and url
 
 Rules:
-- If a field is not found in the resume, use an empty string "" (or empty array [] for arrays).
-- POLISH all extracted content to be ATS-friendly and professional:
   - Rewrite experience/project bullet points with strong action verbs and quantified achievements where possible.
   - Clean up grammar, spelling, and formatting.
   - Make content concise and impactful.
-- For skills, categorize them correctly (e.g., Java, Python → languages; Spring Boot, React → frameworks/frontend).
-- If the resume has NO summary/objective, GENERATE a compelling 2-3 sentence professional summary based on the person's title, experience, and skills. Make it ATS-optimized with relevant keywords.
-- If the resume has a summary, polish and improve it to be more professional and ATS-friendly.
-- Use **bold** markdown syntax (wrap text in double asterisks, e.g. **RESTful APIs**) to highlight important keywords, metrics, technology names, and key achievements within the summary and bullet points (e.g., "Developed **RESTful APIs** using **Spring Boot**, reducing latency by **40%**"). Bold sparingly — only the most impactful terms.
-- Return ONLY the valid JSON object. No markdown fences, no explanation, no extra text.
 
 The response MUST be exactly this JSON structure:
 {
@@ -170,6 +163,12 @@ The response MUST be exactly this JSON structure:
       "location": ""
     }
   ],
-  "certificates": [""]
-}`;
+    "certificates": [
+      {
+        "name": "",
+        "issuer": "",
+        "url": ""
+      }
+    ]
+  }`;
 }

@@ -517,7 +517,7 @@
 .rb-preview--template2 .rb-preview-header {
   order: 0;
   padding-bottom: 12px;
-  border-bottom: 1px solid #1f2937;
+  border-bottom: none;
   margin-bottom: 12px;
 }
 
@@ -538,28 +538,24 @@
   font-size: 0.92rem;
 }
 
-.rb-preview--template2 .rb-preview-section--summary {
+.rb-preview--template2 .rb-preview-section--experience {
   order: 1;
 }
 
-.rb-preview--template2 .rb-preview-section--experience {
+.rb-preview--template2 .rb-preview-section--projects {
   order: 2;
 }
 
-.rb-preview--template2 .rb-preview-section--projects {
+.rb-preview--template2 .rb-preview-section--certifications {
   order: 3;
 }
 
-.rb-preview--template2 .rb-preview-section--certifications {
+.rb-preview--template2 .rb-preview-section--skills {
   order: 4;
 }
 
-.rb-preview--template2 .rb-preview-section--skills {
-  order: 5;
-}
-
 .rb-preview--template2 .rb-preview-section--education {
-  order: 6;
+  order: 5;
 }
 
 .rb-preview--template2 .rb-preview-item {
@@ -573,7 +569,7 @@
 
 .rb-preview--template2 .rb-preview-section--certifications ul {
   margin: 0;
-  padding-left: 16px;
+  padding-left: 20px;
 }
 
 .rb-preview--template2 .rb-preview-section--skills .rb-preview-skills-grid {

@@ -113,7 +113,7 @@ const EMPTY_RESUME = {
       location: "",
     },
   ],
-  certificates: [{ name: "", url: "" }],
+  certificates: [{ name: "", issuer: "", url: "" }],
 };
 
 // Returns the display name of a certificate entry (handles string or {name, url} shapes).
@@ -121,6 +121,8 @@ const EMPTY_RESUME = {
 // (preview, PDF export) so an empty "Certifications" headline never shows.
 const getCertName = (cert) =>
   (typeof cert === "string" ? cert : cert?.name || "").trim();
+const getCertIssuer = (cert) =>
+  (typeof cert === "string" ? "" : cert?.issuer || "").trim();
 
 // Counts the form fields the user has actually filled in (arrays and nested
 // objects are walked). EMPTY_RESUME scores 0, a couple of typed characters
@@ -513,6 +515,8 @@ function ResumeBuilder({ onClose }) {
                 ? { name: cert, url: "" }
                 : {
                     name: cert.name || cert.certificate || "",
+                    issuer:
+                      cert.issuer || cert.issuerName || cert.organization || "",
                     url: cert.url || cert.link || "",
                   },
             )
@@ -603,7 +607,7 @@ function ResumeBuilder({ onClose }) {
           location: "",
         });
       } else if (section === "certificates") {
-        items.push({ name: "", url: "" });
+        items.push({ name: "", issuer: "", url: "" });
       }
       return { ...prev, [section]: items };
     });
@@ -1333,9 +1337,9 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
       });
     };
 
-    const addBullet = (text, size = 10) => {
+    const addBullet = (text, size = 10, indent = 0) => {
       const tokens = segmentToTokens(parseSegments(text.trim()));
-      const maxWidth = contentWidth - 12;
+      const maxWidth = contentWidth - 12 - indent;
       const lines = wrapTokens(tokens, maxWidth, size);
       ensureSpace(lines.length * 5.5);
       lines.forEach((line, i) => {
@@ -1343,15 +1347,15 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
           doc.setFont("helvetica", "normal");
           doc.setFontSize(size);
           doc.setTextColor(0, 0, 0);
-          doc.text("•", margin + 2, y);
+          doc.text("•", margin + 2 + indent, y);
         }
-        drawTokens(line, margin + 10, size, [0, 0, 0]);
+        drawTokens(line, margin + 10 + indent, size, [0, 0, 0]);
         y += 5.5;
       });
     };
 
     // ===== SUMMARY =====
-    if (resume.summary) {
+    if (resume.summary && resumeTemplate === "template1") {
       addSection("Professional Summary");
       addText(resume.summary, 10);
       y += 4;
@@ -1360,7 +1364,9 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
     // ===== SKILLS =====
     const skillEntries = Object.entries(resume.skills).filter(([, v]) => v);
     if (skillEntries.length > 0) {
-      addSection("Technical Skills");
+      addSection(
+        resumeTemplate === "template2" ? "Skills" : "Technical Skills",
+      );
       const skillLabels = {
         languages: "Languages",
         frameworks: "Frameworks",
@@ -1408,7 +1414,11 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
 
     // ===== EXPERIENCE =====
     if (resume.experience.some((e) => e.company || e.role)) {
-      addSection("Professional Experience");
+      addSection(
+        resumeTemplate === "template2"
+          ? "Experience"
+          : "Professional Experience",
+      );
       resume.experience.forEach((exp) => {
         if (!exp.company && !exp.role) return;
         ensureSpace(30);
@@ -1453,7 +1463,9 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
 
     // ===== PROJECTS =====
     if (resume.projects.some((p) => p.name)) {
-      addSection("Technical Projects");
+      addSection(
+        resumeTemplate === "template2" ? "Projects" : "Technical Projects",
+      );
       resume.projects.forEach((proj) => {
         if (!proj.name) return;
         ensureSpace(30);
@@ -1536,30 +1548,45 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
       addSection("Certifications");
       certs.forEach((cert) => {
         const certName = getCertName(cert);
+        const certIssuer = getCertIssuer(cert);
+        const certLabel =
+          resumeTemplate === "template2" && certIssuer
+            ? `${certName} - ${certIssuer}`
+            : certName;
+        const certIndent = resumeTemplate === "template2" ? 4 : 0;
         const certUrl = typeof cert === "string" ? "" : cert.url || "";
         if (certUrl && certUrl.startsWith("http")) {
           // Draw clickable link for certificate
           doc.setFont("helvetica", "normal");
           doc.setFontSize(10);
           doc.setTextColor(30, 58, 138);
-          const lines = doc.splitTextToSize(certName, contentWidth - 12);
+          const lines = doc.splitTextToSize(
+            certLabel,
+            contentWidth - 12 - certIndent,
+          );
           ensureSpace(lines.length * 5.5);
           const linkY = y;
           lines.forEach((line, i) => {
             if (i === 0) {
-              doc.text("•", margin + 2, y);
-              doc.text(line, margin + 10, y);
+              doc.text("•", margin + 2 + certIndent, y);
+              doc.text(line, margin + 10 + certIndent, y);
             } else {
-              doc.text(line, margin + 10, y);
+              doc.text(line, margin + 10 + certIndent, y);
             }
             y += 5.5;
           });
-          doc.link(margin + 8, linkY - 4, doc.getTextWidth(certName), 5, {
-            url: certUrl,
-          });
+          doc.link(
+            margin + 8 + certIndent,
+            linkY - 4,
+            doc.getTextWidth(certLabel),
+            5,
+            {
+              url: certUrl,
+            },
+          );
           doc.setTextColor(0, 0, 0);
         } else {
-          addBullet(certName, 10);
+          addBullet(certLabel, 10, certIndent);
         }
       });
     }
@@ -2267,6 +2294,22 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                   />
                 </div>
                 <div className="rb-field">
+                  <label>Issuing Organization</label>
+                  <input
+                    type="text"
+                    value={cert.issuer || ""}
+                    onChange={(e) =>
+                      updateArrayItem(
+                        "certificates",
+                        idx,
+                        "issuer",
+                        e.target.value,
+                      )
+                    }
+                    placeholder="e.g. Oracle or Google Cloud Platform (GCP)"
+                  />
+                </div>
+                <div className="rb-field">
                   <label>Certificate URL (optional)</label>
                   <input
                     type="text"
@@ -2437,7 +2480,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                   )}
                 </p>
               </div>
-              {resume.summary && (
+              {resumeTemplate === "template1" && resume.summary && (
                 <div className="rb-preview-section rb-preview-section--summary">
                   <h3>Professional Summary</h3>
                   <p>{formatText(resume.summary)}</p>
@@ -2445,7 +2488,11 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
               )}
               {Object.entries(resume.skills).some(([, v]) => v) && (
                 <div className="rb-preview-section rb-preview-section--skills">
-                  <h3>Technical Skills</h3>
+                  <h3>
+                    {resumeTemplate === "template2"
+                      ? "Skills"
+                      : "Technical Skills"}
+                  </h3>
                   <div className="rb-preview-skills-grid">
                     {Object.entries(resume.skills)
                       .filter(([, v]) => v)
@@ -2466,7 +2513,11 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
               )}
               {resume.experience.some((e) => e.company || e.role) && (
                 <div className="rb-preview-section rb-preview-section--experience">
-                  <h3>Professional Experience</h3>
+                  <h3>
+                    {resumeTemplate === "template2"
+                      ? "Experience"
+                      : "Professional Experience"}
+                  </h3>
                   {resume.experience
                     .filter((e) => e.company || e.role)
                     .map((exp, idx) => (
@@ -2497,7 +2548,11 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
               )}
               {resume.projects.some((p) => p.name) && (
                 <div className="rb-preview-section rb-preview-section--projects">
-                  <h3>Technical Projects</h3>
+                  <h3>
+                    {resumeTemplate === "template2"
+                      ? "Projects"
+                      : "Technical Projects"}
+                  </h3>
                   {resume.projects
                     .filter((p) => p.name)
                     .map((proj, idx) => (
@@ -2573,6 +2628,11 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                       .filter(getCertName)
                       .map((cert, idx) => {
                         const certName = getCertName(cert);
+                        const certIssuer = getCertIssuer(cert);
+                        const certLabel =
+                          resumeTemplate === "template2" && certIssuer
+                            ? `${certName} - ${certIssuer}`
+                            : certName;
                         const certUrl =
                           typeof cert === "string" ? "" : cert.url || "";
                         return (
@@ -2588,10 +2648,10 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                                 rel="noopener noreferrer"
                                 className="rb-preview-link"
                               >
-                                {certName}
+                                {certLabel}
                               </a>
                             ) : (
-                              certName
+                              certLabel
                             )}
                           </li>
                         );
