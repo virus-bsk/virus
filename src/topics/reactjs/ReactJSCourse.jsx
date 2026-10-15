@@ -63,7 +63,7 @@ function ReactJSCourse() {
   };
 
   return (
-    <div className="react-course-page">
+    <div className="react-course-page reactjs-course-page">
       <section className="react-course-hero">
         <Link to="/reactjs" className="react-course-back">
           ← Back to ReactJS

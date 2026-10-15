@@ -231,6 +231,23 @@
 .reactive-course-page .react-course-detail {
   min-height: 100%;
 }
+
+.reactive-course-page .react-course-sidebar,
+.javascript-course-page .react-course-sidebar,
+.reactjs-course-page .react-course-sidebar {
+  align-self: stretch;
+  max-height: none;
+  min-height: 0;
+}
+
+.reactive-course-page .react-course-list,
+.javascript-course-page .react-course-list,
+.reactjs-course-page .react-course-list {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+
 .react-course-detail-top {
   display: flex;
   flex-wrap: wrap;
