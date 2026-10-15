@@ -58,9 +58,18 @@ export function svgFactory() {
         .fy-divider { stroke: #ccc; stroke-width: 1; }
         .fy-label { fill: #e94560; font-weight: 600; font-size: 11px; font-family: Segoe UI, sans-serif; }
         .fy-arrow { stroke: #00695c; stroke-width: 2.5; fill: none; marker-end: url(#arrowFY); }
+        .fy-impl { stroke: #6a1b9a; stroke-width: 2; stroke-dasharray: 6,3; fill: none; marker-end: url(#arrowImpl); }
+        .fy-dep  { stroke: #00695c; stroke-width: 2; stroke-dasharray: 5,3; fill: none; marker-end: url(#arrowDep); }
+        .fy-note { fill: #6a1b9a; font-weight: 600; font-size: 10px; font-family: Segoe UI, sans-serif; }
       </style>
       <marker id="arrowFY" markerWidth="12" markerHeight="8" refX="12" refY="4" orient="auto">
         <polygon points="0 0, 12 4, 0 8" fill="#00695c" />
+      </marker>
+      <marker id="arrowImpl" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto">
+        <polygon points="0 0, 13 6, 0 12" fill="#fff" stroke="#6a1b9a" stroke-width="1.5" />
+      </marker>
+      <marker id="arrowDep" markerWidth="12" markerHeight="8" refX="12" refY="4" orient="auto">
+        <polyline points="0 0, 12 4, 0 8" fill="none" stroke="#00695c" stroke-width="1.5" />
       </marker>
     </defs>
     <rect x="20" y="40" width="170" height="110" class="fy-box" />
@@ -91,11 +100,17 @@ export function svgFactory() {
     <line x1="470" y1="296" x2="580" y2="296" class="fy-divider" />
     <text x="480" y="318" class="fy-method">implements</text>
 
-    <line x1="190" y1="80" x2="250" y2="50" class="fy-arrow" />
-    <line x1="190" y1="80" x2="460" y2="50" class="fy-arrow" />
-    <line x1="190" y1="80" x2="460" y2="160" class="fy-arrow" />
-    <line x1="190" y1="80" x2="460" y2="280" class="fy-arrow" />
-    <text x="210" y="130" class="fy-label">client never uses 'new'</text>
+    <!-- Factory DEPENDS ON the «interface» Notification (returns the interface, not concretes) -->
+    <line x1="190" y1="80" x2="248" y2="60" class="fy-dep" />
+    <text x="196" y="52" class="fy-note">«create» returns</text>
+    <text x="196" y="64" class="fy-note">Notification</text>
+
+    <!-- Each concrete class IMPLEMENTS the «interface» Notification (dashed, hollow triangle) -->
+    <line x1="458" y1="55" x2="412" y2="52" class="fy-impl" />
+    <line x1="458" y1="165" x2="412" y2="66" class="fy-impl" />
+    <line x1="458" y1="275" x2="412" y2="80" class="fy-impl" />
+    <text x="228" y="140" class="fy-label">client never uses 'new'</text>
+    <text x="228" y="156" class="fy-note">factory depends on the interface only</text>
     <rect x="150" y="330" width="420" height="50" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5" rx="8" />
     <text x="360" y="350" text-anchor="middle" class="fy-label" fill="#2e7d32">✅ Factory encapsulates creation — add types without touching client</text>
     <text x="360" y="370" class="fy-method" font-size="11" fill="#2e7d32">create("sms") → SMSNotification at runtime</text>
@@ -202,9 +217,13 @@ export function svgStrategy() {
         .st-divider { stroke: #ccc; stroke-width: 1; }
         .st-label { fill: #e94560; font-weight: 600; font-size: 11px; font-family: Segoe UI, sans-serif; }
         .st-arrow { stroke: #00695c; stroke-width: 2.5; fill: none; marker-end: url(#arrowST); }
+        .st-impl { stroke: #6a1b9a; stroke-width: 2; stroke-dasharray: 6,3; fill: none; marker-end: url(#arrowImplST); }
       </style>
       <marker id="arrowST" markerWidth="12" markerHeight="8" refX="12" refY="4" orient="auto">
         <polygon points="0 0, 12 4, 0 8" fill="#00695c" />
+      </marker>
+      <marker id="arrowImplST" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto">
+        <polygon points="0 0, 13 6, 0 12" fill="#fff" stroke="#6a1b9a" stroke-width="1.5" />
       </marker>
     </defs>
     <rect x="20" y="30" width="200" height="140" class="st-box" />
@@ -234,11 +253,14 @@ export function svgStrategy() {
     <text x="530" y="270" text-anchor="middle" class="st-title">Payment</text>
     <line x1="470" y1="284" x2="590" y2="284" class="st-divider" />
     <text x="480" y="306" class="st-method">implements</text>
-    <line x1="220" y1="80" x2="250" y2="60" class="st-arrow" />
-    <line x1="410" y1="60" x2="460" y2="50" class="st-arrow" />
-    <line x1="410" y1="80" x2="460" y2="150" class="st-arrow" />
-    <line x1="410" y1="100" x2="460" y2="260" class="st-arrow" />
-    <text x="210" y="120" class="st-label">delegates</text>
+    <!-- Context delegates to the «interface» (association) -->
+    <line x1="220" y1="80" x2="248" y2="60" class="st-arrow" />
+    <text x="212" y="120" class="st-label">delegates</text>
+
+    <!-- Each concrete IMPLEMENTS «interface» PaymentStrategy (dashed, hollow triangle, concrete -> interface) -->
+    <line x1="458" y1="55" x2="412" y2="52" class="st-impl" />
+    <line x1="458" y1="160" x2="412" y2="66" class="st-impl" />
+    <line x1="458" y1="270" x2="412" y2="80" class="st-impl" />
     <rect x="70" y="340" width="480" height="46" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5" rx="8" />
     <text x="310" y="365" text-anchor="middle" class="st-label" fill="#2e7d32">✅ setStrategy(…) swaps algorithm at runtime — no if/else in checkout()</text>
   </svg>`;
