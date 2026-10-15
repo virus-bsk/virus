@@ -23,7 +23,7 @@ export const umlTopics = [
     category: "structural",
     desc: "Shows classes, their attributes, methods, and the relationships among them.",
     definition:
-      "The most common UML diagram. Represents the static structure: classes (name, attributes with type, operations), relationships (inheritance, association, aggregation, composition, dependency), and multiplicities.",
+      "Simple rule: one diagram = one picture of what your system looks like.\n\nEach class is a box with 3 sections \u2014 name, attributes (what it holds), and operations (what it can do). Lines between boxes show how classes talk to each other \u2014 inheritance, association, composition, or just a passing reference.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ==== CLASS DIAGRAM (structural) ====
 // Rendered as boxes with 3 sections: name / attributes / operations
@@ -68,7 +68,7 @@ class Employee {                 // +----------+
     category: "behavioral",
     desc: "Shows how objects interact over time via messages, in a vertical lifeline timeline.",
     definition:
-      "A Sequence diagram maps an object interaction as a vertical timeline: each participant has a lifeline (dashed), activation bars (rectangles), and horizontal arrows for messages, incl. self-calls and returns.",
+      "Simple rule: read the diagram top-to-bottom, like a timeline.\n\nEach participant (class/actor) has a lifeline (dashed vertical line). Horizontal arrows are messages passed between them, in the order they happen. Activation bars (thin rectangles on the lifeline) show when an object is actively working on a task.",
     videoLink: CHANNEL_UPLOADS,
     code: `/* ==== SEQUENCE DIAGRAM (behavioural, time-ordered) ====
    User         OrderService        PaymentGateway        OrderRepository
@@ -115,7 +115,7 @@ class OrderService {
     category: "behavioral",
     desc: "Captures the functional requirements of a system: actors, use cases, and the relationships between them.",
     definition:
-      "A Use-Case diagram describes WHAT a system does (not HOW). Actors (stick figures) interact with use cases (ovals) inside a system boundary (rectangle). include reuses a mandatory use case, extend adds optional behavior.",
+      "Simple rule: use cases answer what does this system DO not HOW. Actors (stick figures) represent users or other systems. Use cases (ovals) are the features they can use, drawn inside a system boundary (the rectangle). The include arrow means one use case always needs another (mandatory). The extend arrow means one use case optionally triggers another.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ==== USE-CASE DIAGRAM (behavioural) ====
 // Captures functional requirements as ACTORS + USE CASES

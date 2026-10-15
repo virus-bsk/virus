@@ -18,7 +18,7 @@ const PROPERTIES = [
     tagline: "All or nothing",
     accent: "#c2410c",
     meaning:
-      "A transaction is a single atomic unit. Either EVERY step happens, or NONE of it happens. If one step fails, the whole transaction is rolled back — like it never ran.",
+      "Simple rule: ALL steps of a transaction happen together — or NONE of them do.\n\nIf even one step fails, the whole transaction is rolled back, as if it never ran. Like a two-step bank transfer: debit from Account A AND credit to Account B. If the credit to B fails, the debit from A is undone too. Money is never lost or created halfway.",
     analogy:
       "Bank transfer: debit ₹100 from Account A and credit ₹100 to Account B. If the credit to B fails, the debit from A is also undone. Money is never lost or created halfway.",
     sql: `BEGIN;
@@ -35,7 +35,7 @@ COMMIT;   -- only runs if BOTH steps succeed
     tagline: "Always a valid state",
     accent: "#b45309",
     meaning:
-      "A transaction moves the database from one valid state to another. Every rule, constraint, trigger, and invariant is enforced before and after — so the data always stays correct.",
+      "Simple rule: the data always ends up in a valid state — before and after the transaction.\n\nEvery rule, constraint, and invariant is always enforced. A CHECK constraint that says balance cannot go negative will reject any transfer that breaks it. The data can only move from one valid state to another.",
     analogy:
       "A balance can never go negative. A CHECK constraint rejects any transfer that would push the balance below zero. The rule always holds, no matter what.",
     sql: `-- Enforce the rule in the database
@@ -52,7 +52,7 @@ WHERE id = 1;  -- ERROR if balance would go below 0`,
     tagline: "Transactions don't interfere",
     accent: "#15803d",
     meaning:
-      "Concurrent transactions behave as if they ran one after another. Each one sees a consistent snapshot and cannot see another transaction's uncommitted half-work.",
+      "Simple rule: transactions don't see each other's half-done work.\n\nTwo transfers running at exactly the same time each see a clean, consistent balance — no double-spending and no reading partially-updated data. They behave as if they ran one after another, not at the same time.",
     analogy:
       "Two people transfer money at exactly the same time. Each transfer sees a clean, consistent balance — no double-spending and no reading partially-updated data.",
     sql: `-- Default: each transaction is shielded from others
@@ -69,7 +69,7 @@ COMMIT;`,
     tagline: "Survives crashes",
     accent: "#1d4ed8",
     meaning:
-      "Once a transaction is COMMITTED, its changes are permanent. They survive a crash, power loss, or server restart — already written to durable storage (disk / WAL).",
+      "Simple rule: once committed, the changes are permanent.\n\nThey survive crashes, power loss, or server restarts. The database writes the change to durable storage (disk / WAL) BEFORE saying done. So even if the server goes down a second later, the record is still there.",
     analogy:
       "After the transfer completes, the money stays transferred. Even if the server restarts a second later, the record is still there.",
     sql: `-- COMMIT makes the change permanent & crash-proof

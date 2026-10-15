@@ -383,6 +383,7 @@
   margin-bottom: 18px;
   color: #2c2415;
   line-height: 1.7;
+  white-space: pre-line;
 }
 
 .acid-detail-grid {
