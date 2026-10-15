@@ -865,6 +865,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
       // would misplace the tappable link overlays in the PDF).
       let previewWidthPx = element.getBoundingClientRect().width || 780;
       let linkPositions = [];
+      let pageBreakPositions = [];
 
       // Use html2canvas to capture the EXACT preview HTML as an image,
       // guaranteeing the downloaded PDF matches the on-screen preview
@@ -985,6 +986,20 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                 }
                 return false;
               });
+            pageBreakPositions = Array.from(
+              clonedEl.querySelectorAll(
+                ".rb-preview-section, .rb-preview-item, .rb-preview-item li",
+              ),
+            ).flatMap((node) => {
+              const rect = node.getBoundingClientRect();
+              const positions = [];
+              if (node.classList.contains("rb-preview-section")) {
+                positions.push(rect.top - clonedRect.top);
+              } else {
+                positions.push(rect.bottom - clonedRect.top);
+              }
+              return positions;
+            });
           }
           clonedDoc.querySelectorAll(constraintSelectors).forEach((p) => {
             p.style.maxHeight = "none";
@@ -1017,28 +1032,62 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
       // PDF page width.
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
-      const imgRatio = canvasWidth / canvasHeight;
       const imgWidth = pageWidth;
-      const imgHeight = pageWidth / imgRatio;
-
-      // Avoid a blank trailing page: a new page is only created when
-      // there is more than a tiny threshold of content remaining
-      // (3% of one page height). This prevents the PDF from ending with
-      // an empty page when content is just barely over a page boundary.
-      const pageThreshold = pageHeight * 0.03;
-      const totalPages = Math.max(
-        1,
-        Math.floor((imgHeight - pageThreshold) / pageHeight) + 1,
-      );
-      const imgData = canvas.toDataURL("image/png");
 
       // Scale factor: CSS pixels -> PDF mm (uniform image scaling)
       const pixelToMm = imgWidth / previewWidthPx;
+      const canvasScale = canvasWidth / previewWidthPx;
+      const pageCapacityPx = (pageHeight * canvasWidth) / pageWidth;
+      const safeBreaks = pageBreakPositions
+        .map((position) => position * canvasScale)
+        .filter((position) => position > 0 && position < canvasHeight)
+        .sort((left, right) => left - right);
 
-      // Split the image across multiple pages if the resume is long
-      for (let i = 0; i < totalPages; i++) {
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, -(i * pageHeight), imgWidth, imgHeight);
+      // Slice at section and item boundaries so text is not cut in half.
+      let sourceStart = 0;
+      let pageIndex = 0;
+      while (sourceStart < canvasHeight) {
+        const maxSourceEnd = Math.min(
+          sourceStart + pageCapacityPx,
+          canvasHeight,
+        );
+        const nextSafeBreak = safeBreaks
+          .filter(
+            (position) => position > sourceStart && position <= maxSourceEnd,
+          )
+          .at(-1);
+        const sourceEnd =
+          maxSourceEnd === canvasHeight
+            ? canvasHeight
+            : nextSafeBreak || maxSourceEnd;
+        const sliceHeight = Math.ceil(sourceEnd - sourceStart);
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = canvasWidth;
+        pageCanvas.height = sliceHeight;
+        pageCanvas
+          .getContext("2d")
+          .drawImage(
+            canvas,
+            0,
+            sourceStart,
+            canvasWidth,
+            sliceHeight,
+            0,
+            0,
+            canvasWidth,
+            sliceHeight,
+          );
+
+        if (pageIndex > 0) pdf.addPage();
+        const sliceHeightMm = (sliceHeight * pageWidth) / canvasWidth;
+        pdf.addImage(
+          pageCanvas.toDataURL("image/png"),
+          "PNG",
+          0,
+          0,
+          pageWidth,
+          sliceHeightMm,
+        );
 
         // Overlay invisible clickable link annotations on top of the
         // rasterised image so that email / LinkedIn / GitHub links are
@@ -1046,15 +1095,19 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
         // image with no interactivity on its own).
         linkPositions.forEach((link) => {
           const linkPdfY = link.top * pixelToMm;
-          const linkPage = Math.floor(linkPdfY / pageHeight);
-          if (linkPage === i) {
+          const sourceStartCss = sourceStart / canvasScale;
+          const sourceEndCss = sourceEnd / canvasScale;
+          if (link.top >= sourceStartCss && link.top < sourceEndCss) {
             const pdfX = link.left * pixelToMm;
-            const pdfY = linkPdfY - i * pageHeight;
+            const pdfY = linkPdfY - sourceStartCss * pixelToMm;
             const pdfW = Math.max(link.width * pixelToMm, 1);
             const pdfH = Math.max(link.height * pixelToMm, 1);
             pdf.link(pdfX, pdfY, pdfW, pdfH, { url: link.url });
           }
         });
+
+        sourceStart = sourceEnd;
+        pageIndex += 1;
       }
 
       pdf.save(`${(resume.name || "resume").replace(/\s+/g, "_")}_Resume.pdf`);
