@@ -1,4 +1,4 @@
-// ===== OOP System Design — topic data =====
+﻿// ===== OOP System Design — topic data =====
 // Content matches the original standalone HTML guide 1:1.
 // NOTE: videoLink currently points to the BSK CODING channel uploads
 // (opens inside the app via VideoPlayerModal). Replace each with the
@@ -28,7 +28,7 @@ export const oopsTopics = [
     sub: "Blueprint & Instance",
     desc: "A Class is a template/blueprint. An Object is an instance of a class with actual values.",
     definition:
-      'Class defines structure (fields + methods). Object is a concrete entity created from the class using the "new" keyword. Objects hold state (field values) and behavior (methods).',
+      "Simple rule: Class = the plan, Object = the real thing made from that plan.\n\nLike a biscuit mould. The MOULD is the class — it's just the shape. The actual BISCUITS you make from it are the objects.\n\nFrom one mould you can make many biscuits. Each biscuit is separate and has its own taste, but they all have the same shape. That's it.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ========== CLASS & OBJECT ==========
 
@@ -98,7 +98,7 @@ public class Main {
     sub: "Data Hiding + Access Control",
     desc: "Bundling data with methods that operate on it, hiding internal state via private fields.",
     definition:
-      "Encapsulation protects data integrity by making fields private and exposing controlled access via public getters/setters. It reduces complexity and prevents unwanted interference.",
+      "Simple rule: keep the important data locked inside, and only allow safe ways to change it.\n\nLike an ATM machine. You cannot touch the money inside. You can only press buttons (deposit, withdraw). The machine checks everything and keeps the money safe.\n\nSo in code: keep the data private. Don't let anyone directly change it. Only allow safe methods to use it. This stops mistakes and keeps the data correct.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ========== ENCAPSULATION ==========
 
@@ -185,7 +185,7 @@ public class Main {
     sub: "IS-A Relationship",
     desc: "A child class inherits fields and methods from a parent class, enabling code reuse and hierarchy.",
     definition:
-      'Inheritance creates a parent-child relationship using "extends". Child inherits all public/protected members and can override methods. Promotes reusability and polymorphism.',
+      "Simple rule: a child gets things from the parent for free.\n\nLike you got your father's surname and his house. You did not build them again — you just got them. Then you add your own new things on top.\n\nSo in code: a new class (child) can take all the fields and methods from an old class (parent) for free, and then add its own new ones. No need to write the same code again. This is called 'IS-A' — a Son IS-A part of the Father's family.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ========== INHERITANCE ==========
 
@@ -281,7 +281,7 @@ public class Main {
     sub: "Many Forms — Override + Overload",
     desc: "Objects of different types respond to the same method call in their own way. Compile-time (overloading) + Runtime (overriding).",
     definition:
-      'Polymorphism means "many forms". Runtime polymorphism: parent reference, child object. Compile-time polymorphism: method overloading (same name, different params).',
+      "Simple rule: one button, different actions — like 'open'.\n\nYou can open a door, open a file, or open a shop. The same word 'open' does different things depending on what you use it on. The action changes, but the word stays the same.\n\nSo in code: one method name, but each object does it in its own way. You call one thing and the correct action runs automatically.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ========== POLYMORPHISM ==========
 
@@ -372,7 +372,7 @@ public class Main {
     sub: "Hide Implementation, Show Interface",
     desc: "Exposing only essential features while hiding internal details using abstract classes and interfaces.",
     definition:
-      "Abstraction focuses on what an object does instead of how. Abstract classes (partial implementation) and Interfaces (full abstraction) achieve this.",
+      "Simple rule: show only the OUTSIDE, hide the INSIDE.\n\nLike a TV remote. You press buttons (ON, volume, channel) — you don't need to know how the TV works inside (wires, circuits, signals). You just use the simple buttons.\n\nSo in code: show only what the user needs to see. Hide all the complicated inside work. That's Abstraction — simple outside, hidden inside.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ========== ABSTRACTION ==========
 
@@ -474,7 +474,7 @@ public class Main {
     sub: "Has-A: Aggregation + Composition",
     desc: "Association defines relationships between classes. Aggregation (weak, shared) and Composition (strong, owned).",
     definition:
-      "Association is a relationship where one object uses another. Aggregation: parts can exist independently (empty diamond). Composition: parts are owned and destroyed with the whole (filled diamond).",
+      "Simple rule: one thing is connected to another. Like 'phone HAS battery'.\n\nThere are 2 types:\n\n• STRONG (Composition) — the part cannot live without the whole. A BOOK has PAGES. If you tear the book apart, those pages are gone. In the picture this is a FILLED (solid) diamond ◼.\n\n• WEAK (Aggregation) — the part can live on its own. A CLASSROOM has STUDENTS. If the classroom is removed, the students still exist and go to another class. In the picture this is an EMPTY diamond ◻.\n\nEasy trick: FILLED diamond = 'dies together'. EMPTY diamond = 'lives separately'.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ========== ASSOCIATION ==========
 
@@ -609,7 +609,7 @@ public class Main {
     sub: "Uses-A (Temporary)",
     desc: 'One class depends on another when it uses it as a method parameter, local variable, or return type. Weakest coupling.',
     definition:
-      'Dependency is a temporary relationship where a class "uses" another class briefly. It\'s the loosest form of coupling. Shown as a dashed arrow in UML.',
+      "Think of how you briefly use a pen to sign a form, then hand it back — you don't own it, you just needed it for a moment. Dependency is the same: one class just USES another for a short time (as a method parameter, a local variable, or a return type) and then lets it go. It's the loosest, weakest connection between classes, shown in UML as a dashed arrow.",
     videoLink: CHANNEL_UPLOADS,
     code: `// ========== DEPENDENCY ==========
 

@@ -15,7 +15,7 @@ export const solidTopics = [
     sub: "One reason to change",
     desc: "A class should have only one reason to change, i.e., only one responsibility.",
     definition:
-      "SRP states that a class should have only one reason to change — one responsibility. High cohesion within a module and loose coupling between modules. Split large classes into focused, single-purpose ones.",
+      "Simple rule: one class = one job.\n\nLike in a hotel — the cook only cooks. The waiter only serves. The cashier only takes money. Nobody does everyone's job.\n\nIf you ask the cook to also take money and clean tables, then when ONE thing changes (like the menu), you have to disturb him for everything.\n\nSo keep each class doing only ONE work. A 'SendEmail' class should only send email. Nothing else. That's it.",
     videoLink: "https://www.youtube.com/watch?v=EMbCnn01rxc",
     code: `// ===== SINGLE RESPONSIBILITY PRINCIPLE (SRP) =====
 // One class → ONE responsibility (one reason to change).
@@ -81,7 +81,7 @@ public class Main {
     sub: "Open for extension, closed for modification",
     desc: "Software entities should be open for extension but closed for modification.",
     definition:
-      "Classes should be open for extension (you can add new behavior) but closed for modification (you don't change existing code). Achieve this with abstractions and dependency injection.",
+      "Simple rule: you can ADD new things easily, but you should NOT change the old code that already works.\n\nLike your phone charger. When you buy a new phone, you just add a new charger. You don't open the old phone and change its wires.\n\nSo when a new feature comes (like a new payment type), just ADD a new class for it. Don't go and edit the old working code and risk breaking it.",
     videoLink: "https://www.youtube.com/watch?v=j1ZxAKLonl4",
     code: `// ===== OPEN/CLOSED PRINCIPLE (OCP) =====
 // Open for EXTENSION (add new payment type)
@@ -168,7 +168,7 @@ public class Main {
     sub: "Subtypes must be substitutable",
     desc: "Objects of a superclass should be replaceable with objects of its subclasses without breaking.",
     definition:
-      "LSP: if S is a subtype of T, objects of T may be replaced with objects of type S without altering desirable properties of the program. In practice, subclasses must honor the contract/promises of their parent.",
+      "Simple rule: a child must be able to do everything the parent can do.\n\nLike this — if your father says 'everyone in our home can ride a bike', then his son must ALSO be able to ride a bike. If the son cannot ride, then he breaks the family rule and creates problems.\n\nSo in code: if a parent class can do something, the child class must also be able to do it properly. If it can't, don't make it a child of that parent.",
     videoLink: "https://www.youtube.com/watch?v=irHHnn7CZAA",
     code: `// ===== LISKOV SUBSTITUTION PRINCIPLE (LSP) =====
 // Any child implementation must be replaceable with the parent
@@ -249,7 +249,7 @@ public class Main {
     sub: "Many slim clients over one fat interface",
     desc: "Clients should not be forced to depend on interfaces they don't use.",
     definition:
-      'ISP: many client-specific interfaces are better than one general-purpose "fat" interface. Each interface should have only the methods a particular client cares about.',
+      "Simple rule: don't force anyone to learn work they don't need.\n\nLike a hotel menu. A pure vegetarian customer only needs the veg items. Don't give him the full menu with all the non-veg items and force him to read everything.\n\nSo in code: don't make one big interface with 20 methods. Split it into small ones, so each class only takes the methods it actually needs. Nothing extra.",
     videoLink: "https://www.youtube.com/watch?v=4ZdsinALUX8",
     code: `// ===== INTERFACE SEGREGATION PRINCIPLE (ISP) =====
 // Don't force a class to implement methods it doesn't need.
@@ -343,7 +343,7 @@ public class Main {
     sub: "Depend on abstractions, not concretions",
     desc: "High-level modules should not depend on low-level modules. Both should depend on abstractions.",
     definition:
-      "DIP: depend on abstractions (interfaces/abstract classes), not concrete implementations. Inject the concrete dependency from outside (constructor/ method injection).",
+      "Simple rule: connect to the plug, not to the wires inside the wall.\n\nWhen you use a fan, you just put the plug in the socket. You don't touch the wires inside the wall. So tomorrow if the power company changes something, your fan still works the same.\n\nSo in code: depend on a simple interface, not on the actual class. Then you can easily swap one for another (like changing from one database to another) without breaking your code.",
     videoLink: "https://www.youtube.com/watch?v=XDRSpWS8urM",
     code: `// ===== DEPENDENCY INVERSION PRINCIPLE (DIP) =====
 // High-level modules must NOT depend on low-level modules.

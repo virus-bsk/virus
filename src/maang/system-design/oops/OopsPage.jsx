@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import hljs from "../../../utils/hljs";
+import "highlight.js/styles/atom-one-dark.css";
 import "./OopsPage.css";
 import { oopsTopics } from "./oopsData";
 
@@ -10,6 +12,24 @@ import { oopsTopics } from "./oopsData";
  * Each card also has a YouTube video link that plays in-app (the global
  * YouTubeLinkHandler intercepts the anchor and opens VideoPlayerModal).
  */
+
+// IDE-style syntax-highlighted Java code block (same approach as the LLD pages).
+function CodeBlock({ code }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.removeAttribute("data-highlighted");
+      hljs.highlightElement(ref.current);
+    }
+  }, [code]);
+  return (
+    <pre className="oops-code-pre language-java">
+      <code ref={ref} className="language-java">
+        {code}
+      </code>
+    </pre>
+  );
+}
 function TopicCard({ topic, isActive, onClick }) {
   return (
     <div
@@ -95,7 +115,7 @@ function DetailPanel({ topic, onClose }) {
                   </span>
                   <span className="oops-lang-badge">Java 17+</span>
                 </div>
-                <pre>{topic.code}</pre>
+                <CodeBlock code={topic.code} />
               </div>
             </div>
 
