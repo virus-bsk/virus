@@ -362,6 +362,7 @@
 .dbc-definition-box {
   background: linear-gradient(180deg, #fff7ed, #ffffff);
   border: 1px solid rgba(245, 124, 0, 0.2);
+  white-space: pre-line;
   border-left: 4px solid #f57c00;
   border-radius: 12px;
   padding: 14px 16px;

@@ -10,7 +10,10 @@ const CONCEPTS = [
     sub: "Structured vs flexible",
     desc: "SQL is strict and relational; NoSQL is flexible and built for scale.",
     definition:
-      "SQL stores data in tables with fixed schema and relationships. NoSQL stores flexible, document-like data and is better for very large, high-velocity apps.",
+      `Simple rule: Use SQL when you need strict structure, tables, and guaranteed accuracy. Use NoSQL when you need flexibility, speed, and can tolerate some inconsistency.
+
+SQL = tables with fixed columns. NoSQL = flexible documents.
+Rule: SQL for money, NoSQL for feeds.`,
     points: [
       "SQL has a fixed table structure",
       "NoSQL stores data in flexible documents or key-value forms",
@@ -56,7 +59,9 @@ const CONCEPTS = [
     sub: "Faster lookup",
     desc: "An index works like a book index so DB finds rows much faster.",
     definition:
-      "Indexing creates a lookup structure so the database does not scan every row. It improves performance for reads, filters, joins, and sorting.",
+      `Simple rule: An index is a lookup table for your database, like the index at the back of a book. Instead of scanning every page to find a name, you jump straight to it.
+
+Rule: Add index on any column you search, sort, or join on often.`,
     points: [
       "Index speeds up WHERE queries",
       "It reduces full table scans",
@@ -92,7 +97,9 @@ const CONCEPTS = [
     sub: "Connect related data",
     desc: "Joins combine rows from two tables using a shared field like user_id.",
     definition:
-      "A join is used when data sits in different tables but belongs to one real-world story. Example: users and orders are separate tables joined by user_id.",
+      `Simple rule: Joins stitch separate tables back into one story. You split data to keep it clean. You join it back to read it.
+
+Example: users and orders are two tables. You join them on user_id to see who ordered what.`,
     points: [
       "INNER JOIN gives only matching rows",
       "LEFT JOIN keeps all left rows",
@@ -143,7 +150,10 @@ const CONCEPTS = [
     sub: "Remove duplicate data",
     desc: "Normalization keeps data clean by removing repeated data and splitting facts logically.",
     definition:
-      "Normalization reduces duplication and keeps the data consistent. It stores each fact in one place and links related records by keys.",
+      `Simple rule: Normalize to avoid repeating the same data everywhere. Write a fact once. Link to it when needed.
+
+Like a library: one master catalog, many book copies pointing to it.
+Rule: If you see the same data repeated in many rows, it needs normalization.`,
     points: [
       "Avoids repeated values in many rows",
       "Keeps facts in one source of truth",
@@ -173,7 +183,9 @@ const CONCEPTS = [
     sub: "Backup and availability",
     desc: "Replication copies data to multiple servers for safety and read scaling.",
     definition:
-      "Replication duplicates the same dataset across nodes so if one machine fails, others still serve the app and reduce downtime risk.",
+      `Simple rule: Replication is like making copies of your data on different servers. If one shop burns down, the others keep selling.
+
+Rule: Use replication when uptime and read speed matter more than instant data freshness.`,
     points: [
       "Primary server handles writes",
       "Replica nodes receive copies",
@@ -213,7 +225,9 @@ const CONCEPTS = [
     sub: "Split large tables",
     desc: "Partitioning splits one large dataset into smaller logical parts.",
     definition:
-      "When a table becomes huge, it can be divided by date, region, or key range so queries hit only the relevant partitions rather than the whole table.",
+      `Simple rule: Partitioning is slicing one giant table into smaller chunks. Like organizing a big pile of papers into folders by year.
+
+Rule: Partition by the column you query most (date, region, category).`,
     points: [
       "Good for large historical tables",
       "Used by time, region, or category",
@@ -251,7 +265,9 @@ const CONCEPTS = [
     sub: "Distribute across machines",
     desc: "Sharding spreads data across many servers so one machine does not hold everything.",
     definition:
-      "Sharding divides the dataset across multiple machines, allowing horizontal scaling for very high traffic and massive data sets.",
+      `Simple rule: Sharding is splitting your data across many servers. Like a chain of shops, each holds part of the inventory.
+
+Rule: Shard when one machine cannot hold the data or handle the load. You need a shard key (like user_id) to know where data lives.`,
     points: [
       "Splits data across nodes",
       "Improves scale and storage capacity",
@@ -284,15 +300,26 @@ const CONCEPTS = [
   },
   {
     id: "BASE",
-    name: "BASE",
-    icon: "🌊",
-    tagline: "The NoSQL alternative to ACID",
-    accent: "#0e7490",
-    meaning:
-      "BASE = Basically Available, Soft state, Eventually consistent. Where ACID guarantees correctness at every instant, BASE accepts temporary inconsistency in exchange for high availability and partition tolerance — the philosophy behind DynamoDB, Cassandra and MongoDB.",
-    analogy:
-      "A social media like-counter: a celebrity post may show 1.2M likes on one server and 1,200,037 on another for a few seconds. Nobody is harmed — it settles to one number eventually, and the post stays available the whole time.",
-    sql: `ACID  : correct at every instant, scales down
+    icon: "fa-water",
+    title: "BASE",
+    sub: "The NoSQL alternative to ACID",
+    desc: "BASE trades instant consistency for availability and partition tolerance.",
+    definition: `Simple rule: BASE = Eventually consistent. When the network is fine, be consistent. When things break, stay open and converge later.
+
+ACID says: be correct at every instant. BASE says: be available now, fix it later.
+
+Think of a social media like-counter: a celebrity post may show 1.2M likes on one server and 1,200,037 on another for a few seconds. Nobody is harmed - it settles to one number eventually, and the post stays available the whole time.`,
+    points: [
+      "Basically Available - the system always responds",
+      "Soft state - replicas may differ for a short time",
+      "Eventually consistent - all copies converge to one value",
+      "Use BASE for likes, feeds, carts; ACID for bank transfers",
+    ],
+    videoLink: "",
+    videoLabel: "Soon",
+    diagram: (
+      <div className="dbc-diagram-box">
+        <pre>{`ACID  : correct at every instant, scales down
 BASE  : available now, correct later, scales out
 
 Basically Available    : system always responds
@@ -302,19 +329,32 @@ Eventually consistent  : all copies converge
 # Where each fits
 bank transfer  -> ACID (Postgres/MySQL)
 likes, feeds,  -> BASE (Dynamo, Cassandra,
-carts, views            MongoDB)`,
+carts, views            MongoDB)`}</pre>
+      </div>
+    ),
   },
   {
     id: "RWSPLIT",
-    name: "Read/Write Splitting",
-    icon: "🔀",
-    tagline: "Writes to primary, reads to replicas",
-    accent: "#4f46e5",
-    meaning:
-      "Read/Write splitting routes every write to the primary and distributes reads across read replicas. Since most apps are read-heavy (90%+ reads), this multiplies read throughput cheaply. The catch is replication lag — a read right after a write may see stale data, so critical reads (e.g. 'show my just-saved profile') go to the primary.",
-    analogy:
-      "A teacher (primary) writes the official mark sheet once, then photocopies it for all students (replicas). Everyone can read a copy simultaneously — just know a student who checks immediately after an update may see yesterday's sheet.",
-    sql: `app -> writes -> PRIMARY
+    icon: "fa-shuffle",
+    title: "Read/Write Splitting",
+    sub: "Writes to primary, reads to replicas",
+    desc: "Writes go to one primary; reads fan out to many replicas.",
+    definition: `Simple rule: Write to the boss (primary). Read from the helpers (replicas).
+
+Rule: Route reads and writes differently. If you need to read your own write, check the primary.
+
+Think of a teacher (primary) writing the official mark sheet once, then photocopying it for all students (replicas). Everyone reads a copy at once - just know a student checking right after an update may see yesterday's sheet.`,
+    points: [
+      "Writes go to the primary - one source of truth",
+      "Reads go to replicas - many readers at once",
+      "Replication lag means you may read stale data",
+      "Fix: read-your-writes - pin user to primary for N seconds",
+    ],
+    videoLink: "",
+    videoLabel: "Soon",
+    diagram: (
+      <div className="dbc-diagram-box">
+        <pre>{`app -> writes -> PRIMARY
         -> reads  -> replica1, replica2
 
 # Implementation
@@ -323,11 +363,9 @@ carts, views            MongoDB)`,
 
 # Replication lag (async!)
 write -> primary (ack)
-       -> replica (ms-sec later)
-
-# Fix stale reads:
-- read-your-writes: pin user to
-  primary for N seconds after write`,
+       -> replica (ms-sec later)`}</pre>
+      </div>
+    ),
   },
 
 ];
@@ -468,7 +506,7 @@ export default function DatabaseConceptsPage() {
         </h1>
         <div className="dbc-sub-info">
           <span>
-            <i className="fas fa-database" /> 7 core concepts
+            <i className="fas fa-database" /> 9 core concepts
           </span>
           <span>
             <i className="fas fa-diagram-project" /> Diagram friendly
