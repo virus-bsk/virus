@@ -562,6 +562,23 @@
   margin-bottom: 12px;
 }
 
+.rb-preview--template2 .rb-preview-experience-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.rb-preview--template2 .rb-preview-experience-title strong {
+  font-size: 0.95rem;
+}
+
+.rb-preview--template2 .rb-preview-experience-role {
+  color: #000;
+  font-size: 0.8rem;
+  font-style: normal;
+}
+
 .rb-preview--template2 .rb-preview-item li {
   line-height: 1.5;
   margin-bottom: 4px;

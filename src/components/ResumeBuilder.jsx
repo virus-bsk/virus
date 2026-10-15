@@ -1422,12 +1422,24 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
       resume.experience.forEach((exp) => {
         if (!exp.company && !exp.role) return;
         ensureSpace(30);
-        // Role - Company (left, bold) ... Location | Dates (right, italic)
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
-        doc.setTextColor(0, 0, 0);
-        const title = `${exp.role}${exp.company ? " - " + exp.company : ""}`;
-        doc.text(title, margin, y);
+        if (resumeTemplate === "template2") {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(11);
+          doc.setTextColor(0, 0, 0);
+          const company = exp.company || exp.role;
+          doc.text(company, margin, y);
+          if (exp.company && exp.role) {
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.text(` - ${exp.role}`, margin + doc.getTextWidth(company), y);
+          }
+        } else {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(11);
+          doc.setTextColor(0, 0, 0);
+          const title = `${exp.role}${exp.company ? " - " + exp.company : ""}`;
+          doc.text(title, margin, y);
+        }
 
         // Location | Dates — right-aligned, same baseline as the title
         if (exp.location || exp.startDate || exp.endDate) {
@@ -2523,10 +2535,21 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                     .map((exp, idx) => (
                       <div key={idx} className="rb-preview-item">
                         <div className="rb-preview-item-header">
-                          <strong>
-                            {exp.role}
-                            {exp.company ? ` - ${exp.company}` : ""}
-                          </strong>
+                          {resumeTemplate === "template2" ? (
+                            <div className="rb-preview-experience-title">
+                              <strong>{exp.company || exp.role}</strong>
+                              {exp.company && exp.role && (
+                                <span className="rb-preview-experience-role">
+                                  - {exp.role}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <strong>
+                              {exp.role}
+                              {exp.company ? ` - ${exp.company}` : ""}
+                            </strong>
+                          )}
                           <span>
                             {exp.location}
                             {exp.location && (exp.startDate || exp.endDate)
