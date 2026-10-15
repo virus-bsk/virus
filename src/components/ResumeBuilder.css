@@ -413,6 +413,40 @@
   flex-wrap: wrap;
 }
 
+.rb-template-switch {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.rb-template-switch button {
+  min-height: 42px;
+  padding: 9px 14px;
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.08);
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.rb-template-switch button + button {
+  border-left: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.rb-template-switch button.active {
+  color: #fff;
+  background: #2563eb;
+  font-weight: 700;
+}
+
+.rb-template-switch button:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: -3px;
+}
+
 .rb-download-btn {
   display: inline-flex;
   align-items: center;
@@ -432,6 +466,14 @@
 .rb-download-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
+.rb-download-btn:disabled,
+.rb-download-btn:disabled:hover {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .rb-preview-toggle {
@@ -464,6 +506,84 @@
   max-height: 500px;
   overflow-y: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.rb-preview--template2 {
+  border-radius: 0;
+  box-shadow: none;
+  padding: 32px 42px;
+}
+
+.rb-preview--template2 .rb-preview-header {
+  order: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #1f2937;
+  margin-bottom: 12px;
+}
+
+.rb-preview--template2 .rb-preview-title {
+  font-size: 0.9rem !important;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.rb-preview--template2 .rb-preview-section {
+  margin-bottom: 14px;
+}
+
+.rb-preview--template2 .rb-preview-section h3 {
+  margin-bottom: 8px;
+  padding-bottom: 3px;
+  border-bottom: 1.5px solid #374151;
+  font-size: 0.92rem;
+}
+
+.rb-preview--template2 .rb-preview-section--summary {
+  order: 1;
+}
+
+.rb-preview--template2 .rb-preview-section--experience {
+  order: 2;
+}
+
+.rb-preview--template2 .rb-preview-section--projects {
+  order: 3;
+}
+
+.rb-preview--template2 .rb-preview-section--certifications {
+  order: 4;
+}
+
+.rb-preview--template2 .rb-preview-section--skills {
+  order: 5;
+}
+
+.rb-preview--template2 .rb-preview-section--education {
+  order: 6;
+}
+
+.rb-preview--template2 .rb-preview-item {
+  margin-bottom: 12px;
+}
+
+.rb-preview--template2 .rb-preview-item li {
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.rb-preview--template2 .rb-preview-section--certifications ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.rb-preview--template2 .rb-preview-section--skills .rb-preview-skills-grid {
+  grid-template-columns: 140px 12px minmax(0, 1fr);
+  row-gap: 5px;
+}
+
+.rb-preview--template2 .rb-preview-skill-value {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .rb-preview-header {

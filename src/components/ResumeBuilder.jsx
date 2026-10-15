@@ -194,6 +194,7 @@ function ResumeBuilder({ onClose }) {
   const resumeHydratedRef = useRef(false);
   const [savedResumeLoading, setSavedResumeLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [resumeTemplate, setResumeTemplate] = useState("template1");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiMessage, setAiMessage] = useState("");
   const [uploadingResume, setUploadingResume] = useState(false);
@@ -1333,7 +1334,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
     };
 
     const addBullet = (text, size = 10) => {
-      const tokens = segmentToTokens(parseSegments(text));
+      const tokens = segmentToTokens(parseSegments(text.trim()));
       const maxWidth = contentWidth - 12;
       const lines = wrapTokens(tokens, maxWidth, size);
       ensureSpace(lines.length * 5.5);
@@ -2300,6 +2301,28 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
         return (
           <div className="rb-preview-wrap">
             <div className="rb-preview-actions">
+              <div
+                className="rb-template-switch"
+                role="group"
+                aria-label="Resume template"
+              >
+                <button
+                  type="button"
+                  className={resumeTemplate === "template1" ? "active" : ""}
+                  aria-pressed={resumeTemplate === "template1"}
+                  onClick={() => setResumeTemplate("template1")}
+                >
+                  Template 1
+                </button>
+                <button
+                  type="button"
+                  className={resumeTemplate === "template2" ? "active" : ""}
+                  aria-pressed={resumeTemplate === "template2"}
+                  onClick={() => setResumeTemplate("template2")}
+                >
+                  Template 2
+                </button>
+              </div>
               <button className="rb-download-btn" onClick={downloadPDF}>
                 ⬇ Download PDF
               </button>
@@ -2320,13 +2343,20 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
               </button>
             </div>
             <div
-              className="rb-preview"
               ref={previewRef}
-              style={{ display: showPreview ? "block" : "none" }}
+              className={`rb-preview${resumeTemplate === "template2" ? " rb-preview--template2" : ""}`}
+              style={{
+                display: showPreview
+                  ? resumeTemplate === "template2"
+                    ? "flex"
+                    : "block"
+                  : "none",
+                flexDirection: "column",
+              }}
             >
               <div className="rb-preview-header">
                 <h2>{(resume.name || "Your Name").toUpperCase()}</h2>
-                {resume.title && (
+                {resumeTemplate === "template1" && resume.title && (
                   <p className="rb-preview-title">{resume.title}</p>
                 )}
                 <p className="rb-preview-contact">
@@ -2408,13 +2438,13 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                 </p>
               </div>
               {resume.summary && (
-                <div className="rb-preview-section">
+                <div className="rb-preview-section rb-preview-section--summary">
                   <h3>Professional Summary</h3>
                   <p>{formatText(resume.summary)}</p>
                 </div>
               )}
               {Object.entries(resume.skills).some(([, v]) => v) && (
-                <div className="rb-preview-section">
+                <div className="rb-preview-section rb-preview-section--skills">
                   <h3>Technical Skills</h3>
                   <div className="rb-preview-skills-grid">
                     {Object.entries(resume.skills)
@@ -2435,7 +2465,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                 </div>
               )}
               {resume.experience.some((e) => e.company || e.role) && (
-                <div className="rb-preview-section">
+                <div className="rb-preview-section rb-preview-section--experience">
                   <h3>Professional Experience</h3>
                   {resume.experience
                     .filter((e) => e.company || e.role)
@@ -2458,7 +2488,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                         </div>
                         <ul>
                           {exp.points.filter(Boolean).map((p, i) => (
-                            <li key={i}>{formatText(p)}</li>
+                            <li key={i}>{formatText(p.trim())}</li>
                           ))}
                         </ul>
                       </div>
@@ -2466,7 +2496,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                 </div>
               )}
               {resume.projects.some((p) => p.name) && (
-                <div className="rb-preview-section">
+                <div className="rb-preview-section rb-preview-section--projects">
                   <h3>Technical Projects</h3>
                   {resume.projects
                     .filter((p) => p.name)
@@ -2482,7 +2512,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                         </div>
                         <ul>
                           {proj.points.filter(Boolean).map((p, i) => (
-                            <li key={i}>{formatText(p)}</li>
+                            <li key={i}>{formatText(p.trim())}</li>
                           ))}
                         </ul>
                       </div>
@@ -2490,7 +2520,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                 </div>
               )}
               {resume.education.some((e) => e.degree || e.institution) && (
-                <div className="rb-preview-section">
+                <div className="rb-preview-section rb-preview-section--education">
                   <h3>Education</h3>
                   {resume.education
                     .filter((e) => e.degree || e.institution)
@@ -2536,7 +2566,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                 </div>
               )}
               {resume.certificates.filter(getCertName).length > 0 && (
-                <div className="rb-preview-section">
+                <div className="rb-preview-section rb-preview-section--certifications">
                   <h3>Certifications</h3>
                   <ul>
                     {resume.certificates
