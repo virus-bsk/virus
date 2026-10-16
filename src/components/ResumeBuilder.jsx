@@ -218,15 +218,18 @@ const PERSONAL_KEY_ALIASES = {
   name: "name",
   fullname: "name",
   fullnamecandidate: "name",
+  candidatename: "name",
   title: "title",
   jobtitle: "title",
   professionaltitle: "title",
   headline: "title",
   email: "email",
   emailaddress: "email",
+  contactemail: "email",
   mail: "email",
   phone: "phone",
   phonenumber: "phone",
+  contactphone: "phone",
   mobile: "phone",
   mobilephone: "phone",
   contactnumber: "phone",
@@ -244,6 +247,9 @@ const PERSONAL_KEY_ALIASES = {
   location: "location",
   address: "location",
   city: "location",
+  // Safety net: if the model nests personal info under a "personal" key,
+  // normalizePersonalKey("personal") → "personal" so the caller can merge it.
+  personal: "personal",
 };
 
 const normalizePersonalKey = (key) => {
@@ -603,6 +609,13 @@ function ResumeBuilder({ onClose }) {
             ? parsedData.data
             : parsedData;
 
+      // Also pull out a nested "personal" block if the model wrapped fields that way,
+      // so the personal loop below can merge its sub-fields into the resume.
+      const personalBlock =
+        inner && typeof inner === "object" && !Array.isArray(inner)
+          ? inner.personal || null
+          : null;
+
       // How many fields actually get filled — drives an honest final message
       // instead of always claiming success. The merge is computed synchronously
       // from the current `resume` snapshot (not inside a setResume updater) so
@@ -613,15 +626,34 @@ function ResumeBuilder({ onClose }) {
 
       // Personal info — accept the AI's key variants (full_name,
       // phoneNumber, email_address, linkedin_url, ...) and clean values.
-      Object.entries(inner || {}).forEach(([key, value]) => {
-        const field = normalizePersonalKey(key);
-        if (!field || prev[field]) return;
-        const valueText = cleanPersonalValue(field, value);
-        if (valueText) {
-          updated[field] = valueText;
+      // Also handles a nested "personal" block if the model wrapped fields that way.
+      const mergePersonalValue = (targetField, rawValue) => {
+        if (!targetField || prev[targetField]) return;
+        const text = cleanPersonalValue(targetField, rawValue);
+        if (text) {
+          updated[targetField] = text;
           appliedCount += 1;
         }
+      };
+
+      Object.entries(inner || {}).forEach(([key, value]) => {
+        const field = normalizePersonalKey(key);
+        if (field === "personal" && value && typeof value === "object" && !Array.isArray(value)) {
+          // Nested block: { personal: { name: "...", email: "..." } }
+          Object.entries(value).forEach(([subKey, subValue]) => {
+            mergePersonalValue(normalizePersonalKey(subKey), subValue);
+          });
+          return;
+        }
+        mergePersonalValue(field, value);
       });
+
+      // Merge any standalone nested "personal" block not caught by key iteration
+      if (personalBlock && typeof personalBlock === "object" && !Array.isArray(personalBlock)) {
+        Object.entries(personalBlock).forEach(([subKey, subValue]) => {
+          mergePersonalValue(normalizePersonalKey(subKey), subValue);
+        });
+      }
 
       // Summary
       if (inner.summary && !prev.summary) {
@@ -753,6 +785,8 @@ function ResumeBuilder({ onClose }) {
         return;
       }
 
+      // Debug: log the merged payload before committing to state
+      console.log("RESUME BEFORE SET:", { ...updated, personalBlock, innerKeys: Object.keys(inner || {}) });
       setResume(updated);
       setParsingComplete(true);
       setAiMessage(
