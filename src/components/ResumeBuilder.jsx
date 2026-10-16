@@ -125,28 +125,67 @@ const getCertIssuer = (cert) =>
   (typeof cert === "string" ? "" : cert?.issuer || "").trim();
 
 // Maps whatever skill-category key the AI returns (e.g. "Core Concepts",
-// "core_concepts", "coreConcepts") back to the form's fixed lowercase keys.
-// Returns null for unknown categories so stray keys are ignored instead of
-// silently landing under names no input is bound to.
+// "core_concepts", "Programming Languages", "CI/CD") back to the form's
+// fixed lowercase keys. Returns null for unknown categories so stray keys
+// are ignored instead of silently landing under names no input is bound to.
+const SKILL_KEY_ALIASES = {
+  languages: "languages",
+  programminglanguages: "languages",
+  langs: "languages",
+  frameworks: "frameworks",
+  framework: "frameworks",
+  libraries: "frameworks",
+  frontend: "frontend",
+  frontenddevelopment: "frontend",
+  web: "frontend",
+  databases: "databases",
+  database: "databases",
+  devops: "devops",
+  cicd: "devops",
+  tools: "devops",
+  testing: "testing",
+  testingframeworks: "testing",
+  cloud: "cloud",
+  cloudcomputing: "cloud",
+  messaging: "messaging",
+  messagingqueues: "messaging",
+  queues: "messaging",
+  concepts: "concepts",
+  coreconcepts: "concepts",
+  concept: "concepts",
+  fundamentals: "concepts",
+  csfundamentals: "concepts",
+  computerfundamentals: "concepts",
+};
+
 const normalizeSkillKey = (key) => {
   const flat = String(key).toLowerCase().replace(/[\s_-]+/g, "");
-  if (flat === "concept" || flat === "coreconcepts") return "concepts";
-  return Object.prototype.hasOwnProperty.call(EMPTY_RESUME.skills, flat)
-    ? flat
-    : null;
+  if (SKILL_KEY_ALIASES[flat]) return SKILL_KEY_ALIASES[flat];
+  // Fuzzy: accept keys that CONTAIN a known alias (e.g. "corejavaconcepts").
+  const match = Object.keys(SKILL_KEY_ALIASES).find(
+    (alias) => flat.includes(alias),
+  );
+  return match ? SKILL_KEY_ALIASES[match] : null;
 };
 
 // Coerces a skill-category value to the plain string the inputs expect —
-// the model sometimes returns arrays (["Java", "Spring Boot"]) instead of
-// a comma-separated string.
+// the model sometimes returns arrays (["Java", "Spring Boot"]) or nested
+// objects ({"Core": "Java"}) instead of a comma-separated string. Bold
+// markdown is stripped because skills render as plain input text.
 const skillValueToString = (value) => {
   if (Array.isArray(value)) {
     return value
-      .map((v) => (typeof v === "string" ? v : v?.name || v?.label || ""))
+      .map((v) => skillValueToString(v))
       .filter(Boolean)
       .join(", ");
   }
-  return typeof value === "string" ? value.trim() : "";
+  if (value && typeof value === "object") {
+    return Object.values(value)
+      .map((v) => skillValueToString(v))
+      .filter(Boolean)
+      .join(", ");
+  }
+  return typeof value === "string" ? value.replace(/\*\*/g, "").trim() : "";
 };
 
 // Counts the form fields the user has actually filled in (arrays and nested
@@ -711,7 +750,7 @@ TASK: Generate professional ${sectionName} content suggestions.
 - Return ONLY the suggested content in a structured format that can be directly used.
 - IMPORTANT: Make all content ATS-friendly - use strong action verbs, quantified achievements, industry-relevant keywords, and avoid graphics, tables, or special characters that ATS parsers cannot read.
 - IMPORTANT: Use **bold** markdown syntax (wrap text in double asterisks, e.g. **RESTful APIs**) to highlight key keywords, metrics, technology names, and achievements within text content (e.g., "Developed **RESTful APIs** using **Spring Boot**, reducing latency by **40%**"). Bold sparingly to emphasize key accomplishments and technical terms — the content is rendered as rich text.
-- For skills: suggest comprehensive skill categories (Languages, Frameworks, Frontend, Databases, DevOps, Testing, Cloud, Messaging, Core Concepts) based on their experience and projects.
+- For skills: you MUST return ALL NINE category keys (languages, frameworks, frontend, databases, devops, testing, cloud, messaging, concepts), each with a non-empty comma-separated string value. Do not omit any category and do not return arrays or nested objects for values — every value must be a single string.
 - For summary: write a compelling 2-3 sentence professional summary that is ATS-optimized with relevant keywords.
 - For experience: suggest ATS-friendly bullet points with strong action verbs and quantified achievements.
 - For projects: suggest ATS-friendly project descriptions with tech stack and contributions.
@@ -751,106 +790,172 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
       const text = response.text.trim();
       // Remove markdown code fences if present
       const jsonStr = text
-        .replace(/^```json\s*/, "")
+        .replace(/^```(?:json)?\s*/i, "")
         .replace(/```$/, "")
         .trim();
-      const suggestions = JSON.parse(jsonStr);
+      let suggestions;
+      try {
+        suggestions = JSON.parse(jsonStr);
+      } catch {
+        // Fallback: pull the first {...} block out of any surrounding prose
+        const match = jsonStr.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error("AI response contained no JSON object");
+        suggestions = JSON.parse(match[0]);
+      }
 
-      // Apply suggestions to resume
-      setResume((prev) => {
-        const updated = { ...prev };
+      // If the model forgot the {"skills": {...}} wrapper and returned the
+      // category map directly, wrap it so the apply-logic below still works.
+      if (
+        sectionId === "skills" &&
+        suggestions &&
+        !suggestions.skills &&
+        typeof suggestions === "object"
+      ) {
+        const looksLikeSkillMap = Object.keys(suggestions).some((k) =>
+          normalizeSkillKey(k),
+        );
+        if (looksLikeSkillMap) suggestions = { skills: suggestions };
+      }
 
-        if (sectionId === "personal") {
-          Object.keys(suggestions).forEach((key) => {
-            if (suggestions[key] && !prev[key]) {
-              updated[key] = suggestions[key];
+      // Apply suggestions to resume. Computed from the same `resume` snapshot
+      // that was sent to the AI (so the merge matches what the model saw),
+      // then applied with a plain setUpdate — not a side-effecting updater.
+      const prev = resume;
+      const updated = { ...prev };
+      // Tracks how many fields/entries were actually filled so the success
+      // message can tell the truth instead of always claiming success.
+      let appliedCount = 0;
+
+      if (sectionId === "personal") {
+        Object.keys(suggestions).forEach((key) => {
+          if (suggestions[key] && !prev[key]) {
+            updated[key] = suggestions[key];
+            appliedCount += 1;
+          }
+        });
+      } else if (sectionId === "summary") {
+        if (suggestions.summary && !prev.summary) {
+          updated.summary = suggestions.summary;
+          appliedCount += 1;
+        }
+      } else if (sectionId === "skills") {
+        if (
+          suggestions.skills &&
+          typeof suggestions.skills === "object" &&
+          !Array.isArray(suggestions.skills)
+        ) {
+          Object.entries(suggestions.skills).forEach(([key, value]) => {
+            const targetKey = normalizeSkillKey(key);
+            const text = skillValueToString(value);
+            if (targetKey && text && !prev.skills[targetKey]) {
+              updated.skills = {
+                // Spread the ACCUMULATOR (updated), not prev — otherwise
+                // each matched category overwrites the previous one and
+                // only the last key survives.
+                ...updated.skills,
+                [targetKey]: text,
+              };
+              appliedCount += 1;
             }
           });
-        } else if (sectionId === "summary") {
-          if (suggestions.summary && !prev.summary) {
-            updated.summary = suggestions.summary;
-          }
-        } else if (sectionId === "skills") {
-          if (
-            suggestions.skills &&
-            typeof suggestions.skills === "object" &&
-            !Array.isArray(suggestions.skills)
-          ) {
-            Object.entries(suggestions.skills).forEach(([key, value]) => {
-              const targetKey = normalizeSkillKey(key);
-              const text = skillValueToString(value);
-              if (targetKey && text && !prev.skills[targetKey]) {
-                updated.skills = {
-                  // Spread the ACCUMULATOR (updated), not prev — otherwise
-                  // each matched category overwrites the previous one and
-                  // only the last key survives.
-                  ...updated.skills,
-                  [targetKey]: text,
-                };
-              }
-            });
-          }
-        } else if (sectionId === "experience") {
-          if (suggestions.experience && Array.isArray(suggestions.experience)) {
-            const existing = prev.experience.filter((e) => e.company || e.role);
-            const suggested = suggestions.experience.filter(
-              (e) => e.company || e.role,
-            );
-            if (existing.length === 0 && suggested.length > 0) {
-              updated.experience = suggested;
-            }
-          }
-        } else if (sectionId === "projects") {
-          if (suggestions.projects && Array.isArray(suggestions.projects)) {
-            const existing = prev.projects.filter((p) => p.name);
-            const suggested = suggestions.projects.filter((p) => p.name);
-            if (existing.length === 0 && suggested.length > 0) {
-              updated.projects = suggested;
-            }
-          }
-        } else if (sectionId === "education") {
-          if (suggestions.education && Array.isArray(suggestions.education)) {
-            const existing = prev.education.filter(
-              (e) => e.degree || e.institution,
-            );
-            const suggested = suggestions.education.filter(
-              (e) => e.degree || e.institution,
-            );
-            if (existing.length === 0 && suggested.length > 0) {
-              updated.education = suggested;
-            }
-          }
-        } else if (sectionId === "certificates") {
-          if (
-            suggestions.certificates &&
-            Array.isArray(suggestions.certificates)
-          ) {
-            // Filter by actual content (a blank {name:"", ...} row is a
-            // truthy object, so filter(Boolean) would wrongly report the
-            // section as already filled and never apply suggestions).
-            const existing = prev.certificates.filter((c) => getCertName(c));
-            if (existing.length === 0 && suggestions.certificates.length > 0) {
-              updated.certificates = suggestions.certificates
-                .filter(Boolean)
-                .map((cert) =>
-                  typeof cert === "string"
-                    ? { name: cert, issuer: "", url: "" }
-                    : {
-                        name: cert.name || cert.certificate || cert.title || "",
-                        issuer:
-                          cert.issuer || cert.issuedBy || cert.authority || "",
-                        url: cert.url || cert.link || "",
-                      },
-                )
-                .filter((c) => getCertName(c));
-            }
+        }
+      } else if (sectionId === "experience") {
+        if (suggestions.experience && Array.isArray(suggestions.experience)) {
+          const existing = prev.experience.filter((e) => e.company || e.role);
+          const suggested = suggestions.experience.filter(
+            (e) => e.company || e.role,
+          );
+          if (existing.length === 0 && suggested.length > 0) {
+            updated.experience = suggested;
+            appliedCount = suggested.length;
           }
         }
+      } else if (sectionId === "projects") {
+        if (suggestions.projects && Array.isArray(suggestions.projects)) {
+          const existing = prev.projects.filter((p) => p.name);
+          const suggested = suggestions.projects.filter((p) => p.name);
+          if (existing.length === 0 && suggested.length > 0) {
+            updated.projects = suggested;
+            appliedCount = suggested.length;
+          }
+        }
+      } else if (sectionId === "education") {
+        if (suggestions.education && Array.isArray(suggestions.education)) {
+          const existing = prev.education.filter(
+            (e) => e.degree || e.institution,
+          );
+          const suggested = suggestions.education.filter(
+            (e) => e.degree || e.institution,
+          );
+          if (existing.length === 0 && suggested.length > 0) {
+            updated.education = suggested;
+            appliedCount = suggested.length;
+          }
+        }
+      } else if (sectionId === "certificates") {
+        // The model often returns "certifications"/"certs" instead of
+        // "certificates", or the bare array with no wrapper key at all —
+        // accept all of those shapes.
+        const certList = ["certificates", "certifications", "certs"].reduce(
+          (list, key) =>
+            list ||
+            (Array.isArray(suggestions?.[key]) ? suggestions[key] : null),
+          Array.isArray(suggestions) ? suggestions : null,
+        );
+        if (certList) {
+          // Filter by actual content (a blank {name:"", ...} row is a
+          // truthy object, so filter(Boolean) would wrongly report the
+          // section as already filled and never apply suggestions).
+          const existing = prev.certificates.filter((c) => getCertName(c));
+          const suggested = certList
+            .filter(Boolean)
+            .map((cert) =>
+              typeof cert === "string"
+                ? { name: cert, issuer: "", url: "" }
+                : {
+                    name:
+                      cert.name ||
+                      cert.certificate ||
+                      cert.certification ||
+                      cert.title ||
+                      "",
+                    issuer:
+                      cert.issuer ||
+                      cert.issuedBy ||
+                      cert.issuingOrganization ||
+                      cert.authority ||
+                      "",
+                    url: cert.url || cert.link || "",
+                  },
+            )
+            .map((c) => ({
+              ...c,
+              name: c.name.replace(/\*\*/g, "").trim(),
+              issuer: c.issuer.replace(/\*\*/g, "").trim(),
+              url: c.url.trim(),
+            }))
+            .filter((c) => getCertName(c));
+          if (existing.length === 0 && suggested.length > 0) {
+            updated.certificates = suggested;
+            appliedCount = suggested.length;
+          }
+        }
+      }
 
-        return updated;
-      });
-
-      setAiMessage("✨ AI suggestions applied! Review and edit as needed.");
+      if (appliedCount > 0) {
+        setResume(updated);
+        setAiMessage("✨ AI suggestions applied! Review and edit as needed.");
+      } else {
+        // Surface what actually happened so a silent no-op is visible in the
+        // console instead of masquerading as a successful apply.
+        console.warn("AI suggestions not applied — parsed payload:", {
+          sectionId,
+          suggestions,
+        });
+        setAiMessage(
+          `⚠️ AI replied, but nothing was added — your ${sectionName} fields may already have content, or the AI returned an unexpected format (details in browser console).`,
+        );
+      }
     } catch (error) {
       console.error("AI suggestion error:", error);
       setAiMessage("⚠️ Could not generate suggestions. Please try again.");
