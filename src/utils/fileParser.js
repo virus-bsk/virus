@@ -88,36 +88,46 @@ export async function parseResumeFile(file) {
  * summary, experience, projects, skills, education, certificates.
  */
 export function buildResumeDataExtractionPrompt(resumeText, filename) {
-  return `You are an expert resume parser. I have uploaded my resume file "${filename}". 
-Your job is to extract ALL information from it and return it as valid JSON that exactly matches the Resume Builder data structure.
+  return `You are an expert resume parser. I have uploaded my resume file "${filename}".
 
+## 🎯 YOUR GOAL
+Extract ALL information from the resume and return it as **valid JSON only** that exactly matches the Resume Builder data structure below.
+
+## 📄 RESUME CONTENT
 === RESUME CONTENT START ===
 ${resumeText}
 === RESUME CONTENT END ===
 
-Extract every detail you can find:
-1. **name** - Full name
-2. **title** - Professional title / current job title
-3. **email** - Email address
-4. **phone** - Phone number
-5. **linkedin** - LinkedIn URL (if present)
-6. **github** - GitHub URL (if present)
-7. **website** - Personal website / portfolio URL (if present)
-8. **websiteName** - Display label for the website (if present)
-9. **location** - City, State, Country
-10. **summary** - Professional summary / objective statement
-11. **experience** - Array of work experiences with: company, role, startDate, endDate, location, and points (array of achievement/responsibility bullets)
-12. **projects** - Array of projects with: name, techStack, and points (array of contribution bullets)
-13. **skills** - Object with categories: languages, frameworks, frontend, databases, devops, testing, cloud, messaging, concepts (ALL nine keys required, each a single comma-separated string)
-14. **education** - Array of education entries with: degree, institution, cgpa, startYear, endYear, location
-15. **certificates** - Array of certification objects with name, issuer, and url
+## 📋 FIELDS TO EXTRACT
+Extract every detail you can find. Use these exact field names:
 
-Rules:
-  - Rewrite experience/project bullet points with strong action verbs and quantified achievements where possible.
-  - Clean up grammar, spelling, and formatting.
-  - Make content concise and impactful.
+1. **name** — Full name
+2. **title** — Professional title / current job title
+3. **email** — Email address
+4. **phone** — Phone number
+5. **linkedin** — LinkedIn URL (if present)
+6. **github** — GitHub URL (if present)
+7. **website** — Personal website / portfolio URL (if present)
+8. **websiteName** — Display label for the website (if present)
+9. **location** — City, State, Country
+10. **summary** — Professional summary / objective statement
+11. **experience** — Array of work experiences: company, role, startDate, endDate, location, points (array of achievement bullets)
+12. **projects** — Array of projects: name, techStack, points (array of contribution bullets)
+13. **skills** — Object with ALL nine keys: languages, frameworks, frontend, databases, devops, testing, cloud, messaging, concepts (each a single comma-separated string)
+14. **education** — Array of education entries: degree, institution, cgpa, startYear, endYear, location
+15. **certificates** — Array of certification objects: name, issuer, url
 
-The response MUST be exactly this JSON structure (use these EXACT lowercase key names, no other variants like full_name or phoneNumber):
+## ⚠️ CRITICAL RULES (DO NOT VIOLATE)
+- **Output ONLY valid JSON.** No markdown code fences, no explanation, no extra text before or after.
+- **Use EXACT lowercase key names** shown below. Do NOT use variants like full_name, phoneNumber, email_address, etc.
+- **All nine skills keys are required.** Even if a category is empty, include it as an empty string "".
+- **If a field is not found in the resume, use an empty string ""** — do not omit it, do not use null.
+- **Experience/project points must be an array of strings**, even if there is only one bullet.
+- **Dates:** keep as found in the resume (e.g., "Jan 2023", "2023-2025", "Present").
+- **Rewrite bullets** with strong action verbs and quantified achievements where possible.
+- **Clean up grammar, spelling, and formatting.** Make content concise and impactful.
+
+## 📦 REQUIRED JSON STRUCTURE (copy exactly)
 {
   "name": "",
   "title": "",
@@ -167,12 +177,12 @@ The response MUST be exactly this JSON structure (use these EXACT lowercase key 
       "location": ""
     }
   ],
-    "certificates": [
-      {
-        "name": "",
-        "issuer": "",
-        "url": ""
-      }
-    ]
-  }`;
+  "certificates": [
+    {
+      "name": "",
+      "issuer": "",
+      "url": ""
+    }
+  ]
+}`;
 }

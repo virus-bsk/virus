@@ -27,9 +27,8 @@ const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 const AI_MODELS = [
   "gemini-3-flash-preview",
-  "gemini-2.0-flash",
-  "gemini-flash-latest",
-  "gemini-2.5-flash-preview",
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
 ];
 
 const STEPS = [
@@ -2111,17 +2110,6 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
               />
             </div>
             <div className="rb-field">
-              <label>Professional Title *</label>
-              <input
-                type="text"
-                value={resume.title}
-                onChange={(e) =>
-                  updateField("personal", "title", e.target.value)
-                }
-                placeholder="e.g. Full Stack Developer"
-              />
-            </div>
-            <div className="rb-field">
               <label>Email *</label>
               <input
                 type="email"
@@ -2816,9 +2804,6 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
             >
               <div className="rb-preview-header">
                 <h2>{(resume.name || "Your Name").toUpperCase()}</h2>
-                {resumeTemplate === "template1" && resume.title && (
-                  <p className="rb-preview-title">{resume.title}</p>
-                )}
                 <p className="rb-preview-contact">
                   {resume.location && (
                     <span className="rb-preview-contact-item">
