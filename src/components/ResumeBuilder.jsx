@@ -1513,7 +1513,9 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
         doc.setFont("helvetica", "bold");
         doc.setFontSize(11);
         doc.setTextColor(0, 0, 0);
-        doc.text(edu.institution || "", margin, y);
+        // Whole institution line is bold by design — strip any ** markers so
+        // AI-written markdown never prints as literal asterisks in the PDF.
+        doc.text((edu.institution || "").replace(/\*\*/g, ""), margin, y);
 
         if (edu.startYear || edu.endYear) {
           doc.setFont("helvetica", "normal");
@@ -1533,16 +1535,36 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
         let degreeText = edu.degree || "";
         let cgpaText = edu.cgpa ? `CGPA: ${edu.cgpa}` : "";
 
-        if (degreeText && cgpaText) {
-          doc.text(degreeText + "| ", margin, y);
-          const degreeWidth = doc.getTextWidth(degreeText + "| ");
+        // The degree can carry **bold** markdown from the AI — draw it as
+        // inline bold segments (same tokenizer the bullets use), then the
+        // separator and the italic CGPA after it.
+        const degreeTokens = segmentToTokens(parseSegments(degreeText));
+        const sep = degreeText && cgpaText ? "| " : "";
+        let degreeWidth = 0;
+        degreeTokens.forEach((t) => {
+          doc.setFont("helvetica", t.bold ? "bold" : "normal");
+          degreeWidth += doc.getTextWidth(t.text);
+        });
+        doc.setFont("helvetica", "normal");
+        degreeWidth += doc.getTextWidth(sep);
+        let dx = margin;
+        degreeTokens.forEach((t) => {
+          doc.setFont("helvetica", t.bold ? "bold" : "normal");
+          doc.setFontSize(10);
+          doc.setTextColor(0, 0, 0);
+          doc.text(t.text, dx, y);
+          dx += doc.getTextWidth(t.text);
+        });
+        if (sep) {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          doc.text(sep, dx, y);
+        }
+        if (cgpaText) {
           doc.setFont("helvetica", "italic");
+          doc.setFontSize(10);
+          doc.setTextColor(0, 0, 0);
           doc.text(cgpaText, margin + degreeWidth, y);
-        } else if (degreeText) {
-          doc.text(degreeText, margin, y);
-        } else if (cgpaText) {
-          doc.setFont("helvetica", "italic");
-          doc.text(cgpaText, margin, y);
         }
 
         if (edu.location) {
@@ -2607,7 +2629,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                     .map((edu, idx) => (
                       <div key={idx} className="rb-preview-item">
                         <div className="rb-preview-item-header">
-                          <strong>{edu.institution}</strong>
+                          <strong>{formatText(edu.institution)}</strong>
                           <span>
                             {edu.startYear}
                             {edu.startYear && edu.endYear ? " - " : ""}
@@ -2623,7 +2645,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                           }}
                         >
                           <span style={{ fontSize: "0.85rem" }}>
-                            {edu.degree}
+                            {formatText(edu.degree)}
                             {edu.degree && edu.cgpa ? " | " : ""}
                             {edu.cgpa && (
                               <span style={{ fontStyle: "italic" }}>
