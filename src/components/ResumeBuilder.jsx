@@ -332,9 +332,16 @@ function ResumeBuilder({ onClose }) {
   // in the header so the user always knows their work is safe.
   const [lastSavedAt, setLastSavedAt] = useState(null);
   // Lightweight clock so the relative "last saved" label stays fresh.
-  const [nowTick, setNowTick] = useState(Date.now());
+  // nowTick starts at 0 (a constant — satisfies react-hooks/purity, which
+  // forbids Date.now() during render). It is updated only by the interval
+  // callback (not synchronously in the effect body — satisfies
+  // react-hooks/set-state-in-effect) and seeded from the save handlers
+  // (event handlers are not render, so Date.now() is allowed there).
+  const [nowTick, setNowTick] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setNowTick(Date.now()), 30_000);
+    const id = setInterval(() => {
+      setNowTick(Date.now());
+    }, 30_000);
     return () => clearInterval(id);
   }, []);
   const resumeBaselineRef = useRef(JSON.stringify(EMPTY_RESUME));
@@ -462,6 +469,7 @@ function ResumeBuilder({ onClose }) {
     resumeBaselineRef.current = serializedResume;
     setHasSavedResume(true);
     setLastSavedAt(new Date());
+    setNowTick(Date.now());
     setResumeSyncMessage("Resume saved.");
     return true;
   };
@@ -510,6 +518,7 @@ function ResumeBuilder({ onClose }) {
         ? result.value.updatedAt.toDate()
         : new Date(),
     );
+    setNowTick(Date.now());
     setResumeSyncMessage("Saved resume loaded — press Save Resume after editing.");
     setShowPreview(true);
     setStep(STEPS.length - 1);
