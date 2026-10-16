@@ -102,20 +102,22 @@ Extract every detail you can find:
 4. **phone** - Phone number
 5. **linkedin** - LinkedIn URL (if present)
 6. **github** - GitHub URL (if present)
-7. **location** - City, State, Country
-8. **summary** - Professional summary / objective statement
-9. **experience** - Array of work experiences with: company, role, startDate, endDate, location, and points (array of achievement/responsibility bullets)
-10. **projects** - Array of projects with: name, techStack, and points (array of contribution bullets)
-11. **skills** - Object with categories: languages, frameworks, frontend, databases, devops, testing, cloud, messaging, concepts
-12. **education** - Array of education entries with: degree, institution, cgpa, startYear, endYear, location
-  13. **certificates** - Array of certification objects with name, issuer, and url
+7. **website** - Personal website / portfolio URL (if present)
+8. **websiteName** - Display label for the website (if present)
+9. **location** - City, State, Country
+10. **summary** - Professional summary / objective statement
+11. **experience** - Array of work experiences with: company, role, startDate, endDate, location, and points (array of achievement/responsibility bullets)
+12. **projects** - Array of projects with: name, techStack, and points (array of contribution bullets)
+13. **skills** - Object with categories: languages, frameworks, frontend, databases, devops, testing, cloud, messaging, concepts (ALL nine keys required, each a single comma-separated string)
+14. **education** - Array of education entries with: degree, institution, cgpa, startYear, endYear, location
+15. **certificates** - Array of certification objects with name, issuer, and url
 
 Rules:
   - Rewrite experience/project bullet points with strong action verbs and quantified achievements where possible.
   - Clean up grammar, spelling, and formatting.
   - Make content concise and impactful.
 
-The response MUST be exactly this JSON structure:
+The response MUST be exactly this JSON structure (use these EXACT lowercase key names, no other variants like full_name or phoneNumber):
 {
   "name": "",
   "title": "",
@@ -123,6 +125,8 @@ The response MUST be exactly this JSON structure:
   "phone": "",
   "linkedin": "",
   "github": "",
+  "website": "",
+  "websiteName": "",
   "location": "",
   "summary": "",
   "experience": [

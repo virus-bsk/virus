@@ -211,6 +211,60 @@ const skillValueToString = (value) => {
   return typeof value === "string" ? value.replace(/\*\*/g, "").trim() : "";
 };
 
+// Maps the personal-field keys the AI/parser tends to return (full_name,
+// phoneNumber, email_address, linkedin_url, ...) back to the form's fixed
+// field names. Returns null for keys that are not personal fields.
+const PERSONAL_KEY_ALIASES = {
+  name: "name",
+  fullname: "name",
+  fullnamecandidate: "name",
+  title: "title",
+  jobtitle: "title",
+  professionaltitle: "title",
+  headline: "title",
+  email: "email",
+  emailaddress: "email",
+  mail: "email",
+  phone: "phone",
+  phonenumber: "phone",
+  mobile: "phone",
+  mobilephone: "phone",
+  contactnumber: "phone",
+  linkedin: "linkedin",
+  linkedinurl: "linkedin",
+  linkedinprofile: "linkedin",
+  github: "github",
+  githuburl: "github",
+  githubprofile: "github",
+  website: "website",
+  websiteurl: "website",
+  portfolio: "website",
+  websitename: "websiteName",
+  websitelabel: "websiteName",
+  location: "location",
+  address: "location",
+  city: "location",
+};
+
+const normalizePersonalKey = (key) => {
+  const flat = String(key).toLowerCase().replace(/[\s_\-./]+/g, "");
+  return PERSONAL_KEY_ALIASES[flat] || null;
+};
+
+// Plain-text cleanup for personal fields: strips **bold** markdown, and for
+// the title also cuts anything after a "|" separator (the model likes to
+// stuff skills into the title, e.g. "Senior Engineer | Java & Spring Boot").
+const cleanPersonalValue = (key, value) => {
+  const text =
+    typeof value === "string"
+      ? value.replace(/\*\*/g, "").trim()
+      : value == null
+        ? ""
+        : String(value).replace(/\*\*/g, "").trim();
+  if (key === "title") return text.split("|")[0].trim();
+  return text;
+};
+
 // Counts the form fields the user has actually filled in (arrays and nested
 // objects are walked). EMPTY_RESUME scores 0, a couple of typed characters
 // score 1-2, and an uploaded/AI-autofilled resume scores many. Used to guard
@@ -516,140 +570,184 @@ function ResumeBuilder({ onClose }) {
 
       if (!response?.text && lastError) throw lastError;
 
-      // Parse the JSON response
+      // Parse the JSON response — strip code fences and, if the model still
+      // wrapped it in prose, pull the first {...} block out.
       const text = response.text.trim();
       const jsonStr = text
-        .replace(/^```json\s*/, "")
-        .replace(/```$/, "")
-        .replace(/^```\s*/, "")
+        .replace(/^```(?:json)?\s*/i, "")
         .replace(/```$/, "")
         .trim();
-      const parsedData = JSON.parse(jsonStr);
+      let parsedData;
+      try {
+        parsedData = JSON.parse(jsonStr);
+      } catch {
+        const match = jsonStr.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error("AI response contained no JSON object");
+        parsedData = JSON.parse(match[0]);
+      }
 
-      // Sanitize and merge the extracted data into the resume
-      setResume((prev) => {
-        const updated = { ...prev };
+      // Some models wrap the payload ({"resume": {...}} / {"data": {...}}).
+      const inner =
+        parsedData?.resume && typeof parsedData.resume === "object"
+          ? parsedData.resume
+          : parsedData?.data && typeof parsedData.data === "object"
+            ? parsedData.data
+            : parsedData;
 
-        // Personal info
-        const personalFields = [
-          "name",
-          "title",
-          "email",
-          "phone",
-          "linkedin",
-          "github",
-          "website",
-          "websiteName",
-          "location",
-        ];
-        personalFields.forEach((field) => {
-          if (parsedData[field] && !updated[field]) {
-            updated[field] = String(parsedData[field]).trim();
-          }
-        });
+      // How many fields actually get filled — drives an honest final message
+      // instead of always claiming success. The merge is computed synchronously
+      // from the current `resume` snapshot (not inside a setResume updater) so
+      // the count is reliable.
+      let appliedCount = 0;
+      const prev = resume;
+      const updated = { ...prev };
 
-        // Summary
-        if (parsedData.summary && !updated.summary) {
-          updated.summary = String(parsedData.summary).trim();
+      // Personal info — accept the AI's key variants (full_name,
+      // phoneNumber, email_address, linkedin_url, ...) and clean values.
+      Object.entries(inner || {}).forEach(([key, value]) => {
+        const field = normalizePersonalKey(key);
+        if (!field || prev[field]) return;
+        const valueText = cleanPersonalValue(field, value);
+        if (valueText) {
+          updated[field] = valueText;
+          appliedCount += 1;
         }
-
-        // Experience
-        if (
-          parsedData.experience &&
-          Array.isArray(parsedData.experience) &&
-          parsedData.experience.length > 0
-        ) {
-          const validExp = parsedData.experience.filter(
-            (exp) => exp.company || exp.role,
-          );
-          if (validExp.length > 0) {
-            updated.experience = validExp.map((exp) => ({
-              company: exp.company || "",
-              role: exp.role || "",
-              startDate: exp.startDate || "",
-              endDate: exp.endDate || "",
-              location: exp.location || "",
-              points: Array.isArray(exp.points)
-                ? exp.points.filter(Boolean)
-                : [""],
-            }));
-          }
-        }
-
-        // Projects
-        if (
-          parsedData.projects &&
-          Array.isArray(parsedData.projects) &&
-          parsedData.projects.length > 0
-        ) {
-          const validProjects = parsedData.projects.filter((p) => p.name);
-          if (validProjects.length > 0) {
-            updated.projects = validProjects.map((proj) => ({
-              name: proj.name || "",
-              techStack: proj.techStack || "",
-              points: Array.isArray(proj.points)
-                ? proj.points.filter(Boolean)
-                : [""],
-            }));
-          }
-        }
-
-        // Skills
-        if (parsedData.skills && typeof parsedData.skills === "object") {
-          Object.keys(updated.skills).forEach((key) => {
-            if (parsedData.skills[key] && !updated.skills[key]) {
-              updated.skills[key] = String(parsedData.skills[key]).trim();
-            }
-          });
-        }
-
-        // Education
-        if (
-          parsedData.education &&
-          Array.isArray(parsedData.education) &&
-          parsedData.education.length > 0
-        ) {
-          const validEdu = parsedData.education.filter(
-            (edu) => edu.degree || edu.institution,
-          );
-          if (validEdu.length > 0) {
-            updated.education = validEdu.map((edu) => ({
-              degree: edu.degree || "",
-              institution: edu.institution || "",
-              cgpa: edu.cgpa || "",
-              startYear: edu.startYear || "",
-              endYear: edu.endYear || "",
-              location: edu.location || "",
-            }));
-          }
-        }
-
-        // Certificates
-        if (parsedData.certificates && Array.isArray(parsedData.certificates)) {
-          const validCerts = parsedData.certificates
-            .filter(Boolean)
-            .map((cert) =>
-              typeof cert === "string"
-                ? { name: cert, url: "" }
-                : {
-                    name: cert.name || cert.certificate || "",
-                    issuer:
-                      cert.issuer || cert.issuerName || cert.organization || "",
-                    url: cert.url || cert.link || "",
-                  },
-            )
-            .filter((c) => c.name);
-          if (validCerts.length > 0) {
-            updated.certificates = validCerts;
-          }
-        }
-
-        return updated;
       });
 
+      // Summary
+      if (inner.summary && !prev.summary) {
+        updated.summary = String(inner.summary).trim();
+        appliedCount += 1;
+      }
+
+      // Experience
+      if (
+        inner.experience &&
+        Array.isArray(inner.experience) &&
+        inner.experience.length > 0
+      ) {
+        const validExp = inner.experience.filter(
+          (exp) => exp.company || exp.role,
+        );
+        if (validExp.length > 0) {
+          updated.experience = validExp.map((exp) => ({
+            company: exp.company || "",
+            role: exp.role || "",
+            startDate: exp.startDate || "",
+            endDate: exp.endDate || "",
+            location: exp.location || "",
+            points: Array.isArray(exp.points)
+              ? exp.points.filter(Boolean)
+              : [""],
+          }));
+          appliedCount += validExp.length;
+        }
+      }
+
+      // Projects
+      if (
+        inner.projects &&
+        Array.isArray(inner.projects) &&
+        inner.projects.length > 0
+      ) {
+        const validProjects = inner.projects.filter((p) => p.name);
+        if (validProjects.length > 0) {
+          updated.projects = validProjects.map((proj) => ({
+            name: proj.name || "",
+            techStack: proj.techStack || "",
+            points: Array.isArray(proj.points)
+              ? proj.points.filter(Boolean)
+              : [""],
+          }));
+          appliedCount += validProjects.length;
+        }
+      }
+
+      // Skills — fuzzy key matching (same as AI Suggest) so "Core
+      // Concepts"/"core_concepts"/arrays still land in the right inputs.
+      if (inner.skills && typeof inner.skills === "object") {
+        const merged = { ...prev.skills };
+        Object.entries(inner.skills).forEach(([key, value]) => {
+          const targetKey = normalizeSkillKey(key);
+          const skillText = skillValueToString(value);
+          if (targetKey && skillText && !merged[targetKey]) {
+            merged[targetKey] = skillText;
+            appliedCount += 1;
+          }
+        });
+        updated.skills = merged;
+      }
+
+      // Education
+      if (
+        inner.education &&
+        Array.isArray(inner.education) &&
+        inner.education.length > 0
+      ) {
+        const validEdu = inner.education.filter(
+          (edu) => edu.degree || edu.institution,
+        );
+        if (validEdu.length > 0) {
+          updated.education = validEdu.map((edu) => ({
+            degree: edu.degree || "",
+            institution: edu.institution || "",
+            cgpa: edu.cgpa || "",
+            startYear: edu.startYear || "",
+            endYear: edu.endYear || "",
+            location: edu.location || "",
+          }));
+          appliedCount += validEdu.length;
+        }
+      }
+
+      // Certificates — accept "certificates"/"certifications"/"certs"
+      const certList = ["certificates", "certifications", "certs"].reduce(
+        (list, key) =>
+          list || (Array.isArray(inner?.[key]) ? inner[key] : null),
+        null,
+      );
+      if (certList) {
+        const validCerts = certList
+          .filter(Boolean)
+          .map((cert) =>
+            typeof cert === "string"
+              ? { name: cert, issuer: "", url: "" }
+              : {
+                  name:
+                    cert.name ||
+                    cert.certificate ||
+                    cert.certification ||
+                    cert.title ||
+                    "",
+                  issuer:
+                    cert.issuer ||
+                    cert.issuerName ||
+                    cert.organization ||
+                    "",
+                  url: cert.url || cert.link || "",
+                },
+          )
+          .map((c) => ({ ...c, name: stripBold(c.name) }))
+          .filter((c) => c.name);
+        if (validCerts.length > 0) {
+          updated.certificates = validCerts;
+          appliedCount += validCerts.length;
+        }
+      }
+
+      if (appliedCount === 0) {
+        // Don't claim success on a silent no-op — surface the payload.
+        console.warn("Resume parse produced no fillable data:", inner);
+        setAiMessage(
+          "⚠️ The file was read, but no details could be extracted (unexpected AI format — details in browser console). Try again or fill in the details manually.",
+        );
+        return;
+      }
+
+      setResume(updated);
       setParsingComplete(true);
       setAiMessage(
-        "✨ Resume parsed successfully! All your details have been auto-filled. Review each section below.",
+        `✨ Resume parsed successfully! ${appliedCount} details auto-filled. Review each section below.`,
       );
 
       // Auto-advance to next step after successful parsing
@@ -807,7 +905,7 @@ TASK: Generate professional ${sectionName} content suggestions.
 - For skills: you MUST return ALL NINE category keys (languages, frameworks, frontend, databases, devops, testing, cloud, messaging, concepts), each with a non-empty comma-separated string value. Do not omit any category and do not return arrays or nested objects for values — every value must be a single string.
 - For summary: write a compelling 2-3 sentence professional summary that is ATS-optimized with relevant keywords.
 - For personal title: return ONLY a short plain job title (e.g. "Senior Software Engineer" or "Java Backend Developer") — at most 4-5 words. Do NOT put skills, technology names, special characters, or "|" separators in the title; skills belong in the skills section. Never use **bold** markdown in the title.
-- For personal fields: never invent name, email, phone, LinkedIn, or GitHub — return empty strings ("") for those unless the user provided them in the resume data above.
+- For personal fields: fill EVERY personal key (name, title, email, phone, linkedin, github, website, websiteName, location). Use the user's real values from the resume data above whenever present. When a value is missing, invent a realistic placeholder (e.g. "yourname@gmail.com", "+91 98765 43210", "linkedin.com/in/yourname") that the user can easily replace — never return empty strings for personal fields.
 - For experience: suggest ATS-friendly bullet points with strong action verbs and quantified achievements.
 - For projects: suggest ATS-friendly project descriptions with tech stack and contributions. The techStack value must be a PLAIN comma-separated list of technologies (e.g. "Spring Boot, React, MySQL, Docker") with NO **bold** markdown — it renders as plain text.
 - For education: suggest standard education entries.
@@ -859,8 +957,23 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
         suggestions = JSON.parse(match[0]);
       }
 
-      // If the model forgot the {"skills": {...}} wrapper and returned the
-      // category map directly, wrap it so the apply-logic below still works.
+      // If the model wrapped the payload ({"resume": {...}} / {"data": {...}})
+      // or forgot the {"skills": {...}} wrapper, normalize the shape so the
+      // apply-logic below still works.
+      if (
+        suggestions?.resume &&
+        typeof suggestions.resume === "object" &&
+        !Array.isArray(suggestions.resume)
+      ) {
+        suggestions = suggestions.resume;
+      } else if (
+        suggestions?.data &&
+        typeof suggestions.data === "object" &&
+        !Array.isArray(suggestions.data) &&
+        !Object.keys(suggestions).some((k) => normalizePersonalKey(k))
+      ) {
+        suggestions = suggestions.data;
+      }
       if (
         sectionId === "skills" &&
         suggestions &&
@@ -883,20 +996,15 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
       let appliedCount = 0;
 
       if (sectionId === "personal") {
-        Object.keys(suggestions).forEach((key) => {
-          if (suggestions[key] && !prev[key]) {
-            updated[key] = suggestions[key];
-            // The title renders as plain text (and must stay a short job
-            // title), so strip **bold** markdown and cut anything after a
-            // "|" separator — the model likes to stuff skills after it
-            // (e.g. "Senior Software Engineer | Java & Spring Boot ...").
-            if (key === "title") {
-              updated.title = String(updated.title)
-                .replace(/\*\*/g, "")
-                .split("|")[0]
-                .trim();
-              if (!updated.title) return;
-            }
+        // Accept the model's key variants (full_name, phoneNumber,
+        // email_address, linkedin_url, ...) via the alias map, and clean
+        // values: strip **bold**, and for the title cut anything after "|".
+        Object.entries(suggestions).forEach(([key, value]) => {
+          const field = normalizePersonalKey(key);
+          if (!field || prev[field]) return;
+          const text = cleanPersonalValue(field, value);
+          if (text) {
+            updated[field] = text;
             appliedCount += 1;
           }
         });
