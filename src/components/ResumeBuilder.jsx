@@ -792,8 +792,6 @@ function ResumeBuilder({ onClose }) {
         return;
       }
 
-      // Debug: log the merged payload before committing to state
-      console.log("RESUME BEFORE SET:", { ...updated, personalBlock, innerKeys: Object.keys(inner || {}) });
       setResume(updated);
       setParsingComplete(true);
       setAiMessage(
@@ -947,16 +945,17 @@ function ResumeBuilder({ onClose }) {
 CURRENT RESUME DATA:
 ${JSON.stringify(resume, null, 2)}
 
-TASK: Generate professional ${sectionName} content suggestions. 
-- If the user has already entered some data, improve and enhance it.
-- If fields are empty, suggest realistic professional content based on their experience level and other sections.
+TASK: Generate or improve ${sectionName} content — UPDATE WORKFLOW:
+- IF the section already has content: READ it carefully, CORRECT errors, IMPROVE wording, add relevant keywords, and highlight key terms/achievements with **bold** markdown. Return the corrected, enhanced version.
+- IF the section is empty: GENERATE fresh professional content from scratch based on the user's experience level and other sections.
+- ALWAYS return improved content — whether starting from scratch or correcting existing.
 - Return ONLY the suggested content in a structured format that can be directly used.
 - IMPORTANT: Make all content ATS-friendly - use strong action verbs, quantified achievements, industry-relevant keywords, and avoid graphics, tables, or special characters that ATS parsers cannot read.
 - IMPORTANT: Use **bold** markdown syntax (wrap text in double asterisks, e.g. **RESTful APIs**) to highlight key keywords, metrics, technology names, and achievements within text content (e.g., "Developed **RESTful APIs** using **Spring Boot**, reducing latency by **40%**"). Bold sparingly to emphasize key accomplishments and technical terms — the content is rendered as rich text.
 - For skills: you MUST return ALL NINE category keys (languages, frameworks, frontend, databases, devops, testing, cloud, messaging, concepts), each with a non-empty comma-separated string value. Do not omit any category and do not return arrays or nested objects for values — every value must be a single string.
 - For summary: write a compelling 2-3 sentence professional summary that is ATS-optimized with relevant keywords.
 - For personal title: return ONLY a short plain job title (e.g. "Senior Software Engineer" or "Java Backend Developer") — at most 4-5 words. Do NOT put skills, technology names, special characters, or "|" separators in the title; skills belong in the skills section. Never use **bold** markdown in the title.
-- For personal fields: fill EVERY personal key (name, title, email, phone, linkedin, github, website, websiteName, location). Use the user's real values from the resume data above whenever present. When a value is missing, invent a realistic placeholder (e.g. "yourname@gmail.com", "+91 98765 43210", "linkedin.com/in/yourname") that the user can easily replace — never return empty strings for personal fields.
+- For personal fields: USE the user's real values; invent placeholders ONLY for missing fields (name, title, email, phone, linkedin, github, website, websiteName, location). Never overwrite real user data with placeholders.
 - For experience: suggest ATS-friendly bullet points with strong action verbs and quantified achievements.
 - For projects: suggest ATS-friendly project descriptions with tech stack and contributions. The techStack value must be a PLAIN comma-separated list of technologies (e.g. "Spring Boot, React, MySQL, Docker") with NO **bold** markdown — it renders as plain text.
 - For education: suggest standard education entries.
@@ -1052,7 +1051,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
         // values: strip **bold**, and for the title cut anything after "|".
         Object.entries(suggestions).forEach(([key, value]) => {
           const field = normalizePersonalKey(key);
-          if (!field || prev[field]) return;
+          if (!field) return;
           const text = cleanPersonalValue(field, value);
           if (text) {
             updated[field] = text;
@@ -1060,7 +1059,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
           }
         });
       } else if (sectionId === "summary") {
-        if (suggestions.summary && !prev.summary) {
+        if (suggestions.summary) {
           updated.summary = suggestions.summary;
           appliedCount += 1;
         }
@@ -1073,7 +1072,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
           Object.entries(suggestions.skills).forEach(([key, value]) => {
             const targetKey = normalizeSkillKey(key);
             const text = skillValueToString(value);
-            if (targetKey && text && !prev.skills[targetKey]) {
+            if (targetKey && text) {
               updated.skills = {
                 // Spread the ACCUMULATOR (updated), not prev — otherwise
                 // each matched category overwrites the previous one and
@@ -1087,18 +1086,16 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
         }
       } else if (sectionId === "experience") {
         if (suggestions.experience && Array.isArray(suggestions.experience)) {
-          const existing = prev.experience.filter((e) => e.company || e.role);
           const suggested = suggestions.experience.filter(
             (e) => e.company || e.role,
           );
-          if (existing.length === 0 && suggested.length > 0) {
+          if (suggested.length > 0) {
             updated.experience = suggested;
             appliedCount = suggested.length;
           }
         }
       } else if (sectionId === "projects") {
         if (suggestions.projects && Array.isArray(suggestions.projects)) {
-          const existing = prev.projects.filter((p) => p.name);
           const suggested = suggestions.projects
             .filter((p) => p.name)
             .map((p) => ({
@@ -1109,20 +1106,17 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
               name: stripBold(p.name),
               techStack: stripBold(p.techStack),
             }));
-          if (existing.length === 0 && suggested.length > 0) {
+          if (suggested.length > 0) {
             updated.projects = suggested;
             appliedCount = suggested.length;
           }
         }
       } else if (sectionId === "education") {
         if (suggestions.education && Array.isArray(suggestions.education)) {
-          const existing = prev.education.filter(
-            (e) => e.degree || e.institution,
-          );
           const suggested = suggestions.education.filter(
             (e) => e.degree || e.institution,
           );
-          if (existing.length === 0 && suggested.length > 0) {
+          if (suggested.length > 0) {
             updated.education = suggested;
             appliedCount = suggested.length;
           }
@@ -1141,7 +1135,6 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
           // Filter by actual content (a blank {name:"", ...} row is a
           // truthy object, so filter(Boolean) would wrongly report the
           // section as already filled and never apply suggestions).
-          const existing = prev.certificates.filter((c) => getCertName(c));
           const suggested = certList
             .filter(Boolean)
             .map((cert) =>
@@ -1170,7 +1163,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
               url: c.url.trim(),
             }))
             .filter((c) => getCertName(c));
-          if (existing.length === 0 && suggested.length > 0) {
+          if (suggested.length > 0) {
             updated.certificates = suggested;
             appliedCount = suggested.length;
           }
