@@ -4,6 +4,7 @@ import { auth } from "../firebase";
 import { isAdminEmail } from "../utils/admin";
 import AdminUsers from "../components/AdminUsers";
 import AdminPricing from "../components/AdminPricing";
+import AdminJobs from "../components/AdminJobs";
 import "../pages/Admin.css";
 
 export default function Admin() {
@@ -23,8 +24,11 @@ export default function Admin() {
       <div className="admin-tabs">
         <button type="button" className={`admin-tab${tab === "users" ? " admin-tab-active" : ""}`} onClick={() => setTab("users")}>Users</button>
         <button type="button" className={`admin-tab${tab === "pricing" ? " admin-tab-active" : ""}`} onClick={() => setTab("pricing")}>Pricing</button>
+        <button type="button" className={`admin-tab${tab === "jobs" ? " admin-tab-active" : ""}`} onClick={() => setTab("jobs")}>AI Jobs</button>
       </div>
-      {tab === "users" ? <AdminUsers /> : <AdminPricing />}
+      {tab === "users" && <AdminUsers />}
+      {tab === "pricing" && <AdminPricing />}
+      {tab === "jobs" && <AdminJobs />}
     </div>
   );
 }

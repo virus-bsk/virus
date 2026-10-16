@@ -27,6 +27,12 @@ rules_version = '2';
 //     week      map        zero-based week indexes to solved flags, e.g. {"0": true}
 //   pricing/{plan}         e.g. pricing/maang_kit — the fee shown on /payment,
 //                          read-only for clients
+//   jobApps/{jobId}        admin-only — AI job-application tracker in the
+//                          hidden console (title, company, url, jd, status,
+//                          fit{score,verdict,strengths,gaps,coverLetter,
+//                          tailoredBullets}, createdAt, updatedAt)
+//   jobProfile/{docId}     admin-only — e.g. jobProfile/admin, the candidate
+//                          summary used as context by the AI Jobs tab
 //
 // Everything else in the database is denied by default.
 
@@ -201,6 +207,18 @@ service cloud.firestore {
       // Only the admin may change pricing (label/amount/currency) from the
       // hidden console; every other account is read-only here.
       allow write: if isAdmin();
+    }
+
+    // AI Jobs tab of the hidden admin console: the tracker of pasted job
+    // descriptions, AI fit scores and drafted applications. Admin-only in
+    // both directions — no other account can read or write these docs.
+    match /jobApps/{jobId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Candidate profile summary used as context by the AI Jobs tab.
+    match /jobProfile/{docId} {
+      allow read, write: if isAdmin();
     }
   }
 }

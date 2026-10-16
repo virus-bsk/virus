@@ -59,3 +59,26 @@
 .admin-detail-v{font-size:.9rem;color:var(--text);word-break:break-word}
 @media(max-width:640px){.admin-row{grid-template-columns:1fr}.admin-select{max-width:none}.admin-detail-grid{grid-template-columns:1fr}}
 @media(max-width:640px){.admin-row{grid-template-columns:1fr}.admin-select{max-width:none}}
+
+/* AI Jobs tab — AdminJobs.jsx */
+.admin-form-wide{max-width:860px}
+.admin-row-title{grid-template-columns:1fr 220px}
+@media(max-width:640px){.admin-row-title{grid-template-columns:1fr}}
+.admin-textarea{min-height:100px;resize:vertical;line-height:1.5}
+.admin-modal-wide{max-width:760px}
+.admin-sub{color:var(--text-h);font-size:.95rem;margin:16px 0 6px}
+.admin-jd{white-space:pre-wrap;background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.85rem;line-height:1.6;color:var(--text);max-height:240px;overflow:auto;margin:0 0 6px}
+.admin-score-good{background:rgba(34,197,94,.18);color:#86efac}
+.admin-score-mid{background:rgba(245,158,11,.18);color:#fcd34d}
+.admin-score-low{background:rgba(239,68,68,.18);color:#fca5a5}
+.admin-status-applied{background:rgba(56,189,248,.16);color:#7dd3fc}
+.admin-status-interview{background:rgba(245,158,11,.18);color:#fcd34d}
+.admin-status-offer{background:rgba(34,197,94,.18);color:#86efac}
+.admin-status-rejected{background:rgba(239,68,68,.18);color:#fca5a5}
+.admin-ai-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.admin-ai-block{background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:10px}
+.admin-ai-verdict{color:var(--text);font-size:.9rem;margin:6px 0 0;line-height:1.55}
+.admin-ai-list{margin:6px 0 0;padding-left:18px;color:var(--text);font-size:.88rem;line-height:1.65}
+.admin-ai-cover{white-space:pre-wrap;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:.87rem;line-height:1.6;color:var(--text);margin:8px 0;max-height:260px;overflow:auto}
+.admin-btn-danger{background:rgba(239,68,68,.16);color:#fca5a5}
+.admin-row-actions{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
