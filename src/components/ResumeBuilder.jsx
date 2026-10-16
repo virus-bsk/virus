@@ -247,6 +247,14 @@ const PERSONAL_KEY_ALIASES = {
   location: "location",
   address: "location",
   city: "location",
+  firstname: "name",
+  lastname: "name",
+  first_name: "name",
+  last_name: "name",
+  givenname: "name",
+  surname: "name",
+  contactperson: "name",
+  applicantname: "name",
   // Safety net: if the model nests personal info under a "personal" key,
   // normalizePersonalKey("personal") → "personal" so the caller can merge it.
   personal: "personal",
@@ -799,8 +807,9 @@ function ResumeBuilder({ onClose }) {
       }, 1200);
     } catch (error) {
       console.error("Resume parsing error:", error);
+      const detail = error?.message || String(error);
       setAiMessage(
-        "⚠️ Could not parse the resume. Please try again or fill in the details manually.",
+        `⚠️ Could not parse the resume: ${detail}. Please try again or fill in the details manually.`,
       );
     } finally {
       setUploadingResume(false);
