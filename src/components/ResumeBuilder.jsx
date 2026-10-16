@@ -124,6 +124,31 @@ const getCertName = (cert) =>
 const getCertIssuer = (cert) =>
   (typeof cert === "string" ? "" : cert?.issuer || "").trim();
 
+// Maps whatever skill-category key the AI returns (e.g. "Core Concepts",
+// "core_concepts", "coreConcepts") back to the form's fixed lowercase keys.
+// Returns null for unknown categories so stray keys are ignored instead of
+// silently landing under names no input is bound to.
+const normalizeSkillKey = (key) => {
+  const flat = String(key).toLowerCase().replace(/[\s_-]+/g, "");
+  if (flat === "concept" || flat === "coreconcepts") return "concepts";
+  return Object.prototype.hasOwnProperty.call(EMPTY_RESUME.skills, flat)
+    ? flat
+    : null;
+};
+
+// Coerces a skill-category value to the plain string the inputs expect —
+// the model sometimes returns arrays (["Java", "Spring Boot"]) instead of
+// a comma-separated string.
+const skillValueToString = (value) => {
+  if (Array.isArray(value)) {
+    return value
+      .map((v) => (typeof v === "string" ? v : v?.name || v?.label || ""))
+      .filter(Boolean)
+      .join(", ");
+  }
+  return typeof value === "string" ? value.trim() : "";
+};
+
 // Counts the form fields the user has actually filled in (arrays and nested
 // objects are walked). EMPTY_RESUME scores 0, a couple of typed characters
 // score 1-2, and an uploaded/AI-autofilled resume scores many. The first-save
@@ -746,12 +771,21 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
             updated.summary = suggestions.summary;
           }
         } else if (sectionId === "skills") {
-          if (suggestions.skills) {
-            Object.keys(suggestions.skills).forEach((key) => {
-              if (suggestions.skills[key] && !prev.skills[key]) {
+          if (
+            suggestions.skills &&
+            typeof suggestions.skills === "object" &&
+            !Array.isArray(suggestions.skills)
+          ) {
+            Object.entries(suggestions.skills).forEach(([key, value]) => {
+              const targetKey = normalizeSkillKey(key);
+              const text = skillValueToString(value);
+              if (targetKey && text && !prev.skills[targetKey]) {
                 updated.skills = {
-                  ...prev.skills,
-                  [key]: suggestions.skills[key],
+                  // Spread the ACCUMULATOR (updated), not prev — otherwise
+                  // each matched category overwrites the previous one and
+                  // only the last key survives.
+                  ...updated.skills,
+                  [targetKey]: text,
                 };
               }
             });
@@ -791,19 +825,24 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
             suggestions.certificates &&
             Array.isArray(suggestions.certificates)
           ) {
-            const existing = prev.certificates.filter(Boolean);
+            // Filter by actual content (a blank {name:"", ...} row is a
+            // truthy object, so filter(Boolean) would wrongly report the
+            // section as already filled and never apply suggestions).
+            const existing = prev.certificates.filter((c) => getCertName(c));
             if (existing.length === 0 && suggestions.certificates.length > 0) {
               updated.certificates = suggestions.certificates
                 .filter(Boolean)
                 .map((cert) =>
                   typeof cert === "string"
-                    ? { name: cert, url: "" }
+                    ? { name: cert, issuer: "", url: "" }
                     : {
-                        name: cert.name || cert.certificate || "",
+                        name: cert.name || cert.certificate || cert.title || "",
+                        issuer:
+                          cert.issuer || cert.issuedBy || cert.authority || "",
                         url: cert.url || cert.link || "",
                       },
                 )
-                .filter((c) => c.name);
+                .filter((c) => getCertName(c));
             }
           }
         }
