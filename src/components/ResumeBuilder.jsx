@@ -1422,16 +1422,18 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
       resume.experience.forEach((exp) => {
         if (!exp.company && !exp.role) return;
         ensureSpace(30);
+        const hasSeparateRole =
+          resumeTemplate === "template2" && Boolean(exp.company && exp.role);
         if (resumeTemplate === "template2") {
           doc.setFont("helvetica", "bold");
           doc.setFontSize(11);
           doc.setTextColor(0, 0, 0);
           const company = exp.company || exp.role;
           doc.text(company, margin, y);
-          if (exp.company && exp.role) {
-            doc.setFont("helvetica", "normal");
+          if (hasSeparateRole) {
+            doc.setFont("helvetica", "italic");
             doc.setFontSize(9);
-            doc.text(` - ${exp.role}`, margin + doc.getTextWidth(company), y);
+            doc.text(exp.role, margin, y + 5);
           }
         } else {
           doc.setFont("helvetica", "bold");
@@ -1463,7 +1465,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
             doc.text(lineText, pageWidth - margin, y, { align: "right" });
           }
         }
-        y += 8;
+        y += hasSeparateRole ? 13 : 8;
 
         // Bullet points
         exp.points.filter(Boolean).forEach((point) => {
@@ -2540,7 +2542,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                               <strong>{exp.company || exp.role}</strong>
                               {exp.company && exp.role && (
                                 <span className="rb-preview-experience-role">
-                                  - {exp.role}
+                                  {exp.role}
                                 </span>
                               )}
                             </div>

@@ -564,9 +564,9 @@
 
 .rb-preview--template2 .rb-preview-experience-title {
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
 }
 
 .rb-preview--template2 .rb-preview-experience-title strong {
@@ -576,7 +576,7 @@
 .rb-preview--template2 .rb-preview-experience-role {
   color: #000;
   font-size: 0.8rem;
-  font-style: normal;
+  font-style: italic;
 }
 
 .rb-preview--template2 .rb-preview-item li {
