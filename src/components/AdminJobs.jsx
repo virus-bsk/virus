@@ -25,9 +25,11 @@ const PROFILE_PATH = "jobProfile/admin";
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
-// Try-in-order fallback chain for the AI Jobs tab. ResumeBuilder.jsx keeps
-// its own separate (longer) chain — do not sync the two.
-const AI_MODELS = ["gemini-3-flash-preview", "gemini-2.0-flash", "gemini-flash-latest"];
+// Try-in-order fallback chain for the AI Jobs tab — all three verified
+// working against this API key (tested 2026-10-16): the retired 2.x GA models
+// return 404 and the 3.6+ models currently 503 for this key, so stick to
+// these. ResumeBuilder.jsx keeps its own separate chain — do not sync.
+const AI_MODELS = ["gemini-3.5-flash", "gemini-3-flash-preview", "gemini-3.5-flash-lite"];
 
 const STATUSES = [
   { id: "saved", label: "Saved" },
