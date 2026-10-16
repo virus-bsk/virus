@@ -70,6 +70,11 @@ const formatText = (text) => {
   });
 };
 
+// Strips **bold** markdown from fields that render as PLAIN text (title,
+// techStack, form inputs, PDF export) so the raw asterisks never show.
+const stripBold = (text) =>
+  typeof text === "string" ? text.replace(/\*\*/g, "").trim() : "";
+
 const EMPTY_RESUME = {
   name: "",
   title: "",
@@ -752,8 +757,10 @@ TASK: Generate professional ${sectionName} content suggestions.
 - IMPORTANT: Use **bold** markdown syntax (wrap text in double asterisks, e.g. **RESTful APIs**) to highlight key keywords, metrics, technology names, and achievements within text content (e.g., "Developed **RESTful APIs** using **Spring Boot**, reducing latency by **40%**"). Bold sparingly to emphasize key accomplishments and technical terms — the content is rendered as rich text.
 - For skills: you MUST return ALL NINE category keys (languages, frameworks, frontend, databases, devops, testing, cloud, messaging, concepts), each with a non-empty comma-separated string value. Do not omit any category and do not return arrays or nested objects for values — every value must be a single string.
 - For summary: write a compelling 2-3 sentence professional summary that is ATS-optimized with relevant keywords.
+- For personal title: return ONLY a short plain job title (e.g. "Senior Software Engineer" or "Java Backend Developer") — at most 4-5 words. Do NOT put skills, technology names, special characters, or "|" separators in the title; skills belong in the skills section. Never use **bold** markdown in the title.
+- For personal fields: never invent name, email, phone, LinkedIn, or GitHub — return empty strings ("") for those unless the user provided them in the resume data above.
 - For experience: suggest ATS-friendly bullet points with strong action verbs and quantified achievements.
-- For projects: suggest ATS-friendly project descriptions with tech stack and contributions.
+- For projects: suggest ATS-friendly project descriptions with tech stack and contributions. The techStack value must be a PLAIN comma-separated list of technologies (e.g. "Spring Boot, React, MySQL, Docker") with NO **bold** markdown — it renders as plain text.
 - For education: suggest standard education entries.
 - For certificates: suggest relevant certifications for a Java developer.
 
@@ -830,6 +837,17 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
         Object.keys(suggestions).forEach((key) => {
           if (suggestions[key] && !prev[key]) {
             updated[key] = suggestions[key];
+            // The title renders as plain text (and must stay a short job
+            // title), so strip **bold** markdown and cut anything after a
+            // "|" separator — the model likes to stuff skills after it
+            // (e.g. "Senior Software Engineer | Java & Spring Boot ...").
+            if (key === "title") {
+              updated.title = String(updated.title)
+                .replace(/\*\*/g, "")
+                .split("|")[0]
+                .trim();
+              if (!updated.title) return;
+            }
             appliedCount += 1;
           }
         });
@@ -873,7 +891,16 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
       } else if (sectionId === "projects") {
         if (suggestions.projects && Array.isArray(suggestions.projects)) {
           const existing = prev.projects.filter((p) => p.name);
-          const suggested = suggestions.projects.filter((p) => p.name);
+          const suggested = suggestions.projects
+            .filter((p) => p.name)
+            .map((p) => ({
+              ...p,
+              // name & techStack render as plain text — never keep **bold**
+              // markers there. Bullet points DO render via formatText, so
+              // their **bold** markdown is intentionally preserved.
+              name: stripBold(p.name),
+              techStack: stripBold(p.techStack),
+            }));
           if (existing.length === 0 && suggested.length > 0) {
             updated.projects = suggested;
             appliedCount = suggested.length;
@@ -1630,13 +1657,14 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
         doc.setFont("helvetica", "bold");
         doc.setFontSize(11);
         doc.setTextColor(0, 0, 0);
-        doc.text(proj.name, margin, y);
+        doc.text(stripBold(proj.name), margin, y);
         if (proj.techStack) {
           doc.setFont("helvetica", "italic");
           doc.setFontSize(9);
           doc.setTextColor(0, 0, 0);
-          const techWidth = doc.getTextWidth(proj.techStack);
-          doc.text(proj.techStack, pageWidth - margin - techWidth, y);
+          const techText = stripBold(proj.techStack);
+          const techWidth = doc.getTextWidth(techText);
+          doc.text(techText, pageWidth - margin - techWidth, y);
         }
         y += 5;
         proj.points.filter(Boolean).forEach((point) => {
@@ -2749,10 +2777,10 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
                     .map((proj, idx) => (
                       <div key={idx} className="rb-preview-item">
                         <div className="rb-preview-item-header">
-                          <strong>{proj.name}</strong>
+                          <strong>{stripBold(proj.name)}</strong>
                           {proj.techStack && (
                             <span className="rb-preview-tech">
-                              {proj.techStack}
+                              {stripBold(proj.techStack)}
                             </span>
                           )}
                         </div>
