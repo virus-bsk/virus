@@ -194,10 +194,10 @@ export async function fetchJobsWithAI() {
 // Requires VITE_GITHUB_DISPATCH_TOKEN: a fine-grained personal access token
 // scoped to THIS repository only, with Account permissions -> Actions:
 // Read and write. Optional VITE_GITHUB_REPO overrides the target
-// (default bskcoding/bskcoding).
+// (default virus-bsk/virus).
 // Returns { ok, error? }.
 // ---------------------------------------------------------------------------
-export const GITHUB_REPO = import.meta.env.VITE_GITHUB_REPO || "bskcoding/bskcoding";
+export const GITHUB_REPO = import.meta.env.VITE_GITHUB_REPO || "virus-bsk/virus";
 export const GITHUB_FETCH_WORKFLOW_URL = `https://github.com/${GITHUB_REPO}/actions/workflows/fetch-jobs.yml`;
 
 export async function runDailyJobsCron() {
