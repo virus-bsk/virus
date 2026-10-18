@@ -78,7 +78,7 @@ export default {
     let upstream;
     try {
       upstream = await fetch(upstreamUrl.toString(), init);
-    } catch (_) {
+    } catch {
       return jsonError("Could not reach Cline API.", 502);
     }
 

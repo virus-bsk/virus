@@ -5,7 +5,6 @@ import {
   addDocument,
   getCollection,
   removeDocument,
-  setDocument,
   serverTimestamp,
   subscribeCollection,
   updateDocument,
@@ -30,8 +29,8 @@ export function validateJob(job) {
   // ARE direct links even though the URL contains the word "jobs".
   const link = job.applyLink?.trim();
   if (link) {
-    let host = "";
-    let path = "";
+    let host;
+    let path;
     try {
       const url = new URL(link);
       host = url.hostname.toLowerCase();

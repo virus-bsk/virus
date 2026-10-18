@@ -27,8 +27,8 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
           rewrite: (path) => path.replace(/^\/api\/cline/, ""),
-          configure: (proxy, options) => {
-            proxy.on("proxyReq", (proxyReq, req, res) => {
+          configure: (proxy) => {
+            proxy.on("proxyReq", (proxyReq) => {
               if (clineApiKey) {
                 proxyReq.setHeader("Authorization", `Bearer ${clineApiKey}`);
               }

@@ -41,7 +41,7 @@ async function resolveModels({ model, models } = {}) {
     if (Array.isArray(adminModels) && adminModels.length > 0) {
       return adminModels;
     }
-  } catch (_) {
+  } catch {
     // Firestore unavailable — fall through to env defaults.
   }
   return DEFAULT_CLINEC_MODELS;
@@ -135,7 +135,7 @@ async function tryModelStream({ baseUrl, apiKey, model, messages, systemMessage,
             fullContent += delta.content;
             onChunk(delta.content);
           }
-        } catch (_) {
+        } catch {
           // Ignore malformed SSE lines
         }
       }
