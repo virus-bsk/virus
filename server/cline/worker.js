@@ -57,8 +57,11 @@ export default {
       return jsonError("Not found", 404);
     }
 
-    // Forward the request to api.cline.bot
-    const upstreamUrl = new URL(pathname, base);
+    // Forward the request to api.cline.bot.
+    // NOTE: new URL(pathname, base) would DROP the base's "/api/v1" prefix
+    // (absolute-path references replace the whole path), so join the strings
+    // first and then parse — e.g. ".../api/v1" + "/models" -> .../api/v1/models.
+    const upstreamUrl = new URL(base.replace(/\/+$/, "") + pathname);
     upstreamUrl.search = url.search; // preserve query string
 
     const headers = {};
