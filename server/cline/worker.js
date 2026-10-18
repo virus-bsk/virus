@@ -24,7 +24,10 @@ const CORS_HEADERS = {
 };
 
 function withCors(response, init = {}) {
-  return new Response(response.body, {
+  // Accept either a Response object or a plain body (string); a string has
+  // no `.body` property, so pass it through as-is.
+  const body = response instanceof Response ? response.body : response;
+  return new Response(body, {
     ...init,
     headers: { ...CORS_HEADERS, ...init.headers },
   });
@@ -97,7 +100,11 @@ export default {
         key !== "te" &&
         key !== "trailers" &&
         key !== "transfer-encoding" &&
-        key !== "upgrade"
+        key !== "upgrade" &&
+        // Body was re-serialized from decoded text above; keep upstream's
+        // encoding/length out of it or clients get a corrupt/empty body.
+        key !== "content-encoding" &&
+        key !== "content-length"
       ) {
         responseHeaders[key] = val;
       }
