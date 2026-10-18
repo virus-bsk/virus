@@ -34,5 +34,8 @@ scripts/.tmp-*
 .env
 !.env.production
 
+# Local Cline API scratch test — contains a hardcoded API key, never commit.
+test-cline.mjs
+
 # Interview kit source (raw markdown — generated data lives in src/data/companyInterviews/)
 java-fullstack-interview-kit-main/

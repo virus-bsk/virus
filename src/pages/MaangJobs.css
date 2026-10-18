@@ -1,0 +1,522 @@
+/* /maang/jobs — dedicated product-company job board page.
+   Jobs live in Firestore (jobs collection) and refresh daily via Cline. */
+
+/* ===== PAGE ===== */
+.maang-page.mjobs {
+  max-width: 1150px;
+}
+
+/* ===== BACK LINK (chip above the hero) ===== */
+.mjobs-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.mjobs-back:hover {
+  color: #33ff57;
+  border-color: rgba(51, 255, 87, 0.45);
+  background: rgba(51, 255, 87, 0.07);
+}
+
+/* ===== HERO: title block left, stat tiles right ===== */
+.mjobs-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 32px 36px;
+  margin-bottom: 22px;
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(51, 255, 87, 0.09) 0%, transparent 60%),
+    radial-gradient(circle at 85% 80%, rgba(59, 130, 246, 0.1), transparent 55%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 20px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 10px 36px rgba(0, 0, 0, 0.45);
+  animation: mjobsHeroIn 0.45s ease backwards;
+}
+
+@keyframes mjobsHeroIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mjobs-hero-main {
+  min-width: 0;
+}
+
+.mjobs-title {
+  margin: 0 0 8px;
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.25;
+  color: var(--text-h);
+}
+
+.mjobs-subtitle {
+  margin: 0;
+  max-width: 560px;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text);
+  opacity: 0.85;
+}
+
+.mjobs-stats {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.mjobs-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 96px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mjobs-stat-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #33ff57;
+  line-height: 1;
+}
+
+.mjobs-stat-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+}
+
+/* ===== SEARCH TOOLBAR ===== */
+.mjobs-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 26px 0 4px;
+}
+
+.mjobs-search-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.mjobs-search {
+  width: 100%;
+  padding: 13px 44px 13px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mjobs-search::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.mjobs-search:focus {
+  border-color: #33ff57;
+  box-shadow: 0 0 0 3px rgba(51, 255, 87, 0.14);
+}
+
+.mjobs-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.mjobs-clear:hover {
+  background: rgba(51, 255, 87, 0.25);
+  color: #fff;
+}
+
+.mjobs-results {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+}
+
+/* ===== JOB GRID & CARDS ===== */
+.mjobs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.mjobs-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 16px;
+  background: linear-gradient(
+    145deg,
+    rgba(16, 26, 48, 0.9),
+    rgba(10, 18, 34, 0.85)
+  );
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  overflow: hidden;
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+  animation: mjobsCardIn 0.5s ease backwards;
+  animation-delay: calc(var(--mj-idx, 0) * 0.05s);
+}
+
+@keyframes mjobsCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mjobs-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(51, 255, 87, 0.5);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.45),
+    0 0 24px rgba(51, 255, 87, 0.08);
+}
+
+.mjobs-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mjobs-avatar {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #04140a;
+}
+
+.mj-c0 { background: linear-gradient(135deg, #33ff57, #00c853); }
+.mj-c1 { background: linear-gradient(135deg, #60a5fa, #3b82f6); color: #fff; }
+.mj-c2 { background: linear-gradient(135deg, #c084fc, #a133ff); color: #fff; }
+.mj-c3 { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+.mj-c4 { background: linear-gradient(135deg, #2dd4bf, #14b8a6); }
+
+.mjobs-card-heading {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mjobs-card-title {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #fff;
+}
+
+.mjobs-card-company {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #33ff57;
+}
+
+/* Glowing "NEW" flag for openings posted in the last 48h. */
+.mjobs-new {
+  margin-left: auto;
+  align-self: flex-start;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #04140a;
+  background: linear-gradient(135deg, #33ff57, #00c853);
+  box-shadow: 0 0 12px rgba(51, 255, 87, 0.45);
+}
+
+.mjobs-card-desc {
+  margin: 0;
+  font-size: 0.87rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: pre-wrap;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mjobs-desc-open {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  overflow: visible;
+}
+
+.mjobs-more {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #33ff57;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mjobs-more:hover {
+  text-decoration: underline;
+}
+
+.mjobs-card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mjobs-chip {
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.28);
+}
+
+.mjobs-apply {
+  display: block;
+  text-align: center;
+  padding: 11px 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #33ff57, #00c853);
+  color: #04140a;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.mjobs-apply:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+/* ===== SKELETON LOADING CARDS ===== */
+.mjobs-skeleton {
+  pointer-events: none;
+}
+
+.mjobs-sk {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06) 25%,
+    rgba(255, 255, 255, 0.13) 37%,
+    rgba(255, 255, 255, 0.06) 63%
+  );
+  background-size: 400% 100%;
+  animation: mjobsShimmer 1.4s ease infinite;
+}
+
+@keyframes mjobsShimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+.mjobs-sk-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mjobs-sk-avatar {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.mjobs-sk-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mjobs-sk-title { width: 70%; height: 14px; }
+.mjobs-sk-company { width: 40%; height: 10px; }
+.mjobs-sk-desc { width: 100%; height: 76px; }
+.mjobs-sk-chip { width: 55%; height: 22px; border-radius: 999px; }
+.mjobs-sk-apply { width: 100%; height: 40px; border-radius: 10px; }
+
+/* ===== EMPTY STATES ===== */
+.mjobs-empty {
+  margin-top: 24px;
+  padding: 52px 24px;
+  text-align: center;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.mjobs-empty-icon {
+  display: block;
+  font-size: 2.6rem;
+  margin-bottom: 12px;
+}
+
+.mjobs-empty h3 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+.mjobs-empty p {
+  margin: 0 auto 20px;
+  max-width: 520px;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.mjobs-empty-cta {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid rgba(51, 255, 87, 0.4);
+  background: rgba(51, 255, 87, 0.1);
+  color: #33ff57;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.mjobs-empty-cta:hover {
+  background: rgba(51, 255, 87, 0.2);
+}
+
+/* ===== FOOTER NOTE ===== */
+.mjobs-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.mjobs-footer a {
+  color: #33ff57;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mjobs-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 820px) {
+  .mjobs-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 26px 22px;
+  }
+
+  .mjobs-stats {
+    width: 100%;
+  }
+
+  .mjobs-stat {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .mjobs-title {
+    font-size: 1.45rem;
+  }
+
+  .mjobs-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .mjobs-results {
+    text-align: center;
+  }
+
+  .mjobs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mjobs-stat-value {
+    font-size: 1.15rem;
+  }
+
+  .mjobs-stat-label {
+    font-size: 0.65rem;
+  }
+}
+

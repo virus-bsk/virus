@@ -3,6 +3,7 @@ import { skills } from "../data/skills";
 import ColoredMaangText from "../components/ColoredMaangText";
 import { googleSeriesIntro } from "../maang/basic-dsa/dsaBasicProblems";
 import youtubeLogo from "../assets/youtube-logo.svg";
+import "./MaangJobs.css";
 
 /**
  * MaangPreparation
@@ -17,6 +18,7 @@ import youtubeLogo from "../assets/youtube-logo.svg";
 
 // Map MAANG sub-topics to their route paths (only the ones that exist)
 const subtopicRoutes = {
+  "💼 Product Company Jobs": "/maang/jobs",
   "🎯 Interview Prep - All Topics": "/maang/interview-prep",
   "📊 DSA Foundation": "/maang/basic-dsa",
   "🌳 Advanced DSAs": "/maang/advanced-dsa",
@@ -34,9 +36,14 @@ function MaangPreparation() {
   const maang = skills.find((s) => s.id === "maang") || {};
 
   const charColors = maang.charColors;
-  // One simple entry card before DSA: all-topics interview prep
-  // (Java, SQL, Spring Boot, Microservices, Kafka, Reactive — 20+10 questions each).
-  const subtopics = ["🎯 Interview Prep - All Topics", ...(maang.subtopics || [])];
+  // FIRST card in the grid: the product-company job board (/maang/jobs).
+  // Next: the one-card all-topics interview prep before DSA (Java, SQL,
+  // Spring Boot, Microservices, Kafka, Reactive — 20+10 questions each).
+  const subtopics = [
+    "💼 Product Company Jobs",
+    "🎯 Interview Prep - All Topics",
+    ...(maang.subtopics || []),
+  ];
   const description =
     maang.description ||
     "Master DSA + System Design + Reactive + Agentic AI to crack top product-based companies";
@@ -130,6 +137,9 @@ function MaangPreparation() {
           })}
         </div>
       </section>
+
+      {/* Product Company Jobs is the FIRST card of the grid above — it opens
+          the full job board at /maang/jobs (all openings in one grid). */}
 
       <section className="maang-page-cta">
         <Link to="/" className="cta-button secondary">

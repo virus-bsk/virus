@@ -10,6 +10,7 @@ import BrandLoader from "./components/BrandLoader";
 import ErrorBoundary from "./components/ErrorBoundary";
 import YouTubeLinkHandler from "./components/YouTubeLinkHandler";
 import FounderProfileModal from "./components/FounderProfileModal";
+import ClineChatTest from "./components/ClineChatTest";
 import { BASENAME } from "./utils/basePath";
 
 // The password modal imports utils/firebaseAuth (=> the whole Firebase SDK),
@@ -22,6 +23,7 @@ const ChangePasswordModal = lazy(() => import("./components/ChangePasswordModal"
 // downloaded when the user actually visits them.
 const Home = lazy(() => import("./pages/Home"));
 const MaangPreparation = lazy(() => import("./pages/MaangPreparation"));
+const MaangJobs = lazy(() => import("./pages/MaangJobs"));
 const AdvancedSystemDesign = lazy(
   () => import("./maang/system-design/advance/AdvanceSystemDesignPage"),
 );
@@ -339,6 +341,15 @@ function App() {
                   element={
                     <RequirePaid>
                       <MaangPreparation />
+                    </RequirePaid>
+                  }
+                />
+                {/* Full product-company job grid (one page, all jobs). */}
+                <Route
+                  path="/maang/jobs"
+                  element={
+                    <RequirePaid>
+                      <MaangJobs />
                     </RequirePaid>
                   }
                 />
@@ -765,6 +776,7 @@ function App() {
                   element={<CompanyInterview />}
                 />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/cline-test" element={<ClineChatTest />} />
                 <Route path="/profile" element={<Profile />} />
                 {/* Payment: live account status from Firestore + Cashfree checkout (wired up later) */}
                 <Route

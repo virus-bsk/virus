@@ -1,0 +1,8 @@
+name = "cline-proxy"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# Plain (non-secret) variables. Secrets must be set separately:
+#   npx wrangler secret put CLINE_API_KEY
+[vars]
+CLINE_BASE_URL = "https://api.cline.bot/api/v1"

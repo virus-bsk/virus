@@ -1,0 +1,28 @@
+name: Daily Product Jobs Fetch (Cline)
+
+on:
+  schedule:
+    # Every day at 06:00 UTC.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  fetch-jobs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch jobs via Cline -> Firestore
+        env:
+          CLINE_API_KEY: ${{ secrets.CLINE_API_KEY }}
+          CLINE_BASE_URL: ${{ vars.CLINE_BASE_URL }}
+          CLINE_MODELS: ${{ vars.CLINE_MODELS }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+        run: node scripts/fetch-jobs.mjs

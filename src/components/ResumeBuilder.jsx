@@ -17,7 +17,11 @@ import {
   buildResumeDataExtractionPrompt,
 } from "../utils/fileParser";
 import { auth } from "../firebase";
-import { getDocument, serverTimestamp, setDocument } from "../utils/firestore";
+import {
+  getDocument,
+  serverTimestamp,
+  setDocument,
+} from "../utils/firestore";
 import { userDocId } from "../utils/userProfile";
 import "./ResumeBuilder.css";
 
@@ -553,7 +557,7 @@ function ResumeBuilder({ onClose }) {
 
     if (!ai || !apiKey) {
       setAiMessage(
-        "⚠️ Gemini API key not configured. Add VITE_GEMINI_API_KEY to .env",
+        "⚠️ AI API key not configured. Add VITE_GEMINI_API_KEY to .env",
       );
       return;
     }
@@ -919,7 +923,7 @@ function ResumeBuilder({ onClose }) {
   const getAISuggestion = async (sectionId) => {
     if (!ai || !apiKey) {
       setAiMessage(
-        "⚠️ Gemini API key not configured. Add VITE_GEMINI_API_KEY to .env",
+        "⚠️ AI API key not configured. Add VITE_GEMINI_API_KEY to .env",
       );
       return;
     }

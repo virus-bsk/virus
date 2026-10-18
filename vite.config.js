@@ -7,6 +7,9 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const basePath = env.VITE_BASE_PATH || "/";
 
+  // Cline API key for local dev proxy (never commit this)
+  const clineApiKey = env.VITE_CLINEC_API_KEY;
+
   return {
     base: basePath,
     plugins: [react()],
@@ -16,6 +19,24 @@ export default defineConfig(({ mode }) => {
         // Polling avoids Windows EBUSY file watch errors on locked files
         usePolling: true,
         interval: 1000,
+      },
+      // Proxy Cline API calls through localhost to avoid CORS blocking
+      proxy: {
+        "/api/cline": {
+          target: "https://api.cline.bot/api/v1",
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/api\/cline/, ""),
+          configure: (proxy, options) => {
+            proxy.on("proxyReq", (proxyReq, req, res) => {
+              if (clineApiKey) {
+                proxyReq.setHeader("Authorization", `Bearer ${clineApiKey}`);
+              }
+              proxyReq.setHeader("HTTP-Referer", "http://localhost:5173");
+              proxyReq.setHeader("X-Title", "bskcoding");
+            });
+          },
+        },
       },
     },
 

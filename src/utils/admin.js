@@ -18,4 +18,9 @@ export function isAdminUser(user) {
   return isAdminEmail(email);
 }
 
-export default { ADMIN_EMAIL, ADMIN_PREFIX, isAdminEmail, isAdminUser };
+export default {
+  ADMIN_EMAIL,
+  ADMIN_PREFIX,
+  isAdminEmail,
+  isAdminUser,
+};

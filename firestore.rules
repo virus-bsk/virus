@@ -33,6 +33,15 @@ rules_version = '2';
 //                          tailoredBullets}, createdAt, updatedAt)
 //   jobProfile/{docId}     admin-only — e.g. jobProfile/admin, the candidate
 //                          summary used as context by the AI Jobs tab
+//   jobs/{jobId}           PUBLIC READ — product-company job listings shown on
+//                          the MAANG Preparation page grid. Admin-only writes
+//                          from the browser (Job Manager tab); the nightly
+//                          GitHub Actions cron writes via the Admin SDK, which
+//                          bypasses these rules. Fields: title, company,
+//                          description, experience, applyLink, source,
+//                          createdAt, updatedAt
+//   clineModels/global     public read — failover AI model list used by the
+//                          Cline service (jobs fetcher); admin-only write
 //
 // Everything else in the database is denied by default.
 
@@ -219,6 +228,22 @@ service cloud.firestore {
     // Candidate profile summary used as context by the AI Jobs tab.
     match /jobProfile/{docId} {
       allow read, write: if isAdmin();
+    }
+
+    // Product-company job listings for the MAANG Preparation page grid.
+    // Anyone may read (the grid is public, even for signed-out visitors);
+    // only the admin console may write from the browser. The nightly GitHub
+    // Actions cron writes via the Admin SDK, which bypasses these rules.
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Failover AI model list used by the Cline service (daily jobs fetcher).
+    // Model names aren't secrets, so reads are public; writes admin-only.
+    match /clineModels/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }
