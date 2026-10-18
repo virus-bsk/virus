@@ -1,12 +1,14 @@
 // Admin console – Job Manager tab.
 // Add/manage product-based company jobs with direct apply links.
 // Stored in Firestore at jobs/{id}.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   addJob,
   fetchJobsWithAI,
   getJobs,
+  GITHUB_FETCH_WORKFLOW_URL,
   removeJob,
+  runDailyJobsCron,
   validateJob,
 } from "../utils/jobs";
 import "../pages/Admin.css";
@@ -24,7 +26,9 @@ export default function AdminJobsManager() {
   });
   const [saving, setSaving] = useState(false);
   const [aiFetching, setAiFetching] = useState(false);
+  const [cronRunning, setCronRunning] = useState(false);
   const [toast, setToast] = useState(null);
+  const refreshTimer = useRef(null);
 
   useEffect(() => {
     getJobs()
@@ -109,6 +113,39 @@ export default function AdminJobsManager() {
     setAiFetching(false);
   };
 
+  // Manual button: run the SAME daily GitHub Actions cron
+  // (.github/workflows/fetch-jobs.yml) right now. The automatic 06:00 UTC
+  // schedule is untouched — this only dispatches an extra run on demand.
+  const handleRunCron = async () => {
+    setCronRunning(true);
+    try {
+      const res = await runDailyJobsCron();
+      if (!res.ok) {
+        setToast({ type: "error", message: res.error });
+      } else {
+        setToast({
+          type: "success",
+          message: "Daily fetch cron triggered. Fresh jobs will appear in a couple of minutes.",
+        });
+        // Re-read the list after the workflow run gets a chance to finish.
+        clearTimeout(refreshTimer.current);
+        refreshTimer.current = setTimeout(() => {
+          getJobs()
+            .then((r) => setJobs(r.value || []))
+            .catch(() => {
+              /* keep current list on refresh failure */
+            });
+        }, 120000);
+      }
+    } catch (err) {
+      setToast({ type: "error", message: `Cron trigger failed: ${err.message}` });
+    }
+    setCronRunning(false);
+  };
+
+  // Cancel a pending post-trigger list refresh if the tab unmounts.
+  useEffect(() => () => clearTimeout(refreshTimer.current), []);
+
   if (!loaded) {
     return <div className="admin-card"><p className="admin-note">Loading…</p></div>;
   }
@@ -128,15 +165,44 @@ export default function AdminJobsManager() {
         they appear on the MAANG Preparation page. Use the buttons below only
         to run it on demand or edit entries manually.
       </p>
-      <button
-        type="button"
-        onClick={handleAIFetch}
-        disabled={aiFetching}
-        className="admin-btn"
-        style={{ marginBottom: 20 }}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+          alignItems: "center",
+          marginBottom: 8,
+        }}
       >
-        {aiFetching ? "AI is searching for jobs…" : "Find Jobs with AI (Now)"}
-      </button>
+        <button
+          type="button"
+          onClick={handleAIFetch}
+          disabled={aiFetching}
+          className="admin-btn"
+        >
+          {aiFetching ? "AI is searching for jobs…" : "Find Jobs with AI (Now)"}
+        </button>
+        <button
+          type="button"
+          onClick={handleRunCron}
+          disabled={cronRunning || aiFetching}
+          className="admin-btn"
+        >
+          {cronRunning ? "Triggering daily cron…" : "Run Daily Fetch Cron Now"}
+        </button>
+      </div>
+      <p className="admin-note" style={{ marginBottom: 16 }}>
+        <strong>Run Daily Fetch Cron Now</strong> starts the same GitHub
+        Actions workflow that already runs automatically every day at 06:00
+        UTC — the daily schedule stays unchanged.{" "}
+        <a
+          href={GITHUB_FETCH_WORKFLOW_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View workflow runs
+        </a>
+      </p>
 
       <p className="admin-note" style={{ marginBottom: 8 }}>
         <strong>Or add one manually</strong> — direct apply links only, no

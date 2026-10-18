@@ -184,6 +184,72 @@ export async function fetchJobsWithAI() {
   return { ok: true, added, skipped };
 }
 
+// ---------------------------------------------------------------------------
+// Manual trigger for the daily jobs cron workflow
+// (.github/workflows/fetch-jobs.yml). The automatic schedule (06:00 UTC
+// daily) is NOT changed — this only dispatches an EXTRA run of the same
+// workflow on demand via GitHub's REST API (workflow_dispatch), e.g. from
+// the admin console's "Run Daily Fetch Cron Now" button.
+//
+// Requires VITE_GITHUB_DISPATCH_TOKEN: a fine-grained personal access token
+// scoped to THIS repository only, with Account permissions -> Actions:
+// Read and write. Optional VITE_GITHUB_REPO overrides the target
+// (default bskcoding/bskcoding).
+// Returns { ok, error? }.
+// ---------------------------------------------------------------------------
+export const GITHUB_REPO = import.meta.env.VITE_GITHUB_REPO || "bskcoding/bskcoding";
+export const GITHUB_FETCH_WORKFLOW_URL = `https://github.com/${GITHUB_REPO}/actions/workflows/fetch-jobs.yml`;
+
+export async function runDailyJobsCron() {
+  const token = import.meta.env.VITE_GITHUB_DISPATCH_TOKEN;
+  if (!token) {
+    return {
+      ok: false,
+      error:
+        "Manual trigger is not configured: set VITE_GITHUB_DISPATCH_TOKEN (fine-grained PAT, Actions: Read and write) in .env / GitHub secrets. The daily 06:00 UTC cron still runs on schedule.",
+    };
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/fetch-jobs.yml/dispatches`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/vnd.github+json",
+          Authorization: `Bearer ${token}`,
+          "X-GitHub-Api-Version": "2022-11-28",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ref: "main" }),
+      },
+    );
+
+    // 204 No Content on success.
+    if (res.ok) return { ok: true };
+
+    let detail = "";
+    try {
+      const data = await res.json();
+      if (data?.message) detail = ` — ${data.message}`;
+    } catch {
+      /* non-JSON error body */
+    }
+    const hints = {
+      401: "Token is invalid or expired.",
+      403: "Token does not have Actions read/write access to the repository.",
+      404: "Repository or workflow not found (check VITE_GITHUB_REPO and token scope).",
+      422: "Workflow file is missing from the main branch or lacks a workflow_dispatch trigger.",
+    };
+    return {
+      ok: false,
+      error: `GitHub dispatch failed (${res.status})${detail}. ${hints[res.status] || "Try again."}`,
+    };
+  } catch (err) {
+    return { ok: false, error: `GitHub dispatch failed: ${err.message}` };
+  }
+}
+
 export default {
   JOBS_COLLECTION,
   validateJob,
@@ -194,4 +260,7 @@ export default {
   removeJob,
   FIND_JOBS_PROMPT,
   fetchJobsWithAI,
+  GITHUB_REPO,
+  GITHUB_FETCH_WORKFLOW_URL,
+  runDailyJobsCron,
 };

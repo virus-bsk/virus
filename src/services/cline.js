@@ -227,6 +227,16 @@ export const clineChat = async (
     }
   }
 
+  // Distinguish "cannot reach the network at all" (CORS block, offline,
+  // dev server not running) from HTTP/model errors — the raw TypeError
+  // ("Failed to fetch") is cryptic for users.
+  if (lastError instanceof TypeError && lastError.message.includes("fetch")) {
+    throw new Error(
+      "Network blocked: the browser could not reach the Cline API (CORS or offline). " +
+        "Local dev: run `npm run dev` (uses the /api/cline proxy). " +
+        "Production: deploy the server/cline worker and set VITE_CLINEC_BASE_URL.",
+    );
+  }
   throw lastError || new Error("All Cline models failed.");
 };
 
@@ -302,6 +312,14 @@ export const clineChatStream = async (
     }
   }
 
+  // Same network/CORS hint as clineChat — see above.
+  if (lastError instanceof TypeError && lastError.message.includes("fetch")) {
+    throw new Error(
+      "Network blocked: the browser could not reach the Cline API (CORS or offline). " +
+        "Local dev: run `npm run dev` (uses the /api/cline proxy). " +
+        "Production: deploy the server/cline worker and set VITE_CLINEC_BASE_URL.",
+    );
+  }
   throw lastError || new Error("All Cline models failed.");
 };
 

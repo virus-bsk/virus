@@ -37,6 +37,8 @@ jobs:
           CASHFREE_MODE: ${{ secrets.VITE_CASHFREE_MODE }}
           CASHFREE_API_BASE: ${{ secrets.VITE_CASHFREE_API_BASE }}
           CASHFREE_PROXY_TOKEN: ${{ secrets.VITE_CASHFREE_PROXY_TOKEN }}
+          CLINE_BASE_URL: ${{ secrets.VITE_CLINEC_BASE_URL }}
+          GITHUB_DISPATCH_TOKEN: ${{ secrets.VITE_GITHUB_DISPATCH_TOKEN }}
         run: |
           if [ -z "$GEMINI_KEY" ]; then
             echo "❌ VITE_GEMINI_API_KEY secret is not set"
@@ -68,6 +70,28 @@ jobs:
             echo "⚠️ Cashfree proxy URL is unset — Pay button will be disabled"
           else
             echo "✅ Cashfree configuration is available"
+          fi
+
+          # Cline proxy URL (Cloudflare worker at server/cline/). The live
+          # site CANNOT call api.cline.bot directly — it returns no CORS
+          # headers — so AI features fail with "Failed to fetch" unless the
+          # worker is deployed and its URL is set here. The API key stays in
+          # the worker secret, never in the bundle.
+          echo "VITE_CLINEC_BASE_URL=$CLINE_BASE_URL" >> .env
+          if [ -z "$CLINE_BASE_URL" ]; then
+            echo "⚠️ VITE_CLINEC_BASE_URL is unset — AI features on the live site will fail (CORS). Deploy server/cline and add the secret."
+          else
+            echo "✅ Cline proxy URL is available"
+          fi
+
+          # Manual "Run Daily Fetch Cron Now" button (admin console).
+          # Optional — if unset the button reports "not configured", but the
+          # automatic daily 06:00 UTC cron (fetch-jobs.yml) is untouched.
+          echo "VITE_GITHUB_DISPATCH_TOKEN=$GITHUB_DISPATCH_TOKEN" >> .env
+          if [ -z "$GITHUB_DISPATCH_TOKEN" ]; then
+            echo "⚠️ VITE_GITHUB_DISPATCH_TOKEN is unset — manual cron button disabled"
+          else
+            echo "✅ GitHub dispatch token is available"
           fi
 
       - name: Check Gemini secret
