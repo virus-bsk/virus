@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, Fragment } from "react";
-import { onAuthStateChanged, connectAuthEmulator } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import {
   FaLocationDot,
@@ -1538,6 +1538,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
   const downloadPDFText = async () => {
     const { default: jsPDFLib } = await loadJSPDF();
     const doc = new jsPDFLib();
+    const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 18;
     const contentWidth = pageWidth - margin * 2;
