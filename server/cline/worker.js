@@ -19,7 +19,8 @@
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Headers":
+    "Content-Type, Authorization, HTTP-Referer, X-Title",
   "Access-Control-Max-Age": "86400",
 };
 
@@ -34,10 +35,10 @@ function withCors(response, init = {}) {
 }
 
 function jsonError(message, status) {
-  return withCors(
-    JSON.stringify({ error: message }),
-    { status, headers: { "Content-Type": "application/json" } },
-  );
+  return withCors(JSON.stringify({ error: message }), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 
 export default {
