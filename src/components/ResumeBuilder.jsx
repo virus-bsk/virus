@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, Fragment } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, connectAuthEmulator } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import {
   FaLocationDot,
@@ -9,9 +9,6 @@ import {
   FaSquareEnvelope,
 } from "react-icons/fa6";
 import { CgWebsite } from "react-icons/cg";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
-import { GoogleGenAI } from "@google/genai";
 import {
   parseResumeFile,
   buildResumeDataExtractionPrompt,
@@ -25,9 +22,39 @@ import {
 import { userDocId } from "../utils/userProfile";
 import "./ResumeBuilder.css";
 
-// Initialize Gemini AI client for suggestions
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+// Dynamic imports for heavy dependencies to reduce initial bundle size
+// These load only when the user actually performs the export action
+let jsPDFLib = null;
+let html2canvasLib = null;
+let googleGenAILib = null;
+
+const loadJSPDF = async () => {
+  if (jsPDFLib) return jsPDFLib;
+  const module = await import("jspdf");
+  jsPDFLib = module;
+  return module;
+};
+
+const loadHtml2Canvas = async () => {
+  if (html2canvasLib) return html2canvasLib;
+  const module = await import("html2canvas");
+  html2canvasLib = module;
+  return module;
+};
+
+const loadGoogleGenAI = async () => {
+  if (googleGenAILib) return googleGenAILib;
+  const module = await import("@google/genai");
+  googleGenAILib = module;
+  return module;
+};
+
+// Initialize Gemini AI client for suggestions (lazy load)
+const initializeGeminiAI = async () => {
+  const { GoogleGenAI } = await loadGoogleGenAI();
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  return apiKey ? new GoogleGenAI({ apiKey }) : null;
+};
 
 const AI_MODELS = [
   "gemini-3-flash-preview",
@@ -555,7 +582,8 @@ function ResumeBuilder({ onClose }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!ai || !apiKey) {
+    const ai = await initializeGeminiAI();
+    if (!ai) {
       setAiMessage(
         "⚠️ AI API key not configured. Add VITE_GEMINI_API_KEY to .env",
       );
@@ -921,7 +949,8 @@ function ResumeBuilder({ onClose }) {
 
   // AI suggestion helper - asks Gemini to suggest content for the current section
   const getAISuggestion = async (sectionId) => {
-    if (!ai || !apiKey) {
+    const ai = await initializeGeminiAI();
+    if (!ai) {
       setAiMessage(
         "⚠️ AI API key not configured. Add VITE_GEMINI_API_KEY to .env",
       );
@@ -1248,6 +1277,10 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
       let linkPositions = [];
       let pageBreakPositions = [];
 
+      // Load html2canvas and jsPDF on-demand (lazy load)
+      const { default: html2canvas } = await loadHtml2Canvas();
+      const { default: jsPDF } = await loadJSPDF();
+
       // Use html2canvas to capture the EXACT preview HTML as an image,
       // guaranteeing the downloaded PDF matches the on-screen preview
       // pixel for pixel.
@@ -1502,9 +1535,9 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation.`;
     }
   };
 
-  const downloadPDFText = () => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
+  const downloadPDFText = async () => {
+    const { default: jsPDFLib } = await loadJSPDF();
+    const doc = new jsPDFLib();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 18;
     const contentWidth = pageWidth - margin * 2;

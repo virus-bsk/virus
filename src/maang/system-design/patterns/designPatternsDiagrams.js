@@ -23,7 +23,7 @@ export function svgSingleton() {
     <text x="50" y="164" class="sp-method">- DatabaseConnection()  (private)</text>
     <text x="50" y="186" class="sp-method" fill="#2e7d32">+ getInstance(): DatabaseConnection</text>
     <text x="50" y="208" class="sp-method">+ connect(): void</text>
-    <text x="150" y="240" class="sp-label">ðŸ”’ only one instance ever</text>
+    <text x="150" y="240" class="sp-label">🔒 only one instance ever</text>
 
     <rect x="330" y="40" width="150" height="90" class="sp-box" />
     <text x="405" y="64" text-anchor="middle" class="sp-title">caller A</text>
@@ -364,11 +364,11 @@ export function svgAdapter() {
     <text x="700" y="130" text-anchor="middle" class="ad-method">+ plugLightning()</text>
 
     <rect x="60" y="190" width="560" height="46" fill="#fff3e0" stroke="#e65100" stroke-width="1.5" rx="8" />
-    <text x="340" y="208" text-anchor="middle" class="ad-label" fill="#e65100">ðŸ”Œ Client only sees USB — Adapter translates to Lightning</text>
+    <text x="340" y="208" text-anchor="middle" class="ad-label" fill="#e65100">🔌 Client only sees USB — Adapter translates to Lightning</text>
     <text x="340" y="226" class="ad-method" font-size="11" fill="#e65100">Neither Laptop nor LightningConnector is modified</text>
 
     <rect x="60" y="260" width="560" height="46" fill="#fff3e0" stroke="#e65100" stroke-width="1.5" rx="8" />
-    <text x="340" y="278" text-anchor="middle" class="ad-label" fill="#e65100">ðŸ“„ XML → JSON: XMLToJSONAdapter implements DataLoader</text>
+    <text x="340" y="278" text-anchor="middle" class="ad-label" fill="#e65100">📄 XML → JSON: XMLToJSONAdapter implements DataLoader</text>
     <text x="340" y="296" class="ad-method" font-size="11" fill="#e65100">legacy XML service + modern JSON client, bridged by adapter</text>
   </svg>`;
 }

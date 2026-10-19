@@ -1,4 +1,4 @@
-﻿// ===== Caching â€” topic data =====
+﻿// ===== Caching — topic data =====
 
 import {
   svgRedis,

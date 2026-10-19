@@ -5,7 +5,6 @@
 // the browser (CORS + ToS), so submission stays human — everything before it
 // is automated here). Visible only inside the hidden admin console.
 import { useEffect, useMemo, useState } from "react";
-import { GoogleGenAI } from "@google/genai";
 import {
   addDocument,
   asDate,
@@ -23,8 +22,22 @@ import "../pages/Admin.css";
 const JOBS = "jobApps";
 const PROFILE_PATH = "jobProfile/admin";
 
+// Dynamic import for GoogleGenAI to reduce initial bundle size
+let googleGenAILib = null;
+
+const loadGoogleGenAI = async () => {
+  if (googleGenAILib) return googleGenAILib;
+  const module = await import("@google/genai");
+  googleGenAILib = module;
+  return module;
+};
+
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+const initializeAI = async () => {
+  const { GoogleGenAI } = await loadGoogleGenAI();
+  return apiKey ? new GoogleGenAI({ apiKey }) : null;
+};
+
 // Try-in-order fallback chain for the AI Jobs tab — all three verified
 // working against this API key (tested 2026-10-16): the retired 2.x GA models
 // return 404 and the 3.6+ models currently 503 for this key, so stick to
@@ -161,7 +174,7 @@ Respond with ONLY a JSON object — no markdown fences, no commentary — with e
 }`;
 }
 
-async function runAi(profile, job) {
+async function runAi(ai, profile, job) {
   if (!ai) throw new Error("VITE_GEMINI_API_KEY is missing.");
   const prompt = buildPrompt(profile, job);
   let response = null;
@@ -358,6 +371,7 @@ export default function AdminJobs() {
 
   const handleAi = async (job) => {
     if (busyId) return;
+    const ai = await initializeAI();
     if (!ai) {
       setToast({ type: "error", message: "Gemini key missing (VITE_GEMINI_API_KEY)." });
       return;
@@ -368,7 +382,7 @@ export default function AdminJobs() {
     }
     setBusyId(job.id);
     try {
-      const fit = await runAi(profile, job);
+      const fit = await runAi(ai, profile, job);
       const res = await updateDocument(`${JOBS}/${job.id}`, { fit, updatedAt: serverTimestamp() });
       if (!res.ok) throw new Error("Could not save the AI result.");
       setJobs((prev) => prev.map((x) => (x.id === job.id ? { ...x, fit } : x)));

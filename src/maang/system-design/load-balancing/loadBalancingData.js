@@ -1,4 +1,4 @@
-﻿// ===== Load Balancing â€” topic data =====
+﻿// ===== Load Balancing — topic data =====
 
 import {
   svgLoadBalancer,
