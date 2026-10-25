@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import "../system-design/api-design/ApiDesignPage.css";
 import "../system-design/acid/AcidPage.css";
 
@@ -436,9 +435,6 @@ function AiMlFundamentalsPage() {
     <div className="acid-page">
       {/* ===== HERO ===== */}
       <section className="acid-hero">
-        <Link to="/maang" className="acid-back">
-          ← Back to MAANG Preparation
-        </Link>
         <h1 className="acid-title">
           AI/ML <span>Fundamentals</span>
         </h1>
@@ -500,4 +496,3 @@ function AiMlFundamentalsPage() {
 }
 
 export default AiMlFundamentalsPage;
-

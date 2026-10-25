@@ -7,31 +7,6 @@
   color: #e2e8f0;
 }
 
-.java-coding-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 1.5rem 2rem 0;
-  color: #64748b;
-  font-size: 0.85rem;
-}
-
-.java-coding-breadcrumb a {
-  color: #94a3b8;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.java-coding-breadcrumb a:hover {
-  color: #fbbf24;
-}
-
-.java-coding-breadcrumb [aria-current="page"] {
-  color: #cbd5e1;
-}
-
 .java-coding-page .coding-questions-grid-wrapper {
   max-width: 1280px;
   margin: 0 auto;
@@ -456,12 +431,6 @@
 }
 
 @media (max-width: 560px) {
-  .java-coding-breadcrumb {
-    gap: 0.45rem;
-    padding: 1rem 1rem 0;
-    font-size: 0.76rem;
-  }
-
   .java-coding-page .coding-questions-grid-wrapper {
     padding: 1.25rem 1rem 2rem;
   }

@@ -63,16 +63,6 @@ function ForwardDeploymentEngineerModule() {
     <div
       className={`fde-page fde-module-page${[1, 2, 3, 4, 5, 6].includes(mod.id) ? " fde-module-page-workspace" : ""}`}
     >
-      <p className="fde-module-breadcrumb">
-        <Link to="/maang">MAANG</Link>
-        <span className="fde-module-crumb-sep">/</span>
-        <Link to="/maang/forward-deployment-engineer">
-          Forward Deployment Engineer
-        </Link>
-        <span className="fde-module-crumb-sep">/</span>
-        <span className="fde-module-crumb-current">Module {mod.no}</span>
-      </p>
-
       {/* ===== Module header ===== */}
       <section className="fde-module-hero">
         <div className="fde-module-hero-row">

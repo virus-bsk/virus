@@ -8,9 +8,6 @@ function ReactiveProgrammingTopics() {
     <div className="spring-boot-topics-page">
       {/* Hero Section */}
       <section className="header-section">
-        <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: "8px", color: "#60a5fa", textDecoration: "none", fontSize: "0.95rem", fontWeight: 500, padding: "8px 16px", borderRadius: "8px", background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)" }}>← Back to Home</Link>
-        </div>
         <div className="logo-container">
           <span className="logo-icon">🔁</span>
           <h1 className="logo-text">REACTIVE PROGRAMMING</h1>

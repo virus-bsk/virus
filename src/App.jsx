@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-ro
 import { useState, useEffect, lazy, Suspense } from "react";
 import "./App.css";
 import NavBar from "./components/NavBar";
+import AppBreadcrumbs from "./components/AppBreadcrumbs";
 import ConfigBanner from "./components/ConfigBanner";
 import RequireAuth from "./components/RequireAuth";
 import RequireAdmin from "./components/RequireAdmin";
@@ -281,6 +282,7 @@ function App() {
             />
           </div>
           <main className="page-container">
+            <AppBreadcrumbs />
             {/* Branded fallback: while a lazy route chunk downloads, keep the
                 BSK logo + ring on screen (fallback={null} left a blank page). */}
             <Suspense fallback={<BrandLoader />}>

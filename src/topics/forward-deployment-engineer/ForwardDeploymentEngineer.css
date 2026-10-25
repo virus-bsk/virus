@@ -214,33 +214,6 @@
 }
 
 /* ===== Module detail page ===== */
-.fde-module-breadcrumb {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.9rem;
-  color: #a0b8cc;
-  margin-bottom: 1.6rem;
-}
-
-.fde-module-breadcrumb a {
-  color: #b0e0ff;
-  text-decoration: none;
-}
-
-.fde-module-breadcrumb a:hover {
-  color: #00d4a0;
-}
-
-.fde-module-crumb-sep {
-  color: #4a5a6e;
-}
-
-.fde-module-crumb-current {
-  color: #e8edf2;
-}
-
 .fde-module-hero {
   background: linear-gradient(135deg, #10161f, #0b0f14);
   border: 1px solid #1e2a36;

@@ -47,9 +47,6 @@ export default function RequirePaid({ children }) {
           <Link to="/payment" className="gate-secondary">
             Go to Payment
           </Link>
-          <Link to="/" className="gate-secondary">
-            Back to Home
-          </Link>
         </div>
       </div>
     );
@@ -76,9 +73,6 @@ export default function RequirePaid({ children }) {
         <div className="gate-actions">
           <Link to="/payment" className="gate-cta">
             View payment options
-          </Link>
-          <Link to="/" className="gate-secondary">
-            Back to Home
           </Link>
         </div>
       </div>

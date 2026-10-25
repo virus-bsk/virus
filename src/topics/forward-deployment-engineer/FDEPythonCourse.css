@@ -91,10 +91,6 @@
   flex-direction: column;
 }
 
-.fde-module-page-workspace .fde-module-breadcrumb {
-  margin-bottom: 12px;
-}
-
 .fde-module-page-workspace .fde-module-hero {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);

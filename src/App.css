@@ -30,6 +30,56 @@
   overflow-x: hidden;
 }
 
+.app-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 12px 24px 0;
+  color: #94a3b8;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.app-breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.app-breadcrumb-separator {
+  color: #64748b;
+}
+
+.app-breadcrumbs a {
+  color: #93c5fd;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.app-breadcrumbs a:hover {
+  color: #dbeafe;
+  text-decoration: underline;
+}
+
+.app-breadcrumbs [aria-current="page"] {
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.app-breadcrumbs a:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+.page-container a[class*="back"]:not(.ci-back-btn),
+.page-container p[class*="back"] {
+  display: none !important;
+}
+
 /* Lazy route loading fallback */
 .page-loader {
   display: flex;

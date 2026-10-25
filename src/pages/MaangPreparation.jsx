@@ -141,11 +141,6 @@ function MaangPreparation() {
       {/* Product Company Jobs is the FIRST card of the grid above — it opens
           the full job board at /maang/jobs (all openings in one grid). */}
 
-      <section className="maang-page-cta">
-        <Link to="/" className="cta-button secondary">
-          Back to Home
-        </Link>
-      </section>
     </div>
   );
 }
