@@ -20,7 +20,8 @@ export const springBootCourseVideos = [
     videoLink: "https://www.youtube.com/watch?v=PXcZeXrCw-k",
   },
   {
-    title: "Spring Boot Annotations - @RestController, @Service, @Repository, @Entity",
+    title:
+      "Spring Boot Annotations - @RestController, @Service, @Repository, @Entity",
     description:
       "Annotations are metadata that tell Spring Boot HOW to treat your classes. They replace hundreds of lines of XML config. KEY ANNOTATIONS: @SpringBootApplication - marks main class. @RestController - marks REST API controller; combines @Controller + @ResponseBody (returns JSON directly). @Controller - returns view templates. @Service - business-logic class. @Repository - data-access class; translates SQL exceptions. @Component - generic stereotype. @Entity - marks class as JPA entity (database table). @Id - primary key. @Autowired - injects dependencies. @Configuration + @Bean - manual bean definition. @GetMapping, @PostMapping - map HTTP methods to handlers. @PathVariable, @RequestParam, @RequestBody - extract data from URL, query, and body. Mastering annotations is the foundation of Spring Boot.",
     category: "Spring Boot Core",
@@ -40,16 +41,16 @@ export const springBootCourseVideos = [
   {
     title: "First REST API - Build, Test with Postman, GET & POST Mapping",
     description:
-      "Your first Spring Boot REST API in 5 steps. STEP 1: Create Spring Boot project at start.spring.io with Spring Web dependency. STEP 2: Open in IntelliJ, run the main class - embedded Tomcat starts on port 8080. STEP 3: Create a @RestController class. STEP 4: Add handler methods with @GetMapping and @PostMapping. Spring auto-converts return values to JSON. STEP 5: Test with Postman. Example: @RestController public class HelloController { @GetMapping(\"/hello\") public String hello() { return \"Hello BSK!\"; } @PostMapping(\"/greet\") public String greet(@RequestBody String name) { return \"Hello, \" + name; } }. Testing: GET http://localhost:8080/hello returns 'Hello BSK!'. POST http://localhost:8080/greet with body 'BSK' returns 'Hello, BSK'. JSON responses make APIs language-agnostic - any client (React, mobile, Python) can consume them.",
+      'Your first Spring Boot REST API in 5 steps. STEP 1: Create Spring Boot project at start.spring.io with Spring Web dependency. STEP 2: Open in IntelliJ, run the main class - embedded Tomcat starts on port 8080. STEP 3: Create a @RestController class. STEP 4: Add handler methods with @GetMapping and @PostMapping. Spring auto-converts return values to JSON. STEP 5: Test with Postman. Example: @RestController public class HelloController { @GetMapping("/hello") public String hello() { return "Hello BSK!"; } @PostMapping("/greet") public String greet(@RequestBody String name) { return "Hello, " + name; } }. Testing: GET http://localhost:8080/hello returns \'Hello BSK!\'. POST http://localhost:8080/greet with body \'BSK\' returns \'Hello, BSK\'. JSON responses make APIs language-agnostic - any client (React, mobile, Python) can consume them.',
     category: "REST API Development",
     pdfDay: "Day 4",
     duration: "16m 12s",
     videoLink: "https://www.youtube.com/watch?v=AVLqwEFRkcQ",
   },
-{
+  {
     title: "Spring Boot CRUD - Create & Read (Employee Management with JPA)",
     description:
-      "Day 5 builds a complete Employee Management System. Setup: 1) Dependencies - Spring Web, Spring Data JPA, H2 Database, Lombok. 2) Define Employee entity: @Entity @Table(name=\"employees\") public class Employee { @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id; private String name; private String department; private double salary; }. 3) Create EmployeeRepository extending JpaRepository<Employee, Long> - you get findAll(), findById(), save(), deleteById() for FREE. 4) Create EmployeeService with @Service and inject the repository. 5) Create EmployeeController with endpoints: POST /api/employees (create), GET /api/employees (list all), GET /api/employees/{id} (find one). Test with Postman - send JSON body for POST, verify GET returns saved data. JpaRepository's magic: zero SQL, zero JDBC code. This pattern (Entity -> Repository -> Service -> Controller) is used in every Spring Boot project worldwide.",
+      'Day 5 builds a complete Employee Management System. Setup: 1) Dependencies - Spring Web, Spring Data JPA, H2 Database, Lombok. 2) Define Employee entity: @Entity @Table(name="employees") public class Employee { @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id; private String name; private String department; private double salary; }. 3) Create EmployeeRepository extending JpaRepository<Employee, Long> - you get findAll(), findById(), save(), deleteById() for FREE. 4) Create EmployeeService with @Service and inject the repository. 5) Create EmployeeController with endpoints: POST /api/employees (create), GET /api/employees (list all), GET /api/employees/{id} (find one). Test with Postman - send JSON body for POST, verify GET returns saved data. JpaRepository\'s magic: zero SQL, zero JDBC code. This pattern (Entity -> Repository -> Service -> Controller) is used in every Spring Boot project worldwide.',
     category: "REST API Development",
     pdfDay: "Day 5",
     duration: "45m 0s",
@@ -58,7 +59,7 @@ export const springBootCourseVideos = [
   {
     title: "Spring Boot CRUD - Update & Delete with JPA",
     description:
-      "Day 6 completes CRUD with UPDATE and DELETE. UPDATE - use @PutMapping(\"/{id}\"): find by id, update fields, repo.save() returns updated entity. Spring's save() performs INSERT if id is new, UPDATE if id exists. DELETE - use @DeleteMapping(\"/{id}\"): repo.deleteById(id). @PathVariable extracts id from URL. @RequestBody deserializes JSON body into Java object. Test in Postman: PUT http://localhost:8080/api/employees/1 with updated JSON -> 200 OK with updated object. DELETE http://localhost:8080/api/employees/1 -> 200 OK with confirmation. After this day, your Employee API has FULL CRUD - same operations you'd build for users, products, orders. Mastering these four operations is 80% of API development. The remaining 20% is pagination, filtering, sorting, security - all extensions of these basics.",
+      'Day 6 completes CRUD with UPDATE and DELETE. UPDATE - use @PutMapping("/{id}"): find by id, update fields, repo.save() returns updated entity. Spring\'s save() performs INSERT if id is new, UPDATE if id exists. DELETE - use @DeleteMapping("/{id}"): repo.deleteById(id). @PathVariable extracts id from URL. @RequestBody deserializes JSON body into Java object. Test in Postman: PUT http://localhost:8080/api/employees/1 with updated JSON -> 200 OK with updated object. DELETE http://localhost:8080/api/employees/1 -> 200 OK with confirmation. After this day, your Employee API has FULL CRUD - same operations you\'d build for users, products, orders. Mastering these four operations is 80% of API development. The remaining 20% is pagination, filtering, sorting, security - all extensions of these basics.',
     category: "REST API Development",
     pdfDay: "Day 6",
     duration: "28m 38s",
@@ -85,13 +86,13 @@ export const springBootCourseVideos = [
   {
     title: "Input Validation & Custom Exception Handling - Day 9",
     description:
-      "Day 9 covers input validation - NEVER trust user input. Bad data must be rejected BEFORE it reaches your database. Step 1: Add dependency spring-boot-starter-validation. Step 2: Annotate DTO fields: @NotNull, @NotBlank (for strings), @Size(min=2, max=50), @Min(0), @Max(150), @Email, @Pattern(regexp=\"...\"). Step 3: Add @Valid to controller method parameter: public Employee createEmployee(@Valid @RequestBody EmployeeDTO dto). Step 4: When validation fails, Spring throws MethodArgumentNotValidException. For custom exceptions, create a class extending RuntimeException: public class ResourceNotFoundException extends RuntimeException { public ResourceNotFoundException(String msg) { super(msg); } }. Throw it from service: throw new ResourceNotFoundException(\"Employee not found with id: \" + id). This sets up tomorrow's global handler.",
+      'Day 9 covers input validation - NEVER trust user input. Bad data must be rejected BEFORE it reaches your database. Step 1: Add dependency spring-boot-starter-validation. Step 2: Annotate DTO fields: @NotNull, @NotBlank (for strings), @Size(min=2, max=50), @Min(0), @Max(150), @Email, @Pattern(regexp="..."). Step 3: Add @Valid to controller method parameter: public Employee createEmployee(@Valid @RequestBody EmployeeDTO dto). Step 4: When validation fails, Spring throws MethodArgumentNotValidException. For custom exceptions, create a class extending RuntimeException: public class ResourceNotFoundException extends RuntimeException { public ResourceNotFoundException(String msg) { super(msg); } }. Throw it from service: throw new ResourceNotFoundException("Employee not found with id: " + id). This sets up tomorrow\'s global handler.',
     category: "Error Handling",
     pdfDay: "Day 9",
     duration: "28m 20s",
     videoLink: "https://www.youtube.com/watch?v=xdmAnnNxP84",
   },
-{
+  {
     title: "Global Exception Handling - @ControllerAdvice & @Valid - Day 10",
     description:
       "Day 10 introduces GLOBAL exception handling - the cleanest way to handle errors across the entire application. Instead of try-catch in every controller, create ONE central class: @ControllerAdvice public class GlobalExceptionHandler { @ExceptionHandler(ResourceNotFoundException.class) public ResponseEntity<ErrorResponse> handleNotFound(...) {...} @ExceptionHandler(MethodArgumentNotValidException.class) public ResponseEntity<ErrorResponse> handleValidation(...) {...} }. @ControllerAdvice makes the class apply to ALL controllers. @ExceptionHandler binds a method to a specific exception type. Create an ErrorResponse DTO for consistent error structure. Result: every endpoint returns the SAME error format - clients can parse errors uniformly. This is what production APIs look like.",
@@ -112,7 +113,7 @@ export const springBootCourseVideos = [
   {
     title: "Swagger Documentation - OpenAPI Annotations Explained - Day 12",
     description:
-      "Day 12 covers Swagger (now OpenAPI) - it auto-generates interactive API documentation from your code. Add dependency springdoc-openapi-starter-webmvc-ui. Then annotate: @Operation(summary=\"Get employee by ID\") @ApiResponses({...}) on controller methods. @Parameter(description=\"Employee ID\") on parameters. @Schema(description=\"Employee model\") on DTO fields. Visit http://localhost:8080/swagger-ui.html for the interactive UI - test endpoints directly from the browser. Also visit /v3/api-docs for the raw OpenAPI JSON spec. Benefits: frontend team knows what to send, new developers onboard faster, QA can test without Postman, auto-updates when code changes. Swagger is industry standard - every serious API has it.",
+      'Day 12 covers Swagger (now OpenAPI) - it auto-generates interactive API documentation from your code. Add dependency springdoc-openapi-starter-webmvc-ui. Then annotate: @Operation(summary="Get employee by ID") @ApiResponses({...}) on controller methods. @Parameter(description="Employee ID") on parameters. @Schema(description="Employee model") on DTO fields. Visit http://localhost:8080/swagger-ui.html for the interactive UI - test endpoints directly from the browser. Also visit /v3/api-docs for the raw OpenAPI JSON spec. Benefits: frontend team knows what to send, new developers onboard faster, QA can test without Postman, auto-updates when code changes. Swagger is industry standard - every serious API has it.',
     category: "Production Features",
     pdfDay: "Day 12",
     duration: "49m 0s",
@@ -130,16 +131,16 @@ export const springBootCourseVideos = [
   {
     title: "SLF4J & Logback Logging - Debugging & Error Tracking - Day 14",
     description:
-      "Day 14 covers logging - the most under-rated skill. Without logs, debugging production issues is impossible. Spring Boot uses SLF4J as API and Logback as default implementation. Inject logger: private static final Logger log = LoggerFactory.getLogger(EmployeeService.class); Use it: log.trace/debug/info/warn/error. Levels (lowest to highest): TRACE, DEBUG, INFO, WARN, ERROR. Set level globally: logging.level.root=INFO, logging.level.com.bsk=DEBUG. Customize with logback-spring.xml: rolling policies (daily files), patterns, separate error logs. Best practices: 1) Never use System.out.println in production. 2) Log meaningful context. 3) Log exceptions with stack traces. 4) Use parameterized logs: log.info(\"Created employee {}\", id).",
+      'Day 14 covers logging - the most under-rated skill. Without logs, debugging production issues is impossible. Spring Boot uses SLF4J as API and Logback as default implementation. Inject logger: private static final Logger log = LoggerFactory.getLogger(EmployeeService.class); Use it: log.trace/debug/info/warn/error. Levels (lowest to highest): TRACE, DEBUG, INFO, WARN, ERROR. Set level globally: logging.level.root=INFO, logging.level.com.bsk=DEBUG. Customize with logback-spring.xml: rolling policies (daily files), patterns, separate error logs. Best practices: 1) Never use System.out.println in production. 2) Log meaningful context. 3) Log exceptions with stack traces. 4) Use parameterized logs: log.info("Created employee {}", id).',
     category: "Production Features",
     pdfDay: "Day 14",
     duration: "46m 19s",
     videoLink: "https://www.youtube.com/watch?v=DdTZcCpfH9c",
   },
-{
+  {
     title: "Builder Design Pattern in Spring Boot - Day 15",
     description:
-      "Day 15 introduces the Builder Design Pattern - one of the most used patterns in Spring Boot and modern Java. PROBLEM: When a class has many optional fields, constructors explode into all-combination monsters (telescoping constructor anti-pattern). SOLUTION: Builder lets you set fields one at a time, fluently, and only the ones you need. Traditional implementation: public class Employee { private String name; private String dept; private double salary; private String email; // private constructor takes EmployeeBuilder. public static class EmployeeBuilder { private String name; private String dept; private double salary; private String email; public EmployeeBuilder name(String n) { this.name = n; return this; } // setters for each field returning this. public Employee build() { return new Employee(this); } } }. Usage: Employee e = new Employee.EmployeeBuilder().name(\"BSK\").dept(\"IT\").salary(50000).build();. With Lombok, just add @Builder annotation and the pattern is generated automatically. Builders create immutable objects safely and make code very readable. Spring uses builders extensively (e.g. UriComponentsBuilder, MockMvcRequestBuilders).",
+      'Day 15 introduces the Builder Design Pattern - one of the most used patterns in Spring Boot and modern Java. PROBLEM: When a class has many optional fields, constructors explode into all-combination monsters (telescoping constructor anti-pattern). SOLUTION: Builder lets you set fields one at a time, fluently, and only the ones you need. Traditional implementation: public class Employee { private String name; private String dept; private double salary; private String email; // private constructor takes EmployeeBuilder. public static class EmployeeBuilder { private String name; private String dept; private double salary; private String email; public EmployeeBuilder name(String n) { this.name = n; return this; } // setters for each field returning this. public Employee build() { return new Employee(this); } } }. Usage: Employee e = new Employee.EmployeeBuilder().name("BSK").dept("IT").salary(50000).build();. With Lombok, just add @Builder annotation and the pattern is generated automatically. Builders create immutable objects safely and make code very readable. Spring uses builders extensively (e.g. UriComponentsBuilder, MockMvcRequestBuilders).',
     category: "Design Patterns",
     pdfDay: "Day 15",
     duration: "29m 22s",
@@ -148,7 +149,7 @@ export const springBootCourseVideos = [
   {
     title: "JUnit Repository Testing with Spring Data JPA - Day 16",
     description:
-      "Day 16 starts the testing module - the MOST important skill for jobs. TDD (Test-Driven Development) workflow: write failing test -> make it pass -> refactor. Setup: dependencies spring-boot-starter-test (includes JUnit 5, Mockito, AssertJ). For repository tests, use @DataJpaTest - it loads only JPA-related config, uses H2 in-memory DB by default. Example: @DataJpaTest class EmployeeRepositoryTest { @Autowired private EmployeeRepository repo; @Autowired private TestEntityManager em; @Test void testSaveEmployee() { Employee emp = new Employee(\"BSK\", \"IT\", 50000); Employee saved = em.persistAndFlush(emp); assertThat(saved.getId()).isNotNull(); assertThat(repo.findById(saved.getId())).isPresent(); } @Test void testFindByDepartment() { em.persist(new Employee(\"RAM\", \"HR\", 40000)); em.persist(new Employee(\"RAVI\", \"HR\", 45000)); List<Employee> hr = repo.findByDepartment(\"HR\"); assertThat(hr).hasSize(2); } }. TestEntityManager helps set up test data. @DataJpaTest is fast because it skips full Spring context.",
+      'Day 16 starts the testing module - the MOST important skill for jobs. TDD (Test-Driven Development) workflow: write failing test -> make it pass -> refactor. Setup: dependencies spring-boot-starter-test (includes JUnit 5, Mockito, AssertJ). For repository tests, use @DataJpaTest - it loads only JPA-related config, uses H2 in-memory DB by default. Example: @DataJpaTest class EmployeeRepositoryTest { @Autowired private EmployeeRepository repo; @Autowired private TestEntityManager em; @Test void testSaveEmployee() { Employee emp = new Employee("BSK", "IT", 50000); Employee saved = em.persistAndFlush(emp); assertThat(saved.getId()).isNotNull(); assertThat(repo.findById(saved.getId())).isPresent(); } @Test void testFindByDepartment() { em.persist(new Employee("RAM", "HR", 40000)); em.persist(new Employee("RAVI", "HR", 45000)); List<Employee> hr = repo.findByDepartment("HR"); assertThat(hr).hasSize(2); } }. TestEntityManager helps set up test data. @DataJpaTest is fast because it skips full Spring context.',
     category: "Testing",
     pdfDay: "Day 16",
     duration: "32m 54s",
@@ -157,7 +158,7 @@ export const springBootCourseVideos = [
   {
     title: "JUnit Service Layer Testing with Mockito - Day 17 (Part 1)",
     description:
-      "Day 17 covers service-layer testing with Mockito - mocks replace real dependencies. Setup: @ExtendWith(MockitoExtension.class) on test class. Annotate fields: @Mock private EmployeeRepository repo; - Mockito creates a fake. @InjectMocks private EmployeeService service; - injects the mock into service. Stub the mock: when(repo.findById(1L)).thenReturn(Optional.of(employee));. Verify behavior: verify(repo, times(1)).deleteById(1L);. Test the happy path: @Test void getEmployee_WhenExists_ReturnsEmployee() { Employee emp = new Employee(1L, \"BSK\", \"IT\", 50000); when(repo.findById(1L)).thenReturn(Optional.of(emp)); Employee found = service.getEmployeeById(1L); assertThat(found.getName()).isEqualTo(\"BSK\"); verify(repo).findById(1L); }. Test the exception path: assertThrows(ResourceNotFoundException.class, () -> service.getEmployeeById(99L));. Mockito lets you test the service layer WITHOUT touching the database - tests run in milliseconds.",
+      'Day 17 covers service-layer testing with Mockito - mocks replace real dependencies. Setup: @ExtendWith(MockitoExtension.class) on test class. Annotate fields: @Mock private EmployeeRepository repo; - Mockito creates a fake. @InjectMocks private EmployeeService service; - injects the mock into service. Stub the mock: when(repo.findById(1L)).thenReturn(Optional.of(employee));. Verify behavior: verify(repo, times(1)).deleteById(1L);. Test the happy path: @Test void getEmployee_WhenExists_ReturnsEmployee() { Employee emp = new Employee(1L, "BSK", "IT", 50000); when(repo.findById(1L)).thenReturn(Optional.of(emp)); Employee found = service.getEmployeeById(1L); assertThat(found.getName()).isEqualTo("BSK"); verify(repo).findById(1L); }. Test the exception path: assertThrows(ResourceNotFoundException.class, () -> service.getEmployeeById(99L));. Mockito lets you test the service layer WITHOUT touching the database - tests run in milliseconds.',
     category: "Testing",
     pdfDay: "Day 17",
     duration: "16m 30s",
@@ -172,10 +173,10 @@ export const springBootCourseVideos = [
     duration: "29m 41s",
     videoLink: "https://www.youtube.com/watch?v=GD_Tb6RicNA",
   },
-{
+  {
     title: "JUnit Controller Layer Testing with Mockito - Day 19 (Part 1)",
     description:
-      "Day 19 covers controller-layer testing using MockMvc - simulates HTTP requests without starting a real server. Setup: @WebMvcTest(EmployeeController.class) - loads ONLY the web layer (NOT services, NOT repositories). @Autowired private MockMvc mockMvc; @MockBean private EmployeeService service; - service is mocked. Example test: @Test void getEmployee_Returns200AndJson() throws Exception { Employee emp = new Employee(1L, \"BSK\", \"IT\", 50000); when(service.getEmployeeById(1L)).thenReturn(emp); mockMvc.perform(get(\"/api/employees/1\").contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath(\"$.name\").value(\"BSK\")).andExpect(jsonPath(\"$.department\").value(\"IT\")); }. MockMvc lets you call get(), post(), put(), delete() like an HTTP client. Status assertions: isOk() (200), isCreated() (201), isNotFound() (404), isBadRequest() (400). JSON path assertions extract values from the response body using JSONPath syntax ($.fieldName).",
+      'Day 19 covers controller-layer testing using MockMvc - simulates HTTP requests without starting a real server. Setup: @WebMvcTest(EmployeeController.class) - loads ONLY the web layer (NOT services, NOT repositories). @Autowired private MockMvc mockMvc; @MockBean private EmployeeService service; - service is mocked. Example test: @Test void getEmployee_Returns200AndJson() throws Exception { Employee emp = new Employee(1L, "BSK", "IT", 50000); when(service.getEmployeeById(1L)).thenReturn(emp); mockMvc.perform(get("/api/employees/1").contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("BSK")).andExpect(jsonPath("$.department").value("IT")); }. MockMvc lets you call get(), post(), put(), delete() like an HTTP client. Status assertions: isOk() (200), isCreated() (201), isNotFound() (404), isBadRequest() (400). JSON path assertions extract values from the response body using JSONPath syntax ($.fieldName).',
     category: "Testing",
     pdfDay: "Day 19",
     duration: "14m 49s",
@@ -184,10 +185,19 @@ export const springBootCourseVideos = [
   {
     title: "JUnit Controller Layer Testing with Mockito - Day 20 (Part 2)",
     description:
-      "Day 20 advances controller testing. POST with body: @Test void createEmployee_Returns201() throws Exception { EmployeeDTO dto = new EmployeeDTO(\"BSK\", \"IT\", 50000); when(service.createEmployee(any())).thenReturn(new Employee(1L, \"BSK\", \"IT\", 50000)); mockMvc.perform(post(\"/api/employees\").contentType(MediaType.APPLICATION_JSON).content(new ObjectMapper().writeValueAsString(dto))).andExpect(status().isCreated()).andExpect(jsonPath(\"$.id\").value(1)); }. VALIDATION TESTS: send invalid data and expect 400: mockMvc.perform(post(\"/api/employees\").content(\"{}\")).andExpect(status().isBadRequest());. EXCEPTION TESTS: when(service.getEmployeeById(99L)).thenThrow(new ResourceNotFoundException(\"Not found\")); mockMvc.perform(get(\"/api/employees/99\")).andExpect(status().isNotFound());. AUTHENTICATION TESTS (later): .with(user(\"admin\").roles(\"ADMIN\")). INTEGRATION TESTS: @SpringBootTest with TestRestTemplate or WebTestClient - full context, real DB (H2), real HTTP. These are slower but test the entire stack. Aim for unit tests for fast feedback + integration tests for confidence.",
+      'Day 20 advances controller testing. POST with body: @Test void createEmployee_Returns201() throws Exception { EmployeeDTO dto = new EmployeeDTO("BSK", "IT", 50000); when(service.createEmployee(any())).thenReturn(new Employee(1L, "BSK", "IT", 50000)); mockMvc.perform(post("/api/employees").contentType(MediaType.APPLICATION_JSON).content(new ObjectMapper().writeValueAsString(dto))).andExpect(status().isCreated()).andExpect(jsonPath("$.id").value(1)); }. VALIDATION TESTS: send invalid data and expect 400: mockMvc.perform(post("/api/employees").content("{}")).andExpect(status().isBadRequest());. EXCEPTION TESTS: when(service.getEmployeeById(99L)).thenThrow(new ResourceNotFoundException("Not found")); mockMvc.perform(get("/api/employees/99")).andExpect(status().isNotFound());. AUTHENTICATION TESTS (later): .with(user("admin").roles("ADMIN")). INTEGRATION TESTS: @SpringBootTest with TestRestTemplate or WebTestClient - full context, real DB (H2), real HTTP. These are slower but test the entire stack. Aim for unit tests for fast feedback + integration tests for confidence.',
     category: "Testing",
     pdfDay: "Day 20",
     duration: "19m 38s",
     videoLink: "https://www.youtube.com/watch?v=cA5nFHlb6eE",
+  },
+  {
+    title: "Debugging Spring Boot APIs - Day 21",
+    description:
+      "Day 21 of the Spring Boot 2026 series focuses on debugging Spring Boot APIs using IntelliJ IDEA. Learn how to set breakpoints, inspect variables, and control program execution using Step Over, Step Into, Step Out, and Resume. Understand how to debug your Spring Boot applications step by step to identify and fix issues efficiently. This session is part of the Complete MAANG Preparation series by BSK Coding.",
+    category: "Debugging",
+    pdfDay: "Day 21",
+    duration: "18m 49s",
+    videoLink: "https://youtu.be/a6qiFy7oyis",
   },
 ];

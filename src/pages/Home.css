@@ -444,3 +444,60 @@
     padding: 1rem;
   }
 }
+/* === NEW: Coding Questions Grid === */
+
+/* Top-level section */
+.coding-questions-section {
+  padding: 4rem 2rem;
+  background: #f8f9fa;
+}
+.coding-questions-section .section-title {
+  font-size: 2rem;
+  color: #1a1a1a;
+  margin-bottom: 1rem;
+}
+.coding-questions-section .section-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  max-width: 600px;
+  margin-bottom: 2rem;
+}
+
+/* Grid layout */
+.coding-questions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Individual question card */
+.coding-question-card {
+  background: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+.coding-question-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+.question-number {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+.question-text {
+  font-size: 0.95rem;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* === End of NEW CSS === */
