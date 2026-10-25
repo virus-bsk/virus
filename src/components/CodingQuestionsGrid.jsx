@@ -38,7 +38,7 @@ function CodingQuestionsGrid() {
   const answersById = useMemo(() => {
     const map = {};
     javaInterviewAnswers.forEach((entry) => {
-      map[entry.id] = entry.answer;
+      map[entry.id] = entry;
     });
     return map;
   }, []);
@@ -147,7 +147,7 @@ function CodingQuestionsGrid() {
 
       <div className="coding-questions-grid">
         {filteredQuestions.map((q) => {
-          const answer = answersById[q.id] || "No answer available yet.";
+          const answer = answersById[q.id];
           const isOpen = expanded[q.id] === true;
           return (
             <div
@@ -182,14 +182,52 @@ function CodingQuestionsGrid() {
                       <strong>Output:</strong> {q.output}
                     </span>
                   </div>
-                  <pre className="question-answer-pre">
-                    <code
-                      className="hljs language-java"
-                      dangerouslySetInnerHTML={{
-                        __html: highlightCode(answer, "java"),
-                      }}
-                    />
-                  </pre>
+                  {answer ? (
+                    <div className="question-answer-content">
+                      <section className="question-answer-explanation">
+                        <h3>How to explain this in an interview</h3>
+                        <p>{answer.approach}</p>
+                        <p className="question-answer-complexity">
+                          <strong>Complexity:</strong> {answer.complexity}
+                        </p>
+                      </section>
+                      <div className="question-answer-code-section">
+                        <h3>Java implementation</h3>
+                        <pre className="question-answer-pre">
+                          <code
+                            className="hljs language-java"
+                            dangerouslySetInnerHTML={{
+                              __html: highlightCode(answer.code, "java"),
+                            }}
+                          />
+                        </pre>
+                      </div>
+                      {answer.alternative && (
+                        <div className="question-answer-code-section">
+                          <h3>{answer.alternative.label}</h3>
+                          <p className="question-answer-complexity">
+                            <strong>Complexity:</strong>{" "}
+                            {answer.alternative.complexity}
+                          </p>
+                          <pre className="question-answer-pre">
+                            <code
+                              className="hljs language-java"
+                              dangerouslySetInnerHTML={{
+                                __html: highlightCode(
+                                  answer.alternative.code,
+                                  "java",
+                                ),
+                              }}
+                            />
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="coding-questions-empty" role="status">
+                      No interview answer is available for this question yet.
+                    </p>
+                  )}
                 </>
               )}
             </div>
