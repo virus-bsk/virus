@@ -1,0 +1,481 @@
+.java-coding-page {
+  min-height: calc(100vh - 72px);
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 12% 2%, rgba(245, 158, 11, 0.09), transparent 32rem),
+    #070c14;
+  color: #e2e8f0;
+}
+
+.java-coding-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem 0;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.java-coding-breadcrumb a {
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.java-coding-breadcrumb a:hover {
+  color: #fbbf24;
+}
+
+.java-coding-breadcrumb [aria-current="page"] {
+  color: #cbd5e1;
+}
+
+.java-coding-page .coding-questions-grid-wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: transparent;
+}
+
+.java-coding-page .coding-grid-header {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.6fr);
+  gap: 1.75rem 3rem;
+  margin: 0 0 1.5rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  overflow: hidden;
+  color: #f8fafc;
+  background:
+    radial-gradient(ellipse at 95% 0%, rgba(245, 158, 11, 0.13), transparent 24rem),
+    linear-gradient(135deg, #111c2d 0%, #0b1422 65%, #101a29 100%);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 22px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+}
+
+.java-coding-page .coding-grid-hero {
+  min-width: 0;
+}
+
+.java-coding-page .coding-grid-title-row {
+  align-items: center;
+  gap: 1rem;
+  margin: 0 0 1rem;
+}
+
+.java-coding-page .coding-grid-icon {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex: 0 0 3.5rem;
+  place-items: center;
+  font-size: 1.8rem;
+  background: rgba(245, 158, 11, 0.11);
+  border: 1px solid rgba(251, 191, 36, 0.24);
+  border-radius: 16px;
+}
+
+.java-coding-page .coding-grid-eyebrow {
+  color: #fbbf24;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.java-coding-page .coding-grid-name {
+  margin: 0.25rem 0 0;
+  color: #f8fafc;
+  font-size: clamp(1.55rem, 3vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+.java-coding-page .coding-grid-tagline {
+  margin: 0 0 0.55rem;
+  color: #e2e8f0;
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.java-coding-page .coding-grid-description {
+  max-width: 740px;
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.94rem;
+  line-height: 1.75;
+}
+
+.java-coding-page .coding-grid-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.4rem;
+}
+
+.java-coding-page .coding-grid-stats span {
+  padding: 0.5rem 0.75rem;
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 999px;
+  font-size: 0.77rem;
+}
+
+.java-coding-page .coding-grid-stats strong {
+  color: #f8fafc;
+}
+
+.java-coding-page .coding-grid-controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.2rem;
+  min-width: 0;
+}
+
+.java-coding-page .coding-grid-progress {
+  display: block;
+  margin: 0;
+}
+
+.java-coding-page .coding-grid-progress-copy {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.java-coding-page .coding-grid-progress-copy strong {
+  color: #e2e8f0;
+  font-weight: 700;
+}
+
+.java-coding-page .progress-bar-track {
+  height: 8px;
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.java-coding-page .progress-bar {
+  background: linear-gradient(90deg, #f59e0b, #facc15);
+}
+
+.java-coding-page .coding-question-search {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 48px;
+  padding: 0 0.75rem;
+  color: #94a3b8;
+  background: rgba(2, 6, 13, 0.52);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.java-coding-page .coding-question-search:focus-within {
+  border-color: rgba(251, 191, 36, 0.65);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+}
+
+.java-coding-page .coding-search-icon {
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.java-coding-page .coding-question-search input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  color: #f8fafc;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.java-coding-page .coding-question-search input::placeholder {
+  color: #64748b;
+}
+
+.java-coding-page .coding-question-search input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+.java-coding-page .coding-question-search kbd {
+  padding: 0.15rem 0.4rem;
+  color: #64748b;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 0.72rem;
+}
+
+.java-coding-page .subtopics-container {
+  grid-column: 1 / -1;
+  gap: 0.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.13);
+}
+
+.java-coding-page .subtopic-badge {
+  padding: 0.42rem 0.7rem;
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.09);
+  border: 1px solid rgba(148, 163, 184, 0.13);
+  font-size: 0.73rem;
+}
+
+.java-coding-page .coding-question-count {
+  grid-column: 1 / -1;
+  margin: -1rem 0 0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.java-coding-page .coding-question-count strong {
+  color: #cbd5e1;
+}
+
+.java-coding-page .coding-questions-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  max-width: none;
+}
+
+.java-coding-page .coding-question-card {
+  min-width: 0;
+  gap: 0.9rem;
+  padding: 1rem 1.1rem;
+  color: #e2e8f0;
+  background: linear-gradient(145deg, #101a29, #0c1420);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.java-coding-page .coding-question-card:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(145deg, #142033, #0f1928);
+  border-color: rgba(251, 191, 36, 0.28);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2);
+}
+
+.java-coding-page .question-header {
+  min-width: 0;
+  gap: 0.8rem;
+}
+
+.java-coding-page .question-number {
+  width: 34px;
+  height: 34px;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.18);
+  border-radius: 10px;
+  font-size: 0.78rem;
+}
+
+.java-coding-page .question-text {
+  min-width: 0;
+  color: #f1f5f9;
+  font-size: 0.91rem;
+  font-weight: 650;
+}
+
+.java-coding-page .answer-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  width: auto;
+  min-height: 34px;
+  padding: 0.35rem 0.55rem 0.35rem 0.7rem;
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 9px;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.java-coding-page .answer-toggle:hover {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.java-coding-page .answer-toggle-icon {
+  font-size: 1rem;
+}
+
+.java-coding-page .coding-question-card:has(.question-answer-pre) {
+  grid-column: 1 / -1;
+}
+
+.java-coding-page .question-meta {
+  gap: 0.5rem;
+}
+
+.java-coding-page .question-meta-item {
+  max-width: 100%;
+  padding: 0.35rem 0.6rem;
+  overflow-wrap: anywhere;
+  color: #aab8ca;
+  background: rgba(2, 6, 13, 0.42);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 7px;
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.java-coding-page .question-meta-item strong {
+  color: #cbd5e1;
+}
+
+.java-coding-page .question-answer-pre {
+  max-height: 34rem;
+  border-color: rgba(148, 163, 184, 0.15);
+  font-size: 0.79rem;
+}
+
+.java-coding-page .coding-questions-empty {
+  grid-column: 1 / -1;
+  padding: 3rem 1rem;
+  color: #94a3b8;
+  text-align: center;
+  background: rgba(16, 26, 41, 0.7);
+  border: 1px dashed rgba(148, 163, 184, 0.24);
+  border-radius: 16px;
+}
+
+.java-coding-page .coding-questions-empty > span {
+  color: #fbbf24;
+  font-size: 2rem;
+}
+
+.java-coding-page .coding-questions-empty h2 {
+  margin: 0.5rem 0;
+  color: #f1f5f9;
+  font-size: 1.1rem;
+}
+
+.java-coding-page .coding-questions-empty p {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+@media (max-width: 850px) {
+  .java-coding-page .coding-grid-header {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .java-coding-page .coding-grid-controls {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    align-items: center;
+  }
+
+  .java-coding-page .coding-questions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .java-coding-breadcrumb {
+    gap: 0.45rem;
+    padding: 1rem 1rem 0;
+    font-size: 0.76rem;
+  }
+
+  .java-coding-page .coding-questions-grid-wrapper {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  .java-coding-page .coding-grid-header {
+    gap: 1.2rem;
+    padding: 1.25rem;
+    border-radius: 16px;
+  }
+
+  .java-coding-page .coding-grid-title-row {
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .java-coding-page .coding-grid-icon {
+    width: 2.8rem;
+    height: 2.8rem;
+    flex-basis: 2.8rem;
+    border-radius: 12px;
+    font-size: 1.45rem;
+  }
+
+  .java-coding-page .coding-grid-name {
+    font-size: 1.45rem;
+  }
+
+  .java-coding-page .coding-grid-description {
+    font-size: 0.86rem;
+  }
+
+  .java-coding-page .coding-grid-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .java-coding-page .subtopics-container {
+    gap: 0.4rem;
+    padding-top: 1rem;
+  }
+
+  .java-coding-page .subtopic-badge {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.68rem;
+  }
+
+  .java-coding-page .coding-questions-grid {
+    gap: 0.65rem;
+  }
+
+  .java-coding-page .coding-question-card {
+    padding: 0.85rem;
+  }
+
+  .java-coding-page .question-header {
+    gap: 0.55rem;
+  }
+
+  .java-coding-page .question-text {
+    font-size: 0.84rem;
+  }
+
+  .java-coding-page .answer-toggle {
+    gap: 0.25rem;
+    min-height: 32px;
+    padding: 0.3rem 0.4rem 0.3rem 0.55rem;
+    font-size: 0.68rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .java-coding-page *,
+  .java-coding-page *::before,
+  .java-coding-page *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

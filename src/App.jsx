@@ -154,6 +154,9 @@ const Roadmap90Day = lazy(
 const JavaTopics = lazy(() => import("./topics/java/JavaTopics"));
 const JavaCourse = lazy(() => import("./topics/java/JavaCourse"));
 const JavaInterview = lazy(() => import("./topics/java/JavaInterview"));
+const JavaCodingQuestions = lazy(
+  () => import("./pages/JavaCodingQuestions"),
+);
 const InterviewPrep = lazy(() => import("./pages/InterviewPrep"));
 const JavaScriptTopics = lazy(
   () => import("./topics/javascript/JavaScriptTopics"),
@@ -293,6 +296,10 @@ function App() {
                 <Route path="/java" element={<JavaTopics />} />
                 <Route path="/java/course" element={<JavaCourse />} />
                 <Route path="/java/interview" element={<JavaInterview />} />
+                <Route
+                  path="/java/coding-questions"
+                  element={<JavaCodingQuestions />}
+                />
                 <Route path="/javascript" element={<JavaScriptTopics />} />
                 <Route
                   path="/javascript/course"

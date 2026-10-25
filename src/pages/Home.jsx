@@ -38,6 +38,7 @@ function Home() {
   const linkFor = (id) => {
     if (id === "90-day-job-roadmap") return "/roadmap";
     if (id === "java") return "/java";
+    if (id === "java-30-coding-questions") return "/java/coding-questions";
     if (id === "javascript") return "/javascript";
     if (id === "reactjs") return "/reactjs";
     if (id === "spring-boot") return "/spring-boot";

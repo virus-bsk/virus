@@ -1,0 +1,224 @@
+/* ============ Top 30 Java Coding Questions Grid ============ */
+
+.coding-questions-grid-wrapper {
+  padding: 4rem 1.5rem;
+  background: #f8fafc;
+}
+
+.coding-grid-header {
+  max-width: 1180px;
+  margin: 0 auto 2.5rem;
+  padding: 2rem 1.75rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+}
+
+.coding-grid-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.4rem;
+}
+
+.coding-grid-icon {
+  font-size: 2.2rem;
+}
+
+.coding-grid-name {
+  font-size: 1.7rem;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(135deg, #ef4444 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.coding-grid-tagline {
+  margin: 0 0 0.6rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.coding-grid-description {
+  margin: 0 0 1.25rem;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.coding-grid-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.progress-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #334159;
+  min-width: 120px;
+}
+
+.progress-bar-track {
+  flex: 1;
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90, #22c55e, #16a34a);
+  border-radius: 999px;
+}
+
+.subtopics-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.subtopic-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f8fafc;
+  background: #475569;
+}
+
+.subtopic-icon {
+  font-size: 1.05rem;
+}
+
+.coding-questions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.25rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  align-content: start;
+}
+
+.coding-question-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.1rem 1.15rem;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.coding-question-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+  border-color: #cbd5e1;
+}
+
+.question-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.question-number {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: rgba(56, 189, 248, 0.13);
+  color: #0ea5e9;
+  font-weight: 700;
+  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.question-text {
+  font-size: 1rem;
+  color: #0f172a;
+  font-weight: 600;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.answer-toggle {
+  flex-shrink: 0;
+  width: 30px;
+  height: 26px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.answer-toggle:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.question-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.question-meta-item {
+  font-size: 0.78rem;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* Answer code block — dark theme supplied by highlight.js/atom-one-dark.css */
+.question-answer-pre {
+  margin: 0;
+  border-radius: 8px;
+  overflow-x: auto;
+  max-height: 28rem;
+  font-family: "Fira Code", "JetBrains Mono", "Courier New", monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  border: 1px solid #e2e8f0;
+}
+
+/* Tame highlight.js padding (1em) so compact cards stay readable */
+.question-answer-pre code.hljs {
+  padding: 0.6em !important;
+}
+
+@media (max-width: 768px) {
+  .coding-questions-grid-wrapper {
+    padding: 3rem 1rem;
+  }
+  .coding-grid-header {
+    padding: 1.5rem;
+  }
+  .coding-grid-name {
+    font-size: 1.4rem;
+  }
+  .coding-questions-grid {
+    grid-template-columns: 1fr;
+  }
+}

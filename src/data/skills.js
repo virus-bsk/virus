@@ -9,7 +9,7 @@
     charColors: ["#FF5733", "#FFBD33", "#33FF57", "#33A1FF", "#A133FF"],
     description:
       "Master DSA + System Design + Reactive + Agentic AI to crack top product-based companies",
-         subtopics: [
+    subtopics: [
       "📊 DSA Foundation",
       "🌳 Advanced DSAs",
       "🔀 Graph Mastery",
@@ -83,6 +83,26 @@
       "Build Tools (Maven, Gradle)",
       "Testing (JUnit, Mockito)",
       "Design Patterns in Java",
+    ],
+  },
+  {
+    id: "java-30-coding-questions",
+    name: "Top 30 Java Coding Interview Questions",
+    icon: "☕",
+    color: "#00ff1e",
+    progress: 100,
+    description:
+      "Practice 30 frequently asked Java coding interview questions with optimized solutions.",
+    subtopics: [
+      "Arrays & Strings",
+      "Two Pointers & Sliding Window",
+      "Hashing",
+      "Heaps & Priority Queue",
+      "Linked Lists",
+      "Divide & Conquer",
+      "Dynamic Programming",
+      "Binary Search",
+      "Stacks & Queues",
     ],
   },
   {
@@ -250,7 +270,7 @@
       "Cloud Architecture Fundamentals",
     ],
   },
-    {
+  {
     id: "company-interview",
     name: "Company-wise Interview Prep",
     icon: "🏢",
