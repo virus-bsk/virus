@@ -2,7 +2,7 @@
   position: fixed;
   top: 104px;
   right: max(18px, calc((100vw - 1200px) / 2 + 24px));
-  z-index: 110;
+  z-index: 60;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
