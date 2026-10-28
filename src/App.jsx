@@ -231,6 +231,7 @@ const ResumeBuilderPage = lazy(() => import("./pages/ResumeBuilderPage"));
 const FeaturesPage = lazy(() => import("./pages/FeaturesPage"));
 const Admin = lazy(() => import("./pages/Admin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const VenkateshBharath = lazy(() => import("./pages/VenkateshBharath"));
 
 // Restores the original route after GitHub Pages 404 redirect.
 // When a user refreshes /login, GitHub Pages serves 404.html which
@@ -263,6 +264,27 @@ function ScrollToTop() {
   return null;
 }
 
+function PlatformChrome({ onOpenChangePassword, onOpenFounder }) {
+  const { pathname } = useLocation();
+
+  if (/^\/venkatesh-bharath(?:\/|$)/.test(pathname)) {
+    return null;
+  }
+
+  return (
+    <>
+      <ConfigBanner />
+      <div className="navbar-container">
+        <NavBar
+          onOpenChangePassword={onOpenChangePassword}
+          onOpenFounder={onOpenFounder}
+        />
+      </div>
+      <AppBreadcrumbs />
+    </>
+  );
+}
+
 function App() {
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [founderOpen, setFounderOpen] = useState(false);
@@ -274,15 +296,11 @@ function App() {
         <YouTubeLinkHandler />
         <RouteRestorer />
         <div className="app-shell">
-          <ConfigBanner />
-          <div className="navbar-container">
-            <NavBar
-              onOpenChangePassword={() => setShowChangePassword(true)}
-              onOpenFounder={() => setFounderOpen(true)}
-            />
-          </div>
+          <PlatformChrome
+            onOpenChangePassword={() => setShowChangePassword(true)}
+            onOpenFounder={() => setFounderOpen(true)}
+          />
           <main className="page-container">
-            <AppBreadcrumbs />
             {/* Branded fallback: while a lazy route chunk downloads, keep the
                 BSK logo + ring on screen (fallback={null} left a blank page). */}
             <Suspense fallback={<BrandLoader />}>
@@ -787,6 +805,8 @@ function App() {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/cline-test" element={<ClineChatTest />} />
                 <Route path="/profile" element={<Profile />} />
+                {/* Public portfolio/resume page for Venkatesh Bharath (no auth required) */}
+                <Route path="/venkatesh-bharath" element={<VenkateshBharath />} />
                 {/* Payment: live account status from Firestore + Cashfree checkout (wired up later) */}
                 <Route
                   path="/payment"

@@ -1,0 +1,247 @@
+.vb-admin {
+  min-height: 100vh;
+  padding: clamp(24px, 5vw, 64px);
+  background: #f5f7fb;
+  color: #17243b;
+  font-family: var(--vb-display, "Inter", sans-serif);
+}
+
+.vb-admin-header,
+.vb-admin-form {
+  max-width: 1080px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.vb-admin-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.vb-admin-header p {
+  color: #3159dd;
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+
+.vb-admin-header h1 {
+  margin-top: 9px;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1.15;
+}
+
+.vb-admin-header span {
+  display: block;
+  max-width: 680px;
+  margin-top: 10px;
+  color: #46556d;
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.vb-admin-header > a {
+  flex: 0 0 auto;
+  padding: 11px 15px;
+  border: 1px solid #d5ddec;
+  border-radius: 8px;
+  color: #3159dd;
+  font-size: 0.9rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.vb-admin-form {
+  display: grid;
+  gap: 16px;
+  padding: clamp(18px, 3vw, 32px);
+  border: 1px solid #dce3ef;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 40px rgba(40, 62, 108, 0.08);
+}
+
+.vb-admin-section {
+  display: grid;
+  gap: 18px;
+  padding: 24px 0;
+  border-bottom: 1px solid #e8edf5;
+}
+
+.vb-admin-section:first-child {
+  padding-top: 0;
+}
+
+.vb-admin-section-heading,
+.vb-admin-item-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.vb-admin-section-heading h2 {
+  font-size: 1.25rem;
+}
+
+.vb-admin-section-heading p {
+  margin-top: 5px;
+  color: #66748a;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.vb-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.vb-admin-field {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
+  color: #34445d;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.vb-admin-field input,
+.vb-admin-field textarea {
+  width: 100%;
+  min-height: 43px;
+  padding: 10px 12px;
+  border: 1px solid #c8d2e2;
+  border-radius: 7px;
+  background: #fbfcff;
+  color: #17243b;
+  font: inherit;
+  font-weight: 400;
+}
+
+.vb-admin-field textarea {
+  min-height: 100px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.vb-admin-field input:focus-visible,
+.vb-admin-field textarea:focus-visible,
+.vb-admin-add:focus-visible,
+.vb-admin-remove:focus-visible,
+.vb-admin-save:focus-visible,
+.vb-admin-header > a:focus-visible {
+  outline: 2px solid #3159dd;
+  outline-offset: 3px;
+}
+
+.vb-admin-field small {
+  color: #66748a;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.vb-admin-item {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #e0e6f0;
+  border-radius: 9px;
+  background: #fbfcff;
+}
+
+.vb-admin-item-heading {
+  align-items: center;
+}
+
+.vb-admin-item-heading h3 {
+  font-size: 1rem;
+}
+
+.vb-admin-add,
+.vb-admin-remove {
+  flex: 0 0 auto;
+  padding: 9px 12px;
+  border: 1px solid #d5ddec;
+  border-radius: 7px;
+  background: #fff;
+  color: #3159dd;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.vb-admin-remove {
+  color: #a4261d;
+}
+
+.vb-admin-loading {
+  padding: 28px;
+  border: 1px solid #dce3ef;
+  border-radius: 8px;
+  color: #46556d;
+}
+
+.vb-admin-error,
+.vb-admin-success {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 7px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.vb-admin-error {
+  background: #fff1f0;
+  color: #a4261d;
+}
+
+.vb-admin-success {
+  background: #edf8f0;
+  color: #176b38;
+}
+
+.vb-admin-save {
+  width: fit-content;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #3159dd;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.vb-admin-save:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+@media (max-width: 600px) {
+  .vb-admin {
+    padding: 20px 14px;
+  }
+
+  .vb-admin-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .vb-admin-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vb-admin-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .vb-admin-item {
+    padding: 14px;
+  }
+}

@@ -203,7 +203,8 @@ service cloud.firestore {
           'websiteName', 'location', 'summary', 'experience', 'projects',
           'skills', 'education', 'certificates', 'updatedAt'
         ])
-          && request.resource.data.updatedAt == request.time;
+          && (!request.resource.data.keys().hasAny(['updatedAt'])
+            || request.resource.data.updatedAt == request.time);
       }
 
       allow read: if ownsResumeDoc();
@@ -244,6 +245,18 @@ service cloud.firestore {
     match /clineModels/{docId} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // Public portfolio profile. Store only its JSON text; no timestamps or
+    // other metadata are written. Visitors can read it; the admin can edit it.
+    match /portfolio/{profileId} {
+      allow read: if profileId == 'venkatesh-bharath';
+      allow create, update: if isAdmin()
+        && profileId == 'venkatesh-bharath'
+        && request.resource.data.keys().hasOnly(['content'])
+        && request.resource.data.content is string
+        && request.resource.data.content.size() <= 900000;
+      allow delete: if false;
     }
   }
 }

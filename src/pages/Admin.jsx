@@ -7,6 +7,7 @@ import AdminPricing from "../components/AdminPricing";
 import AdminJobs from "../components/AdminJobs";
 import AdminClineModels from "../components/AdminClineModels";
 import AdminJobsManager from "../components/AdminJobsManager";
+import VenkateshBharathAdmin from "./VenkateshBharathAdmin";
 import "../pages/Admin.css";
 
 export default function Admin() {
@@ -29,12 +30,14 @@ export default function Admin() {
         <button type="button" className={`admin-tab${tab === "jobs" ? " admin-tab-active" : ""}`} onClick={() => setTab("jobs")}>AI Jobs</button>
         <button type="button" className={`admin-tab${tab === "clineModels" ? " admin-tab-active" : ""}`} onClick={() => setTab("clineModels")}>Cline Models</button>
         <button type="button" className={`admin-tab${tab === "jobManager" ? " admin-tab-active" : ""}`} onClick={() => setTab("jobManager")}>Job Manager</button>
+        <button type="button" className={`admin-tab${tab === "portfolio" ? " admin-tab-active" : ""}`} onClick={() => setTab("portfolio")}>Portfolio</button>
       </div>
       {tab === "users" && <AdminUsers />}
       {tab === "pricing" && <AdminPricing />}
       {tab === "jobs" && <AdminJobs />}
       {tab === "clineModels" && <AdminClineModels />}
       {tab === "jobManager" && <AdminJobsManager />}
+      {tab === "portfolio" && <VenkateshBharathAdmin />}
     </div>
   );
 }

@@ -52,7 +52,6 @@ export default defineConfig(({ mode }) => {
             if (id.includes("firebase/auth")) return "firebase-auth";
             if (id.includes("firebase/firestore")) return "firebase-firestore";
             if (id.includes("firebase/analytics")) return "firebase-analytics";
-            if (id.includes("firebase/storage")) return "firebase-storage";
 
             // Heavily-weighted libraries. jspdf/html2canvas/@google/genai are
             // only ever loaded via dynamic import, so their chunks stay lazy.
