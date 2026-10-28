@@ -684,26 +684,39 @@
 
 .vb-project-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 15px;
+  gap: 12px;
 }
 
 .vb-project-card {
-  display: flex;
-  min-height: 330px;
-  flex-direction: column;
-  padding: 23px;
+  overflow: hidden;
   border: 1px solid var(--vb-line);
-  border-radius: 10px;
+  border-radius: 12px;
   background:
     linear-gradient(135deg, rgba(49, 89, 221, 0.045), transparent 55%),
     var(--vb-surface);
-  transition: transform 180ms ease, border-color 180ms ease;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
-.vb-project-card:hover {
-  transform: translateY(-4px);
+.vb-project-card:hover,
+.vb-project-card[open] {
   border-color: rgba(49, 89, 221, 0.38);
+  box-shadow: 0 12px 30px rgba(40, 62, 108, 0.08);
+}
+
+.vb-project-summary {
+  display: block;
+  padding: 22px 25px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.vb-project-summary::-webkit-details-marker {
+  display: none;
+}
+
+.vb-project-summary:focus-visible {
+  outline: 2px solid var(--vb-accent);
+  outline-offset: -4px;
 }
 
 .vb-project-topline {
@@ -713,24 +726,74 @@
 }
 
 .vb-project-arrow {
+  display: inline-flex;
   color: var(--vb-accent);
-  font-size: 1.3rem;
+  font-size: 1rem;
+  transition: transform 180ms ease;
 }
 
-.vb-project-card h3 {
-  margin-top: 33px;
+.vb-project-card[open] .vb-project-arrow {
+  transform: rotate(90deg);
+}
+
+.vb-project-title {
+  display: block;
+  margin-top: 15px;
   color: var(--vb-ink);
-  font-size: 1.28rem;
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
   font-weight: 620;
   letter-spacing: -0.04em;
   line-height: 1.25;
 }
 
-.vb-project-card > p {
-  margin-top: 12px;
+.vb-project-expand-hint {
+  display: inline-block;
+  margin-top: 9px;
+  color: var(--vb-faint);
+  font-size: 0.78rem;
+}
+
+.vb-project-details {
+  display: grid;
+  gap: 20px;
+  padding: 0 25px 24px;
+  border-top: 1px solid var(--vb-line);
+}
+
+.vb-project-detail-block {
+  padding-top: 18px;
+}
+
+.vb-project-detail-block h4 {
+  margin-bottom: 8px;
+  color: var(--vb-ink);
+  font-size: 0.82rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.vb-project-detail-block p,
+.vb-project-detail-block ul {
   color: var(--vb-muted);
   font-size: 0.9rem;
   line-height: 1.75;
+}
+
+.vb-project-detail-block ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.vb-project-detail-block li::marker {
+  color: var(--vb-accent);
+}
+
+.vb-project-impact li {
+  color: var(--vb-accent);
+  font-weight: 700;
 }
 
 .vb-project-tech,
@@ -756,25 +819,15 @@
   font-size: 0.74rem;
 }
 
-.vb-project-card > a,
-.vb-project-private {
+.vb-project-link {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   width: fit-content;
-  margin-top: auto;
-  padding-top: 23px;
+  margin-top: 20px;
   font-size: 0.82rem;
   font-weight: 700;
-}
-
-.vb-project-card > a {
   color: var(--vb-accent);
-}
-
-.vb-project-private {
-  color: var(--vb-faint);
-  font-weight: 550;
 }
 
 .vb-expertise-section .vb-section-heading {
@@ -784,24 +837,37 @@
 .vb-skills-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  overflow: hidden;
-  border: 1px solid var(--vb-line);
-  border-radius: 10px;
-  background: var(--vb-line);
+  gap: 14px;
 }
 
 .vb-skill-card {
-  min-height: 160px;
+  min-height: 170px;
   padding: 22px;
-  background: var(--vb-bg);
+  border: 1px solid var(--vb-line);
+  border-radius: 11px;
+  background:
+    linear-gradient(145deg, rgba(49, 89, 221, 0.08), transparent 58%),
+    var(--vb-surface);
+  transition: transform 180ms ease, border-color 180ms ease;
+}
+
+.vb-skill-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(49, 89, 221, 0.4);
 }
 
 .vb-skill-card-heading {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-bottom: 17px;
+}
+
+.vb-skill-card-heading i {
+  display: inline-flex;
+  color: var(--vb-accent);
+  font-size: 1.05rem;
+  font-style: normal;
 }
 
 .vb-skill-card-heading h3 {
@@ -815,8 +881,114 @@
   gap: 8px;
   padding: 9px 12px;
   color: var(--vb-ink);
-  font-size: 0.95rem;
+  font-size: 0.82rem;
   font-weight: 550;
+}
+
+.vb-vision-section {
+  background:
+    radial-gradient(ellipse at 85% 20%, rgba(49, 89, 221, 0.08), transparent 30rem),
+    var(--vb-bg);
+}
+
+.vb-goals-timeline {
+  display: grid;
+  max-width: 850px;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vb-goal {
+  position: relative;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 16px;
+  min-height: 108px;
+}
+
+.vb-goal:not(:last-child)::before {
+  position: absolute;
+  top: 15px;
+  bottom: -1px;
+  left: 8px;
+  width: 1px;
+  background: var(--vb-line);
+  content: "";
+}
+
+.vb-goal-marker {
+  z-index: 1;
+  width: 17px;
+  height: 17px;
+  margin-top: 3px;
+  border: 4px solid var(--vb-surface);
+  border-radius: 50%;
+  background: var(--vb-accent);
+  box-shadow: 0 0 0 1px rgba(49, 89, 221, 0.3);
+}
+
+.vb-goal-term {
+  color: var(--vb-accent);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.vb-goal p {
+  max-width: 760px;
+  margin-top: 7px;
+  color: var(--vb-ink);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.vb-hobbies-section {
+  background: #edf1f8;
+  border-block: 1px solid rgba(29, 48, 82, 0.07);
+}
+
+.vb-hobbies-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.vb-hobby-card {
+  min-height: 190px;
+  padding: 22px;
+  border: 1px solid var(--vb-line);
+  border-radius: 11px;
+  background: var(--vb-surface);
+  transition: transform 180ms ease, border-color 180ms ease;
+}
+
+.vb-hobby-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(49, 89, 221, 0.4);
+}
+
+.vb-hobby-icon {
+  display: inline-flex;
+  min-height: 35px;
+  align-items: center;
+  color: var(--vb-accent);
+  font-size: 1.6rem;
+}
+
+.vb-hobby-card h3 {
+  margin-top: 13px;
+  color: var(--vb-ink);
+  font-size: 1rem;
+}
+
+.vb-hobby-card p {
+  margin-top: 7px;
+  color: var(--vb-muted);
+  font-size: 0.85rem;
+  line-height: 1.65;
 }
 
 .vb-skill-tags i {
@@ -1304,13 +1476,12 @@
     font-size: clamp(3.2rem, 7vw, 5rem);
   }
 
-  .vb-project-grid {
+  .vb-skills-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .vb-project-card:last-child {
-    grid-column: 1 / -1;
-    min-height: 270px;
+  .vb-hobbies-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1484,14 +1655,17 @@
 
   .vb-project-grid,
   .vb-skills-grid,
-  .vb-certification-list {
+  .vb-certification-list,
+  .vb-hobbies-grid {
     grid-template-columns: 1fr;
   }
 
-  .vb-project-card,
-  .vb-project-card:last-child {
-    min-height: 300px;
-    grid-column: auto;
+  .vb-project-summary {
+    padding: 18px;
+  }
+
+  .vb-project-details {
+    padding: 0 18px 20px;
   }
 
   .vb-skill-card {

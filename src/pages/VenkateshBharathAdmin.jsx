@@ -24,6 +24,42 @@ const EMPTY_PROFILE = {
   certifications: [],
   skills: {},
   stats: [],
+  goals: [
+    {
+      term: "Short Term",
+      description: "Master AI architecture and integrate LLMs into enterprise products.",
+    },
+    {
+      term: "Mid Term",
+      description: "Grow into an engineering leadership or technical lead role.",
+    },
+    {
+      term: "Long Term",
+      description: "Build a technology product or business that can scale globally.",
+    },
+  ],
+  hobbies: [
+    {
+      icon: "🎬",
+      title: "Movies",
+      description: "Exploring different perspectives and narratives.",
+    },
+    {
+      icon: "🏋️",
+      title: "Fitness & Training",
+      description: "Watching fitness tutorials and staying active.",
+    },
+    {
+      icon: "🧠",
+      title: "Continuous Learning",
+      description: "Exploring new technology, frameworks, and AI concepts.",
+    },
+    {
+      icon: "💻",
+      title: "Building Websites",
+      description: "Experimenting with web technologies and side projects.",
+    },
+  ],
 };
 
 function normalizeProfile(profile) {
@@ -57,6 +93,8 @@ function normalizeProfile(profile) {
       ? profile.projects.map((item) => ({
           ...item,
           tech: Array.isArray(item.tech) ? item.tech : [],
+          solution: Array.isArray(item.solution) ? item.solution : [],
+          impact: Array.isArray(item.impact) ? item.impact : [],
         }))
       : [],
     education: Array.isArray(profile.education) ? profile.education : [],
@@ -65,6 +103,8 @@ function normalizeProfile(profile) {
       : [],
     skills,
     stats: Array.isArray(profile.stats) ? profile.stats : [],
+    goals: Array.isArray(profile.goals) ? profile.goals : EMPTY_PROFILE.goals,
+    hobbies: Array.isArray(profile.hobbies) ? profile.hobbies : EMPTY_PROFILE.hobbies,
   };
 }
 
@@ -346,8 +386,17 @@ export default function VenkateshBharathAdmin() {
 
             <Section
               title="Projects"
+              description="Use the case-study fields to explain the problem, architecture, and measurable impact."
               addLabel="Add project"
-              onAdd={() => addItem(setProfile, "projects", { name: "", summary: "", tech: [], link: null })}
+              onAdd={() => addItem(setProfile, "projects", {
+                name: "",
+                businessProblem: "",
+                solution: [],
+                impact: [],
+                summary: "",
+                tech: [],
+                link: null,
+              })}
             >
               {profile.projects.map((item, index) => (
                 <article className="vb-admin-item" key={`project-${index}`}>
@@ -359,8 +408,66 @@ export default function VenkateshBharathAdmin() {
                     <TextField label="Project name" value={item.name} onChange={(value) => updateArrayItem(setProfile, "projects", index, { name: value })} />
                     <TextField label="Project link (optional)" value={item.link || ""} onChange={(value) => updateArrayItem(setProfile, "projects", index, { link: value || null })} />
                   </div>
+                  <TextField
+                    label="Business problem"
+                    value={item.businessProblem}
+                    onChange={(value) => updateArrayItem(setProfile, "projects", index, { businessProblem: value })}
+                    multiline
+                  />
+                  <ListField
+                    label="Solution & architecture"
+                    values={item.solution}
+                    onChange={(value) => updateArrayItem(setProfile, "projects", index, { solution: value })}
+                  />
+                  <ListField
+                    label="Impact / metrics"
+                    values={item.impact}
+                    onChange={(value) => updateArrayItem(setProfile, "projects", index, { impact: value })}
+                    hint="Add one result per line. Include verified metrics only."
+                  />
                   <TextField label="Project summary" value={item.summary} onChange={(value) => updateArrayItem(setProfile, "projects", index, { summary: value })} multiline />
                   <ListField label="Technologies" values={item.tech} onChange={(value) => updateArrayItem(setProfile, "projects", index, { tech: value })} />
+                </article>
+              ))}
+            </Section>
+
+            <Section
+              title="Vision & future goals"
+              description="These goals are editable starter ideas from your brief."
+              addLabel="Add goal"
+              onAdd={() => addItem(setProfile, "goals", { term: "", description: "" })}
+            >
+              {profile.goals.map((item, index) => (
+                <article className="vb-admin-item" key={`goal-${index}`}>
+                  <div className="vb-admin-item-heading">
+                    <h3>Goal {index + 1}</h3>
+                    <button type="button" className="vb-admin-remove" onClick={() => removeItem(setProfile, "goals", index)}>Remove</button>
+                  </div>
+                  <div className="vb-admin-grid">
+                    <TextField label="Timeline" value={item.term} onChange={(value) => updateArrayItem(setProfile, "goals", index, { term: value })} />
+                    <TextField label="Goal" value={item.description} onChange={(value) => updateArrayItem(setProfile, "goals", index, { description: value })} multiline />
+                  </div>
+                </article>
+              ))}
+            </Section>
+
+            <Section
+              title="Life beyond code"
+              description="Editable interests and personal pursuits."
+              addLabel="Add interest"
+              onAdd={() => addItem(setProfile, "hobbies", { icon: "", title: "", description: "" })}
+            >
+              {profile.hobbies.map((item, index) => (
+                <article className="vb-admin-item" key={`hobby-${index}`}>
+                  <div className="vb-admin-item-heading">
+                    <h3>Interest {index + 1}</h3>
+                    <button type="button" className="vb-admin-remove" onClick={() => removeItem(setProfile, "hobbies", index)}>Remove</button>
+                  </div>
+                  <div className="vb-admin-grid">
+                    <TextField label="Icon / emoji (optional)" value={item.icon} onChange={(value) => updateArrayItem(setProfile, "hobbies", index, { icon: value })} />
+                    <TextField label="Title" value={item.title} onChange={(value) => updateArrayItem(setProfile, "hobbies", index, { title: value })} />
+                  </div>
+                  <TextField label="Description" value={item.description} onChange={(value) => updateArrayItem(setProfile, "hobbies", index, { description: value })} multiline />
                 </article>
               ))}
             </Section>
