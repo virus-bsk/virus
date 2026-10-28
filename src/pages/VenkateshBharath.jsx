@@ -134,6 +134,18 @@ function getPublicProfile(profile) {
   return publicProfile;
 }
 
+function renderEmphasis(text) {
+  return String(text || "")
+    .split(/(\*\*[^*]+\*\*)/g)
+    .map((part, index) =>
+      part.startsWith("**") && part.endsWith("**") ? (
+        <strong key={index}>{part.slice(2, -2)}</strong>
+      ) : (
+        part
+      ),
+    );
+}
+
 const EMPTY_PROFILE = {
   name: "",
   headline: "",
@@ -533,9 +545,6 @@ function VenkateshBharath() {
               <br />
               <span>paths into tech.</span>
             </h1>
-            <p className="vb-hero-summary">
-              {profile.summary}
-            </p>
             <div className="vb-hero-actions">
               <a className="vb-button vb-button-primary" href="#projects">
                 Explore my work <FaArrowRight aria-hidden="true" />
@@ -622,18 +631,16 @@ function VenkateshBharath() {
             <p className="vb-kicker">01 / A little about me</p>
             <h2>Engineering is better when knowledge is shared.</h2>
           </div>
-          <div className="vb-about-grid">
-            <p className="vb-about-lead">{profile.summary}</p>
-            <div className="vb-about-note">
-              <span className="vb-note-index">MY APPROACH</span>
-              <p>
-                Learn deeply. Build with care. Make complex ideas easier to
-                understand for the next person.
-              </p>
-              <a href="#experience">
-                The journey so far <FaArrowRight aria-hidden="true" />
-              </a>
-            </div>
+          <p className="vb-about-lead">{renderEmphasis(profile.summary)}</p>
+          <div className="vb-about-note">
+            <span className="vb-note-index">MY APPROACH</span>
+            <p>
+              Learn deeply. Build with care. Make complex ideas easier to
+              understand for the next person.
+            </p>
+            <a href="#experience">
+              The journey so far <FaArrowRight aria-hidden="true" />
+            </a>
           </div>
         </section>
 

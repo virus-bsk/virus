@@ -274,7 +274,13 @@ export default function VenkateshBharathAdmin() {
                 <TextField label="YouTube URL" value={profile.youtube} onChange={(value) => updateField("youtube", value)} />
                 <TextField label="Profile image URL" value={profile.avatar} onChange={(value) => updateField("avatar", value)} />
               </div>
-              <TextField label="About / summary" value={profile.summary} onChange={(value) => updateField("summary", value)} multiline />
+              <TextField
+                label="About / summary"
+                value={profile.summary}
+                onChange={(value) => updateField("summary", value)}
+                multiline
+                hint="Use **text** around words you want bold on the public portfolio. The asterisks are stored in Firestore but displayed as bold text."
+              />
             </Section>
 
             <Section
