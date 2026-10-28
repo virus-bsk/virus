@@ -13,7 +13,11 @@
   min-height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 83% 7%, rgba(75, 112, 225, 0.12), transparent 34rem),
+    radial-gradient(
+      ellipse at 83% 7%,
+      rgba(75, 112, 225, 0.12),
+      transparent 34rem
+    ),
     var(--vb-bg);
   color: var(--vb-ink);
   font-family: var(--vb-display);
@@ -267,7 +271,10 @@
   border: 1px solid var(--vb-line);
   border-radius: 50%;
   color: var(--vb-muted);
-  transition: color 160ms ease, border-color 160ms ease, transform 160ms ease;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
 }
 
 .vb-hero-socials a:hover,
@@ -319,7 +326,11 @@
   place-items: center;
   border-radius: 8px;
   background:
-    radial-gradient(ellipse at 50% 30%, rgba(94, 127, 232, 0.25), transparent 43%),
+    radial-gradient(
+      ellipse at 50% 30%,
+      rgba(94, 127, 232, 0.25),
+      transparent 43%
+    ),
     linear-gradient(140deg, #e1e9fa, #cbd8f1 75%);
 }
 
@@ -513,6 +524,64 @@
   line-height: 1.9;
 }
 
+.vb-founder-card {
+  display: grid;
+  grid-template-columns: minmax(96px, 128px) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  max-width: 900px;
+  margin-top: 30px;
+  padding: 18px 22px;
+  border: 1px solid rgba(86, 120, 237, 0.26);
+  border-radius: 16px;
+  background: linear-gradient(115deg, #101c3c, #1d3470);
+  color: #ffffff;
+  box-shadow: 0 16px 38px rgba(24, 43, 92, 0.16);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.vb-founder-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 44px rgba(24, 43, 92, 0.23);
+}
+
+.vb-founder-card > img {
+  width: 100%;
+  max-height: 78px;
+  object-fit: contain;
+}
+
+.vb-founder-copy {
+  display: grid;
+  gap: 3px;
+}
+
+.vb-founder-copy .vb-note-index {
+  color: #9fb5ff;
+}
+
+.vb-founder-card .vb-founder-copy strong {
+  color: #ffffff;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+}
+
+.vb-founder-copy small {
+  color: #c3d0f0;
+  font-size: 0.82rem;
+}
+
+.vb-founder-card .vb-founder-visit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 .vb-about-note {
   max-width: 720px;
   margin-top: 30px;
@@ -629,6 +698,45 @@
   font-style: normal;
 }
 
+.vb-company-logo-image {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.vb-company-logo-image[title="Zensar"] {
+  width: 80px;
+  height: 30px;
+  filter: brightness(0);
+}
+
+.vb-company-logo-image[title="ACL Digital"] {
+  width: 85px;
+  height: 30px;
+}
+
+.vb-american-express-wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #1768ac;
+  font-size: 0.57rem;
+  font-weight: 950;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+  white-space: nowrap;
+}
+
+.vb-company-logo-image[title="Virtusa"] {
+  width: 88px;
+}
+
+.vb-company-logo-image[title="PayPal"] {
+  filter: invert(19%) sepia(97%) saturate(2139%) hue-rotate(207deg)
+    brightness(86%) contrast(106%);
+}
+
 .vb-company-logo[data-company="American Express"] i {
   color: #1768ac;
 }
@@ -694,7 +802,9 @@
   background:
     linear-gradient(135deg, rgba(49, 89, 221, 0.045), transparent 55%),
     var(--vb-surface);
-  transition: border-color 180ms ease, box-shadow 180ms ease;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .vb-project-card:hover,
@@ -848,7 +958,9 @@
   background:
     linear-gradient(145deg, rgba(49, 89, 221, 0.08), transparent 58%),
     var(--vb-surface);
-  transition: transform 180ms ease, border-color 180ms ease;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease;
 }
 
 .vb-skill-card:hover {
@@ -887,7 +999,11 @@
 
 .vb-vision-section {
   background:
-    radial-gradient(ellipse at 85% 20%, rgba(49, 89, 221, 0.08), transparent 30rem),
+    radial-gradient(
+      ellipse at 85% 20%,
+      rgba(49, 89, 221, 0.08),
+      transparent 30rem
+    ),
     var(--vb-bg);
 }
 
@@ -962,7 +1078,9 @@
   border: 1px solid var(--vb-line);
   border-radius: 11px;
   background: var(--vb-surface);
-  transition: transform 180ms ease, border-color 180ms ease;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease;
 }
 
 .vb-hobby-card:hover {
@@ -1008,7 +1126,11 @@
   border: 1px solid var(--vb-line);
   border-radius: 12px;
   background:
-    radial-gradient(circle at 100% 0, rgba(49, 89, 221, 0.1), transparent 23rem),
+    radial-gradient(
+      circle at 100% 0,
+      rgba(49, 89, 221, 0.1),
+      transparent 23rem
+    ),
     var(--vb-surface);
 }
 
@@ -1098,7 +1220,8 @@
   color: #4285f4;
 }
 
-.vb-certification-logo[aria-label="Microsoft and LinkedIn logo"] svg:last-child {
+.vb-certification-logo[aria-label="Microsoft and LinkedIn logo"]
+  svg:last-child {
   color: #0a66c2;
 }
 
@@ -1129,7 +1252,11 @@
   padding-block: 100px;
   border-top: 1px solid var(--vb-line);
   background:
-    radial-gradient(ellipse at 80% 100%, rgba(91, 126, 234, 0.15), transparent 42rem),
+    radial-gradient(
+      ellipse at 80% 100%,
+      rgba(91, 126, 234, 0.15),
+      transparent 42rem
+    ),
     #e8eefb;
   scroll-margin-top: 80px;
 }
@@ -1626,6 +1753,20 @@
 
   .vb-about-lead {
     font-size: 1rem;
+  }
+
+  .vb-founder-card {
+    grid-template-columns: 78px minmax(0, 1fr);
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .vb-founder-card > img {
+    max-height: 58px;
+  }
+
+  .vb-founder-card .vb-founder-visit {
+    grid-column: 2;
   }
 
   .vb-experience-card {
