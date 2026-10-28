@@ -141,7 +141,7 @@ function renderEmphasis(text) {
       part.startsWith("**") && part.endsWith("**") ? (
         <strong key={index}>{part.slice(2, -2)}</strong>
       ) : (
-        part
+        part.replace(/\*\*/g, "")
       ),
     );
 }
@@ -490,8 +490,8 @@ function VenkateshBharath() {
         <a className="vb-brand" href="#home" aria-label={`${profile.name} home`}>
           <span className="vb-brand-mark">VB</span>
           <span className="vb-brand-name">
-            {profile.name}
-            <small>{profile.headline}</small>
+            {renderEmphasis(profile.name)}
+            <small>{renderEmphasis(profile.headline)}</small>
           </span>
         </a>
         <button
@@ -538,7 +538,9 @@ function VenkateshBharath() {
           <div className="vb-hero-copy">
             <p className="vb-eyebrow">
               <span className="vb-status-dot" />
-              {profile.location} <span aria-hidden="true">/</span> {profile.headline}
+              {renderEmphasis(profile.location)}{" "}
+              <span aria-hidden="true">/</span>{" "}
+              {renderEmphasis(profile.headline)}
             </p>
             <h1>
               Building better
@@ -594,8 +596,8 @@ function VenkateshBharath() {
                 </span>
               </div>
               <div className="vb-portrait-caption">
-                <span>{profile.name}</span>
-                <small>{profile.headline}</small>
+                <span>{renderEmphasis(profile.name)}</span>
+                <small>{renderEmphasis(profile.headline)}</small>
               </div>
               <span className="vb-portrait-index">VB—PORTFOLIO</span>
             </div>
@@ -616,13 +618,13 @@ function VenkateshBharath() {
           {profile.stats.map((stat, index) => (
             <div className="vb-metric" key={stat.label}>
               <span className="vb-metric-index">0{index + 1}</span>
-              <strong>{stat.value}</strong>
-              <span>{stat.label}</span>
+              <strong>{renderEmphasis(stat.value)}</strong>
+              <span>{renderEmphasis(stat.label)}</span>
             </div>
           ))}
           <div className="vb-metric vb-metric-note">
-            <strong>Learn in public.</strong>
-            <span>Build things that help people grow.</span>
+            <strong>{renderEmphasis("Learn in public.")}</strong>
+            <span>{renderEmphasis("Build things that help people grow.")}</span>
           </div>
         </section>
 
@@ -663,7 +665,7 @@ function VenkateshBharath() {
                   <div className="vb-experience-main">
                     <div className="vb-experience-heading">
                       <div>
-                        <h3>{experience.role}</h3>
+                        <h3>{renderEmphasis(experience.role)}</h3>
                         <div
                           className="vb-experience-organizations"
                           aria-label={experience.company
@@ -686,19 +688,19 @@ function VenkateshBharath() {
                                     organization.name.slice(0, 3).toUpperCase()}
                                 </b>
                               )}
-                              {organization.name}
+                              {renderEmphasis(organization.name)}
                             </span>
                           ))}
                         </div>
                       </div>
                       <span className="vb-experience-period">
-                        {experience.period}
-                        <small>{experience.location}</small>
+                        {renderEmphasis(experience.period)}
+                        <small>{renderEmphasis(experience.location)}</small>
                       </span>
                     </div>
                     <ul>
                       {experience.points.map((point) => (
-                        <li key={point}>{point}</li>
+                        <li key={point}>{renderEmphasis(point)}</li>
                       ))}
                     </ul>
                   </div>
@@ -725,11 +727,11 @@ function VenkateshBharath() {
                     ↗
                   </span>
                 </div>
-                <h3>{project.name}</h3>
-                <p>{project.summary}</p>
+                <h3>{renderEmphasis(project.name)}</h3>
+                <p>{renderEmphasis(project.summary)}</p>
                 <div className="vb-project-tech">
                   {project.tech.map((technology) => (
-                    <span key={technology}>{technology}</span>
+                    <span key={technology}>{renderEmphasis(technology)}</span>
                   ))}
                 </div>
                 {project.link ? (
@@ -762,7 +764,7 @@ function VenkateshBharath() {
                 <article className="vb-skill-card" key={category}>
                   <div className="vb-skill-card-heading">
                     <span>0{index + 1}</span>
-                    <h3>{category}</h3>
+                    <h3>{renderEmphasis(category)}</h3>
                   </div>
                   <div className="vb-skill-tags">
                     {skills.map((skill) => (
@@ -770,7 +772,7 @@ function VenkateshBharath() {
                         <i aria-hidden="true">
                           {SKILL_ICONS[skill] || <FaCode />}
                         </i>
-                        {skill}
+                        {renderEmphasis(skill)}
                       </span>
                     ))}
                   </div>
@@ -788,10 +790,10 @@ function VenkateshBharath() {
             </div>
             {profile.education.map((education) => (
               <article className="vb-education-card" key={education.institution}>
-                <span>{education.period}</span>
-                <h3>{education.degree}</h3>
-                <p>{education.institution}</p>
-                {education.details && <small>{education.details}</small>}
+                <span>{renderEmphasis(education.period)}</span>
+                <h3>{renderEmphasis(education.degree)}</h3>
+                <p>{renderEmphasis(education.institution)}</p>
+                {education.details && <small>{renderEmphasis(education.details)}</small>}
               </article>
             ))}
           </div>
@@ -821,8 +823,8 @@ function VenkateshBharath() {
                     )}
                   </span>
                   <div className="vb-certification-copy">
-                    <h3>{certification.name}</h3>
-                    <p>{certification.issuer}</p>
+                    <h3>{renderEmphasis(certification.name)}</h3>
+                    <p>{renderEmphasis(certification.issuer)}</p>
                   </div>
                 </article>
               ))}
@@ -848,7 +850,7 @@ function VenkateshBharath() {
       <footer className="vb-footer vb-wrap">
         <a className="vb-footer-brand" href="#home">
           <span className="vb-brand-mark">VB</span>
-          <span>{profile.name}</span>
+          <span>{renderEmphasis(profile.name)}</span>
         </a>
         <span>© {new Date().getFullYear()} · Built with intention.</span>
         <div className="vb-footer-socials">
