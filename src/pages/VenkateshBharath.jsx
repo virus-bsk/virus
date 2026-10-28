@@ -118,6 +118,8 @@ const BRAND_LOGOS = {
   ),
 };
 
+const DEFAULT_AVATAR = `${import.meta.env.BASE_URL}portfolio.png`;
+
 function getSocialLinks(profile) {
   return [
     { label: "LinkedIn", icon: <FaLinkedin />, href: profile.linkedin },
@@ -584,7 +586,7 @@ function VenkateshBharath() {
               </div>
               <div className="vb-portrait-image-wrap">
                 <img
-                  src={profile.avatar}
+                  src={profile.avatar || DEFAULT_AVATAR}
                   alt={profile.name}
                   className="vb-portrait"
                   onError={(event) => {
