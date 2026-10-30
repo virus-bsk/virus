@@ -529,9 +529,12 @@
   grid-template-columns: minmax(96px, 128px) minmax(0, 1fr) auto;
   align-items: center;
   gap: 20px;
+  width: 100%;
   max-width: 900px;
+  min-width: 0;
   margin-top: 30px;
   padding: 18px 22px;
+  box-sizing: border-box;
   border: 1px solid rgba(86, 120, 237, 0.26);
   border-radius: 16px;
   background: linear-gradient(115deg, #101c3c, #1d3470);
@@ -563,9 +566,10 @@
 }
 
 .vb-founder-card .vb-founder-copy strong {
-  color: #ffffff;
-  font-size: 1.15rem;
+  color: #83aaff;
+  font-size: 1.22rem;
   letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .vb-founder-copy small {
@@ -592,7 +596,7 @@
 
 .vb-note-index,
 .vb-project-topline,
-.vb-skill-card-heading > span {
+.vb-skill-index {
   color: var(--vb-faint);
   font-size: 0.74rem;
   font-weight: 750;
@@ -790,32 +794,113 @@
   font-size: 0.8rem;
 }
 
+.vb-projects-heading h2 {
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+}
+
 .vb-project-grid {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.vb-project-grid::before {
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 50%;
+  z-index: 1;
+  width: 3px;
+  background: linear-gradient(
+    to bottom,
+    rgba(49, 89, 221, 0.35),
+    #3159dd 4%,
+    #3159dd 96%,
+    rgba(49, 89, 221, 0.35)
+  );
+  box-shadow: 0 0 10px rgba(49, 89, 221, 0.45);
+  content: "";
+  transform: translateX(-50%);
+}
+
+.vb-project-entry {
+  position: relative;
   display: grid;
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr);
+  align-items: start;
+}
+
+.vb-project-entry::after {
+  position: absolute;
+  top: 32px;
+  width: 22px;
+  height: 1px;
+  background: var(--vb-accent);
+  content: "";
+  opacity: 0.65;
+}
+
+.vb-project-entry-left::after {
+  left: calc(50% - 22px);
+}
+
+.vb-project-entry-right::after {
+  left: 50%;
+}
+
+.vb-project-entry-left .vb-project-card {
+  grid-column: 1;
+}
+
+.vb-project-entry-right .vb-project-card {
+  grid-column: 3;
+}
+
+.vb-project-marker {
+  z-index: 1;
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+  width: 13px;
+  height: 13px;
+  margin-top: 26px;
+  border: 3px solid var(--vb-surface);
+  border-radius: 50%;
+  background: var(--vb-accent);
+  box-shadow: 0 0 0 4px rgba(49, 89, 221, 0.12);
 }
 
 .vb-project-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  grid-row: 1;
   overflow: hidden;
   border: 1px solid var(--vb-line);
-  border-radius: 12px;
+  border-radius: 16px;
   background:
-    linear-gradient(135deg, rgba(49, 89, 221, 0.045), transparent 55%),
+    radial-gradient(circle at 100% 0, rgba(81, 117, 232, 0.1), transparent 44%),
     var(--vb-surface);
+  box-shadow: 0 9px 24px rgba(31, 51, 91, 0.055);
   transition:
+    transform 180ms ease,
     border-color 180ms ease,
     box-shadow 180ms ease;
 }
 
 .vb-project-card:hover,
 .vb-project-card[open] {
+  transform: translateY(-2px);
   border-color: rgba(49, 89, 221, 0.38);
-  box-shadow: 0 12px 30px rgba(40, 62, 108, 0.08);
+  box-shadow: 0 16px 34px rgba(31, 51, 91, 0.12);
 }
 
 .vb-project-summary {
   display: block;
-  padding: 22px 25px;
+  flex: 1;
+  padding: 22px 24px;
   cursor: pointer;
   list-style: none;
 }
@@ -833,6 +918,46 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
+}
+
+.vb-project-period {
+  color: var(--vb-accent);
+  font-size: 0.74rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.vb-project-topline-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.vb-project-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--vb-muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.vb-project-brand .vb-company-logo-image {
+  width: 30px;
+  height: 24px;
+}
+
+.vb-project-brand .vb-company-logo-image[title="PayPal"] {
+  width: 25px;
+}
+
+.vb-project-brand .vb-american-express-wordmark {
+  font-size: 0.53rem;
+}
+
+.vb-project-brand > span:last-child {
+  white-space: nowrap;
 }
 
 .vb-project-arrow {
@@ -848,7 +973,7 @@
 
 .vb-project-title {
   display: block;
-  margin-top: 15px;
+  margin-top: 18px;
   color: var(--vb-ink);
   font-size: clamp(1.2rem, 2vw, 1.5rem);
   font-weight: 620;
@@ -856,11 +981,27 @@
   line-height: 1.25;
 }
 
+.vb-project-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 11px;
+  color: var(--vb-muted);
+  font-size: 0.85rem;
+  line-height: 1.65;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.vb-project-card[open] .vb-project-preview {
+  display: none;
+}
+
 .vb-project-expand-hint {
   display: inline-block;
-  margin-top: 9px;
-  color: var(--vb-faint);
-  font-size: 0.78rem;
+  margin-top: 15px;
+  color: var(--vb-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .vb-project-details {
@@ -946,55 +1087,117 @@
 
 .vb-skills-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  align-items: stretch;
   gap: 14px;
 }
 
 .vb-skill-card {
-  min-height: 170px;
-  padding: 22px;
-  border: 1px solid var(--vb-line);
-  border-radius: 11px;
+  position: relative;
+  overflow: hidden;
+  min-height: 145px;
+  padding: 17px;
+  border: 1px solid rgba(48, 69, 111, 0.1);
+  border-radius: 16px;
   background:
-    linear-gradient(145deg, rgba(49, 89, 221, 0.08), transparent 58%),
-    var(--vb-surface);
+    radial-gradient(circle at 100% 0, rgba(81, 117, 232, 0.12), transparent 45%),
+    linear-gradient(145deg, #ffffff, #f8faff);
+  box-shadow: 0 9px 24px rgba(31, 51, 91, 0.055);
   transition:
     transform 180ms ease,
-    border-color 180ms ease;
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.vb-skill-card::before {
+  position: absolute;
+  top: 0;
+  right: 22px;
+  left: 22px;
+  height: 3px;
+  border-radius: 0 0 5px 5px;
+  background: linear-gradient(90deg, #3159dd, #6ea8ff);
+  content: "";
 }
 
 .vb-skill-card:hover {
   transform: translateY(-3px);
   border-color: rgba(49, 89, 221, 0.4);
+  box-shadow: 0 16px 34px rgba(31, 51, 91, 0.12);
 }
 
 .vb-skill-card-heading {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 17px;
+  gap: 8px;
+  margin-bottom: 13px;
+}
+
+.vb-skill-index {
+  color: #8391ac;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
 }
 
 .vb-skill-card-heading i {
   display: inline-flex;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(49, 89, 221, 0.12);
+  border-radius: 11px;
+  background: #edf2ff;
   color: var(--vb-accent);
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-style: normal;
 }
 
 .vb-skill-card-heading h3 {
+  min-width: 0;
+  flex: 1;
   color: var(--vb-ink);
-  font-size: 1.05rem;
+  font-size: 0.88rem;
   font-weight: 650;
-  text-transform: capitalize;
+  line-height: 1.35;
+}
+
+.vb-skill-count {
+  flex: 0 0 auto;
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: #eef2f8;
+  color: #62708a;
+  font-size: 0.6rem;
+  font-weight: 650;
+}
+
+.vb-skill-tags {
+  gap: 6px;
 }
 
 .vb-skill-tags span {
-  gap: 8px;
-  padding: 9px 12px;
-  color: var(--vb-ink);
-  font-size: 0.82rem;
-  font-weight: 550;
+  gap: 5px;
+  padding: 6px 8px;
+  border-color: rgba(49, 89, 221, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #35435e;
+  font-size: 0.7rem;
+  font-weight: 600;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.vb-skill-tags span:hover {
+  transform: translateY(-1px);
+  border-color: rgba(49, 89, 221, 0.3);
+  background: #f0f4ff;
 }
 
 .vb-vision-section {
@@ -1113,7 +1316,7 @@
   display: inline-flex;
   align-items: center;
   color: var(--vb-accent);
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-style: normal;
 }
 
@@ -1767,6 +1970,10 @@
 
   .vb-founder-card .vb-founder-visit {
     grid-column: 2;
+    justify-self: start;
+    max-width: 100%;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
   }
 
   .vb-experience-card {
@@ -1794,11 +2001,40 @@
     gap: 10px;
   }
 
-  .vb-project-grid,
   .vb-skills-grid,
   .vb-certification-list,
   .vb-hobbies-grid {
     grid-template-columns: 1fr;
+  }
+
+  .vb-project-grid {
+    gap: 16px;
+  }
+
+  .vb-project-grid::before {
+    top: 12px;
+    bottom: 12px;
+    left: 7px;
+    transform: none;
+  }
+
+  .vb-project-entry {
+    grid-template-columns: 16px minmax(0, 1fr);
+  }
+
+  .vb-project-entry::after {
+    left: 8px;
+    width: 8px;
+  }
+
+  .vb-project-entry-left .vb-project-card,
+  .vb-project-entry-right .vb-project-card {
+    grid-column: 2;
+  }
+
+  .vb-project-marker {
+    grid-column: 1;
+    margin-top: 24px;
   }
 
   .vb-project-summary {
@@ -1842,6 +2078,35 @@
 
   .vb-chat-panel {
     height: min(530px, calc(100svh - 100px));
+  }
+}
+
+@media (max-width: 420px) {
+  .vb-founder-card {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 12px;
+    padding: 18px 16px;
+    text-align: center;
+  }
+
+  .vb-founder-card > img {
+    width: min(190px, 72%);
+    max-height: 64px;
+  }
+
+  .vb-founder-copy {
+    justify-items: center;
+  }
+
+  .vb-founder-card .vb-founder-visit {
+    grid-column: 1;
+    justify-self: center;
+    margin-top: 2px;
+    padding: 9px 13px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
   }
 }
 

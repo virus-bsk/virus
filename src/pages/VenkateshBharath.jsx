@@ -19,6 +19,7 @@ import {
   FaMicrosoft,
   FaLinkedinIn,
   FaCloud,
+  FaBrain,
 } from "react-icons/fa";
 import {
   SiAmericanexpress,
@@ -27,6 +28,7 @@ import {
   SiHibernate,
   SiJavascript,
   SiReact,
+  SiFirebase,
   SiApachekafka,
   SiDocker,
   SiLinux,
@@ -78,6 +80,7 @@ const SKILL_ICONS = {
   "Docker (Basics)": <SiDocker />,
   "Kubernetes (Basics)": <SiKubernetes />,
   "Harness (Basics)": <FaCode />,
+  "GitHub Actions": <FaGithub />,
   JUnit: <SiJunit5 />,
   Mockito: <SiJunit5 />,
   Postman: <SiPostman />,
@@ -86,9 +89,12 @@ const SKILL_ICONS = {
   TDD: <FaCode />,
   "Google Cloud Platform": <SiGooglecloud />,
   "AWS EC2": <FaCloud />,
+  AWS: <FaCloud />,
   "AWS RDS": <FaCloud />,
   "AWS S3": <FaCloud />,
   "AWS ELB": <FaCloud />,
+  "Firebase Authentication": <SiFirebase />,
+  "Firebase Storage": <SiFirebase />,
   BigQuery: <SiGooglebigquery />,
   "Apache Kafka": <SiApachekafka />,
   Docker: <SiDocker />,
@@ -103,7 +109,201 @@ const SKILL_ICONS = {
   OOP: <FaCode />,
   MVC: <FaCode />,
   "Agile/Scrum": <FaCode />,
+  "Claude AI": <FaBrain />,
+  "GitHub Copilot": <FaGithub />,
+  "Prompt Engineering": <FaCode />,
+  "Agentic AI": <FaRobot />,
 };
+
+const FEATURED_SKILLS = {
+  cloud: ["AWS", "Firebase Authentication", "Firebase Storage"],
+  devops: ["GitHub Actions"],
+  "AI & Developer Tools": [
+    "Claude AI",
+    "GitHub Copilot",
+    "Prompt Engineering",
+    "Agentic AI",
+  ],
+};
+
+const FEATURED_PROJECTS = [
+  {
+    name: "MARS — American Express",
+    businessProblem:
+      "Credit card servicing requires accurate interest calculations, billing, payment due dates, and related card account management.",
+    summary:
+      "Working on MARS, an American Express project focused on credit card management, including interest calculations, billing, and payment due dates.",
+    solution: [],
+    impact: [],
+    tech: [],
+  },
+];
+
+const FEATURED_TEACHING_HOBBY = {
+  title: "Teaching Technical Skills",
+  description:
+    "Sharing practical programming and software engineering lessons through YouTube tutorials.",
+};
+
+const SKILL_CATEGORY_ORDER = [
+  "databases",
+  "languages",
+  "programming",
+  "frameworks",
+  "frontend",
+  "ui",
+  "messaging",
+  "message queue",
+  "devops",
+  "tools",
+  "cloud",
+  "ai & developer tools",
+];
+
+const SKILL_CATEGORY_LABELS = {
+  databases: "Database",
+  languages: "Programming",
+  programming: "Programming",
+  frameworks: "Frameworks",
+  frontend: "UI",
+  ui: "UI",
+  messaging: "Message Queue",
+  "message queue": "Message Queue",
+  devops: "Tools",
+  tools: "Tools",
+  cloud: "Cloud",
+  concepts: "Core Concepts",
+  testing: "Testing",
+};
+
+function getDisplaySkills(category, skills) {
+  const isConcepts = category.trim().toLowerCase() === "concepts";
+  const hasHighLevelDesign = skills.some((skill) =>
+    /high-level design|hld/i.test(skill),
+  );
+  const hasLowLevelDesign = skills.some((skill) =>
+    /low-level design|lld/i.test(skill),
+  );
+  let addedSystemDesign = false;
+
+  return skills.flatMap((skill) => {
+    if (
+      isConcepts &&
+      (hasHighLevelDesign || hasLowLevelDesign) &&
+      /high-level design|low-level design|\b[hl]ld\b/i.test(skill)
+    ) {
+      if (addedSystemDesign) return [];
+      addedSystemDesign = true;
+      return ["System Design (HLD & LLD)"];
+    }
+
+    if (/data structures\s*&\s*algorithms/i.test(skill)) return ["DSA"];
+    if (/^gcp\s*\(/i.test(skill)) return ["GCP"];
+    if (skill === "Firebase Authentication") return ["Firebase Auth"];
+    if (/^Apache (Cassandra|Kafka)$/i.test(skill)) {
+      return [skill.replace(/^Apache /i, "")];
+    }
+
+    return [skill];
+  });
+}
+
+function getPublicHobbies(hobbies) {
+  const normalizedHobbies = [];
+  let addedTeaching = false;
+
+  hobbies.forEach((hobby) => {
+    if (/fitness\s*&\s*training|teaching technical skills/i.test(hobby.title)) {
+      if (!addedTeaching) {
+        normalizedHobbies.push(FEATURED_TEACHING_HOBBY);
+        addedTeaching = true;
+      }
+      return;
+    }
+
+    normalizedHobbies.push(hobby);
+  });
+
+  if (!addedTeaching) normalizedHobbies.push(FEATURED_TEACHING_HOBBY);
+  return normalizedHobbies;
+}
+
+function getOrderedSkillCategories(skills) {
+  return Object.entries(skills).sort(([left], [right]) => {
+    const leftCategory = left.trim().toLowerCase();
+    const rightCategory = right.trim().toLowerCase();
+    const leftOrder = SKILL_CATEGORY_ORDER.indexOf(leftCategory);
+    const rightOrder = SKILL_CATEGORY_ORDER.indexOf(rightCategory);
+    return (
+      (leftOrder === -1 ? SKILL_CATEGORY_ORDER.length : leftOrder) -
+        (rightOrder === -1 ? SKILL_CATEGORY_ORDER.length : rightOrder)
+    );
+  });
+}
+
+function mergePortfolioSkills(skills = {}) {
+  return Object.fromEntries(
+    Object.entries({ ...skills, ...FEATURED_SKILLS }).map(([category, items]) => {
+      const existingSkills = Array.isArray(skills[category])
+        ? skills[category]
+        : [];
+      const requiredSkills = FEATURED_SKILLS[category] || [];
+      return [
+        category,
+        [...new Set([...existingSkills, ...items, ...requiredSkills])],
+      ];
+    }),
+  );
+}
+
+function mergePortfolioProjects(projects = []) {
+  const projectNames = new Set(
+    projects.map((project) => project.name?.trim().toLowerCase()),
+  );
+  return [
+    ...projects,
+    ...FEATURED_PROJECTS.filter(
+      (project) => !projectNames.has(project.name.toLowerCase()),
+    ),
+  ];
+}
+
+function getOrderedPortfolioProjects(projects) {
+  const priority = (project) => {
+    const name = project.name || "";
+    if (/\bmars\b/i.test(name)) return 0;
+    if (/\bpaypal\b/i.test(name) && /cdas/i.test(name)) return 1;
+    if (/\bpaypal\b/i.test(name) && /\bpayments?\b/i.test(name)) return 2;
+    if (/\b(astrazeneca|az healthcare)\b/i.test(name)) return 3;
+    if (/\bpnc\b/i.test(name)) return 4;
+    return 5;
+  };
+
+  return projects
+    .map((project, index) => ({ project, index }))
+    .sort(
+      (left, right) =>
+        priority(left.project) - priority(right.project) ||
+        left.index - right.index,
+    )
+    .map(({ project }) => project);
+}
+
+function getProjectPeriod(project) {
+  const name = project.name || "";
+  if (/\bmars\b/i.test(name)) return "May 2026 – Present";
+  if (/\bpaypal\b/i.test(name) && /cdas/i.test(name)) {
+    return "January 2025 – April 2026";
+  }
+  if (/\bpaypal\b/i.test(name) && /\bpayments?\b/i.test(name)) {
+    return "September 2024 – December 2024";
+  }
+  if (/\b(astrazeneca|az healthcare)\b/i.test(name)) {
+    return "February 2024 – August 2024";
+  }
+  if (/\bpnc\b/i.test(name)) return "January 2022 – December 2023";
+  return project.period || "";
+}
 
 const BRAND_LOGOS = {
   zensar: <SiZensar />,
@@ -150,18 +350,30 @@ const COMPANY_LOGO_ASSETS = [
 const BSK_CODING_URL = "https://bskcoding.com/";
 
 function getCompanyLogoAssets(organization) {
-  const name = organization.name || "";
-  const matchingAssets = COMPANY_LOGO_ASSETS.filter((asset) =>
-    asset.pattern.test(name),
+  const name = (organization.name || "").split(/\s*\(client:/i)[0].trim();
+  const matchingAsset = COMPANY_LOGO_ASSETS.find(
+    (asset) =>
+      !["American Express", "PayPal"].includes(asset.name) &&
+      asset.pattern.test(name),
   );
-  if (matchingAssets.length) return matchingAssets;
+  if (matchingAsset) return [matchingAsset];
 
   const logoAsset = COMPANY_LOGO_ASSETS.find(
     (asset) =>
+      !["American Express", "PayPal"].includes(asset.name) &&
       asset.name.replace(/[^a-z]/gi, "").toLowerCase() ===
       organization.logo?.replace(/[^a-z]/gi, "").toLowerCase(),
   );
   return logoAsset ? [logoAsset] : [];
+}
+
+function getProjectBrand(project) {
+  const name = project.name || "";
+  return COMPANY_LOGO_ASSETS.find(
+    (asset) =>
+      ["American Express", "PayPal"].includes(asset.name) &&
+      asset.pattern.test(name),
+  );
 }
 
 function renderOrganizationLogo(organization) {
@@ -219,25 +431,30 @@ function getPublicProfile(profile) {
           points: Array.isArray(item.points) ? item.points : [],
         }))
       : [],
-    projects: Array.isArray(profile.projects)
-      ? profile.projects.map((item) => ({
-          ...item,
-          tech: Array.isArray(item.tech) ? item.tech : [],
-          solution: Array.isArray(item.solution) ? item.solution : [],
-          impact: Array.isArray(item.impact) ? item.impact : [],
-        }))
-      : [],
+    projects: mergePortfolioProjects(
+      Array.isArray(profile.projects)
+        ? profile.projects.map((item) => ({
+            ...item,
+            tech: Array.isArray(item.tech) ? item.tech : [],
+            solution: Array.isArray(item.solution) ? item.solution : [],
+            impact: Array.isArray(item.impact) ? item.impact : [],
+          }))
+        : [],
+    ),
     education: Array.isArray(profile.education) ? profile.education : [],
     certifications: Array.isArray(profile.certifications)
       ? profile.certifications
       : [],
-    skills:
+    skills: mergePortfolioSkills(
       profile.skills && typeof profile.skills === "object"
         ? profile.skills
         : {},
+    ),
     stats: Array.isArray(profile.stats) ? profile.stats : [],
     goals: Array.isArray(profile.goals) ? profile.goals : [],
-    hobbies: Array.isArray(profile.hobbies) ? profile.hobbies : [],
+    hobbies: getPublicHobbies(
+      Array.isArray(profile.hobbies) ? profile.hobbies : [],
+    ),
   };
   delete publicProfile.phone;
   return publicProfile;
@@ -704,7 +921,7 @@ function VenkateshBharath() {
         if (active && loadedSkills && typeof loadedSkills === "object") {
           setProfile((current) => ({
             ...current,
-            skills: loadedSkills,
+            skills: mergePortfolioSkills(loadedSkills),
           }));
         }
       })
@@ -945,7 +1162,7 @@ function VenkateshBharath() {
           >
             <img src={`${import.meta.env.BASE_URL}bskcodingimg.png`} alt="" />
             <span className="vb-founder-copy">
-              <span className="vb-note-index">FOUNDER</span>
+              <span className="vb-note-index">FOUNDER OF</span>
               <strong>BSK Coding</strong>
               <small>Code. Learn. Grow.</small>
             </span>
@@ -1026,22 +1243,46 @@ function VenkateshBharath() {
               <p className="vb-kicker">03 / Selected work</p>
               <h2>Systems built for scale and reliability.</h2>
             </div>
-            <span className="vb-heading-aside">A selection of my work ↘</span>
+            <span className="vb-heading-aside">
+              A selection of projects across financial services and healthcare
+            </span>
           </div>
           <div className="vb-project-grid">
-            {profile.projects.map((project, index) => (
-              <details className="vb-project-card" key={`${project.name}-${index}`}>
+            {getOrderedPortfolioProjects(profile.projects).map((project, index) => (
+              <div
+                className={`vb-project-entry ${index % 2 === 0 ? "vb-project-entry-left" : "vb-project-entry-right"}`}
+                key={`${project.name}-${index}`}
+              >
+                <span className="vb-project-marker" aria-hidden="true" />
+                <details className="vb-project-card">
                 <summary className="vb-project-summary">
                   <span className="vb-project-topline">
-                    <span>PROJECT / {String(index + 1).padStart(2, "0")}</span>
-                    <span className="vb-project-arrow" aria-hidden="true">
-                      <FaArrowRight />
+                    <span className="vb-project-period">
+                      {renderEmphasis(getProjectPeriod(project))}
+                    </span>
+                    <span className="vb-project-topline-actions">
+                      {getProjectBrand(project) && (
+                        <span className="vb-project-brand" aria-label={`Client: ${getProjectBrand(project).name}`}>
+                          {renderOrganizationLogo({
+                            name: getProjectBrand(project).name,
+                          })}
+                          <span>{getProjectBrand(project).name}</span>
+                        </span>
+                      )}
+                      <span className="vb-project-arrow" aria-hidden="true">
+                        <FaArrowRight />
+                      </span>
                     </span>
                   </span>
                   <span className="vb-project-title">
                     {renderEmphasis(project.name)}
                   </span>
-                  <span className="vb-project-expand-hint">View case study</span>
+                  {(project.summary || project.businessProblem) && (
+                    <span className="vb-project-preview">
+                      {renderEmphasis(project.summary || project.businessProblem)}
+                    </span>
+                  )}
+                  <span className="vb-project-expand-hint">View project details</span>
                 </summary>
                 <div className="vb-project-details">
                   {project.businessProblem && (
@@ -1104,6 +1345,7 @@ function VenkateshBharath() {
                   )}
                 </div>
               </details>
+              </div>
             ))}
           </div>
         </section>
@@ -1115,25 +1357,41 @@ function VenkateshBharath() {
               <h2>Tools and concepts I use to build reliable software.</h2>
             </div>
             <div className="vb-skills-grid">
-              {Object.entries(profile.skills).map(([category, skills], index) => (
-                <article className="vb-skill-card" key={category}>
-                  <div className="vb-skill-card-heading">
-                    <span>0{index + 1}</span>
-                    <i aria-hidden="true"><FaCode /></i>
-                    <h3>{renderEmphasis(category)}</h3>
-                  </div>
-                  <div className="vb-skill-tags">
-                    {skills.map((skill) => (
-                      <span key={skill}>
+              {getOrderedSkillCategories(profile.skills).map(
+                ([category, skills], index) => {
+                  const displaySkills = getDisplaySkills(category, skills);
+                  return (
+                    <article className="vb-skill-card" key={category}>
+                      <div className="vb-skill-card-heading">
+                        <span className="vb-skill-index">0{index + 1}</span>
                         <i aria-hidden="true">
-                          {SKILL_ICONS[skill] || <FaCode />}
+                          <FaCode />
                         </i>
-                        {renderEmphasis(skill)}
-                      </span>
-                    ))}
-                  </div>
-                </article>
-              ))}
+                        <h3>
+                          {renderEmphasis(
+                            SKILL_CATEGORY_LABELS[category.trim().toLowerCase()] ||
+                              category,
+                          )}
+                        </h3>
+                        <span className="vb-skill-count">
+                          {displaySkills.length}{" "}
+                          {displaySkills.length === 1 ? "skill" : "skills"}
+                        </span>
+                      </div>
+                      <div className="vb-skill-tags">
+                        {displaySkills.map((skill) => (
+                          <span key={skill}>
+                            <i aria-hidden="true">
+                              {SKILL_ICONS[skill] || <FaCode />}
+                            </i>
+                            {renderEmphasis(skill)}
+                          </span>
+                        ))}
+                      </div>
+                    </article>
+                  );
+                },
+              )}
             </div>
           </div>
         </section>
@@ -1223,7 +1481,11 @@ function VenkateshBharath() {
                 {profile.hobbies.map((hobby, index) => (
                   <article className="vb-hobby-card" key={`${hobby.title}-${index}`}>
                     <span className="vb-hobby-icon" aria-hidden="true">
-                      {hobby.icon || <FaCode />}
+                      {/teaching technical skills/i.test(hobby.title) ? (
+                        <FaYoutube />
+                      ) : (
+                        hobby.icon || <FaCode />
+                      )}
                     </span>
                     <h3>{renderEmphasis(hobby.title)}</h3>
                     <p>{renderEmphasis(hobby.description)}</p>
