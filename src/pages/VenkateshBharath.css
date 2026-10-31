@@ -175,25 +175,83 @@
 }
 
 .vb-hero h1 {
+  max-width: 670px;
   margin: 0;
   color: var(--vb-ink);
-  font-size: clamp(3.35rem, 6.4vw, 6.3rem);
+  font-size: clamp(2.7rem, 4.7vw, 4rem);
   font-weight: 620;
-  letter-spacing: -0.045em;
-  line-height: 0.98;
+  letter-spacing: -0.05em;
+  line-height: 1.06;
 }
 
-.vb-hero h1 span,
+.vb-hero h1 span {
+  color: var(--vb-accent);
+}
+
 .vb-contact-inner h2 span {
   color: var(--vb-accent);
 }
 
-.vb-hero-summary {
+.vb-career-vision {
   max-width: 555px;
-  margin-top: 26px;
+  margin-top: 18px;
+}
+
+.vb-career-vision-label {
+  margin: 0 0 2px;
   color: var(--vb-muted);
-  font-size: clamp(1rem, 1.45vw, 1.16rem);
-  line-height: 1.8;
+  font-size: 0.79rem;
+  font-weight: 550;
+}
+
+.vb-career-role {
+  min-height: 1.5em;
+  margin: 0;
+  color: var(--vb-accent);
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.45;
+  white-space: normal;
+}
+
+.vb-career-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 3px;
+  background: var(--vb-accent);
+  vertical-align: -0.12em;
+  animation: vb-career-caret-blink 850ms steps(2, start) infinite;
+}
+
+@keyframes vb-career-caret-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.vb-career-ai-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 5px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--vb-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.vb-career-ai-link svg:last-child {
+  transition: transform 160ms ease;
+}
+
+.vb-career-ai-link:hover svg:last-child {
+  transform: translateX(3px);
 }
 
 .vb-hero-actions {
@@ -324,7 +382,7 @@
   min-height: 280px;
   overflow: hidden;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 9px;
   background:
     radial-gradient(
       ellipse at 50% 30%,
@@ -354,6 +412,7 @@
   flex-direction: column;
   gap: 2px;
   padding: 14px 4px 3px;
+  color: var(--vb-ink);
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -404,6 +463,8 @@
   border-radius: 8px;
   background: #ffffff;
   color: var(--vb-muted);
+  cursor: pointer;
+  font: inherit;
   font-size: 0.78rem;
   box-shadow: 0 12px 35px rgba(40, 62, 108, 0.16);
 }
@@ -1821,7 +1882,7 @@
   }
 
   .vb-hero h1 {
-    font-size: clamp(3.2rem, 7vw, 5rem);
+    font-size: clamp(2.55rem, 5.5vw, 3.8rem);
   }
 
   .vb-skills-grid {
@@ -1901,11 +1962,7 @@
   }
 
   .vb-hero h1 {
-    font-size: clamp(3.25rem, 14vw, 5.1rem);
-  }
-
-  .vb-hero-summary {
-    font-size: 0.95rem;
+    font-size: clamp(2.25rem, 9vw, 3.5rem);
   }
 
   .vb-hero-art {

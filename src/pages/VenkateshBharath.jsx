@@ -501,6 +501,14 @@ const ASSISTANT_SUGGESTIONS = [
   "How can I contact him?",
 ];
 
+const CAREER_ROLE_TITLES = [
+  "AI Architect",
+  "Engineering Team Lead",
+  "Java Architect",
+  "Engineering Manager",
+  "Technical Product Manager",
+];
+
 const ASSISTANT_IDENTITY =
   "I’m Venkatesh Bharath’s AI portfolio assistant. I can answer questions about Venkatesh using the information published on this portfolio.";
 const ASSISTANT_IDENTITY_PATTERN =
@@ -870,6 +878,7 @@ async function generatePortfolioAnswer(question, conversation, profile) {
 
 function VenkateshBharath() {
   const chatEndRef = useRef(null);
+  const careerRoleHasStartedRef = useRef(false);
   const [profile, setProfile] = useState(EMPTY_PROFILE);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileLoadError, setProfileLoadError] = useState("");
@@ -877,6 +886,8 @@ function VenkateshBharath() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [assistantTyping, setAssistantTyping] = useState(false);
+  const [careerRoleIndex, setCareerRoleIndex] = useState(0);
+  const [careerRoleText, setCareerRoleText] = useState(CAREER_ROLE_TITLES[0]);
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -947,6 +958,57 @@ function VenkateshBharath() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [messages, chatOpen]);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const timer = window.setTimeout(() => {
+        const nextIndex = (careerRoleIndex + 1) % CAREER_ROLE_TITLES.length;
+        setCareerRoleIndex(nextIndex);
+        setCareerRoleText(CAREER_ROLE_TITLES[nextIndex]);
+      }, 3200);
+
+      return () => window.clearTimeout(timer);
+    }
+
+    const role = CAREER_ROLE_TITLES[careerRoleIndex];
+    const typeInterval = 65;
+    const deleteInterval = 38;
+    const typeDuration = role.length * typeInterval;
+    const holdDuration = 1000;
+    const deleteDuration = role.length * deleteInterval;
+    const cycleDuration = typeDuration + holdDuration + deleteDuration + 100;
+    const showInitialRole = !careerRoleHasStartedRef.current;
+    careerRoleHasStartedRef.current = true;
+    const startedAt = performance.now() - (showInitialRole ? typeDuration : 0);
+    let frameId;
+
+    const animateRole = (now) => {
+      const elapsed = now - startedAt;
+
+      if (elapsed < typeDuration) {
+        const visibleCharacters = Math.floor(elapsed / typeInterval);
+        setCareerRoleText(role.slice(0, visibleCharacters));
+      } else if (elapsed < typeDuration + holdDuration) {
+        setCareerRoleText(role);
+      } else if (elapsed < typeDuration + holdDuration + deleteDuration) {
+        const deletingFor = elapsed - typeDuration - holdDuration;
+        const visibleCharacters =
+          role.length - Math.floor(deletingFor / deleteInterval);
+        setCareerRoleText(role.slice(0, visibleCharacters));
+      } else if (elapsed >= cycleDuration) {
+        setCareerRoleText("");
+        setCareerRoleIndex((index) => (index + 1) % CAREER_ROLE_TITLES.length);
+        return;
+      } else {
+        setCareerRoleText("");
+      }
+
+      frameId = window.requestAnimationFrame(animateRole);
+    };
+
+    frameId = window.requestAnimationFrame(animateRole);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [careerRoleIndex]);
 
   const submitQuestion = async (rawQuestion) => {
     const trimmedQuestion = rawQuestion.trim();
@@ -1063,10 +1125,34 @@ function VenkateshBharath() {
               {renderEmphasis(profile.headline)}
             </p>
             <h1>
-              Building better
-              <br />
-              <span>paths into tech.</span>
+              Building better technology, powered by <span>Java</span> and{" "}
+              <span>AI.</span>
             </h1>
+            <section
+              className="vb-career-vision"
+              aria-labelledby="vb-career-title"
+            >
+              <p className="vb-career-vision-label" id="vb-career-title">
+                Possible future paths
+              </p>
+              <p
+                className="vb-career-role"
+                aria-label={`Future ${CAREER_ROLE_TITLES[careerRoleIndex]}`}
+              >
+                <span aria-hidden="true">Future </span>
+                <span aria-hidden="true">{careerRoleText}</span>
+                <span className="vb-career-caret" aria-hidden="true" />
+              </p>
+              <button
+                className="vb-career-ai-link"
+                type="button"
+                onClick={() => setChatOpen(true)}
+              >
+                <FaRobot aria-hidden="true" />
+                Ask my AI assistant about this journey
+                <FaArrowRight aria-hidden="true" />
+              </button>
+            </section>
             <div className="vb-hero-actions">
               <a className="vb-button vb-button-primary" href="#projects">
                 Explore my work <FaArrowRight aria-hidden="true" />
@@ -1121,10 +1207,15 @@ function VenkateshBharath() {
               </div>
               <span className="vb-portrait-index">VB—PORTFOLIO</span>
             </div>
-            <div className="vb-float-note">
-              <FaJava aria-hidden="true" />
-              <span>Java · Spring Boot · Learning</span>
-            </div>
+            <button
+              className="vb-float-note"
+              type="button"
+              onClick={() => setChatOpen(true)}
+            >
+              <FaRobot aria-hidden="true" />
+              <span>AI portfolio assistant</span>
+              <FaArrowRight aria-hidden="true" />
+            </button>
             <div className="vb-art-label" aria-hidden="true">
               BUILD / SHARE / REPEAT
             </div>
