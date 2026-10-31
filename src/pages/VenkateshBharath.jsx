@@ -1162,9 +1162,7 @@ function VenkateshBharath() {
           >
             <img src={`${import.meta.env.BASE_URL}bskcodingimg.png`} alt="" />
             <span className="vb-founder-copy">
-              <span className="vb-note-index">FOUNDER OF</span>
-              <strong>BSK Coding</strong>
-              <small>Code. Learn. Grow.</small>
+              <span className="vb-note-index">FOUNDER</span>
             </span>
             <span className="vb-founder-visit">
               Visit website <FaExternalLinkAlt aria-hidden="true" />
