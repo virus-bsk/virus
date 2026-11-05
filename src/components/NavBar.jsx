@@ -152,13 +152,18 @@ function NavBar({ onOpenChangePassword, onOpenFounder, theme, onToggleTheme }) {
           className={`hamburger${menuOpen ? " open" : ""}`}
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle navigation menu"
+          aria-expanded={menuOpen}
+          aria-controls="primary-navigation"
         >
           <span></span>
           <span></span>
           <span></span>
         </button>
 
-        <nav className={`nav-links${menuOpen ? " open" : ""}`}>
+        <nav
+          id="primary-navigation"
+          className={`nav-links${menuOpen ? " open" : ""}`}
+        >
           <NavLink to="/" end className="nav-link" onClick={closeMenu}>
             <span>Home</span>
           </NavLink>
