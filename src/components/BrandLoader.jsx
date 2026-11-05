@@ -13,10 +13,10 @@ import { BASENAME } from "../utils/basePath";
 // break a document-relative URL.
 const LOGO_SRC = `${BASENAME === "/" ? "" : BASENAME}/boot-logo.svg`;
 
-export default function BrandLoader({ label }) {
+export default function BrandLoader({ label, logoOnly = false }) {
   return (
     <div
-      className="brand-loader"
+      className={`brand-loader${logoOnly ? " brand-loader-logo-only" : ""}`}
       role="status"
       aria-live="polite"
       aria-label={label || "Loading BSK Coding"}

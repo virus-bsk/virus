@@ -199,3 +199,49 @@
     border-radius: 6px;
   }
 }
+
+#root .app-shell[data-theme="light"] .dsa-course-page {
+  background: transparent;
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .dsa-course-page .lesson-category {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 8px 24px rgba(29, 48, 82, 0.07);
+}
+
+#root .app-shell[data-theme="light"] .dsa-course-page .lesson-category-title {
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .dsa-course-page .lesson-card {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 4px 14px rgba(29, 48, 82, 0.06);
+}
+
+#root .app-shell[data-theme="light"] .dsa-course-page .lesson-card:hover {
+  background: #ffffff;
+  border-color: #3159dd;
+  box-shadow: 0 10px 24px rgba(49, 89, 221, 0.14);
+}
+
+#root .app-shell[data-theme="light"] .dsa-course-page .lesson-number {
+  background: #eaf0fb;
+  color: #3159dd;
+}
+
+#root .app-shell[data-theme="light"] .dsa-course-page .lesson-title {
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .dsa-course-page .lesson-desc {
+  color: #52627a;
+}
+
+#root .app-shell[data-theme="light"] .dsa-course-page .lesson-play-btn {
+  background: #e11d48 !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}

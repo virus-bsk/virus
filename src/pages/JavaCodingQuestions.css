@@ -479,6 +479,169 @@
   .java-coding-page .coding-questions-grid {
     gap: 0.65rem;
   }
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page {
+  background:
+    radial-gradient(ellipse at 12% 2%, rgba(49, 89, 221, 0.07), transparent 32rem),
+    #f5f7fb;
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-grid-header {
+  background: linear-gradient(135deg, #ffffff, #f8faff);
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 12px 32px rgba(29, 48, 82, 0.09);
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-grid-icon {
+  background: #eaf0fb;
+  border-color: rgba(49, 89, 221, 0.2);
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-grid-eyebrow {
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-grid-name {
+  color: #17243b !important;
+  -webkit-text-fill-color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-grid-tagline,
+#root .app-shell[data-theme="light"] .java-coding-page .coding-grid-description {
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-grid-stats span,
+#root .app-shell[data-theme="light"] .java-coding-page .subtopic-badge {
+  background: #eef3fb !important;
+  border: 1px solid rgba(49, 89, 221, 0.16);
+  color: #46556d !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-grid-stats strong {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-grid-progress-copy {
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-grid-progress-copy strong {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .progress-bar-track {
+  background: #e2e8f0;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-question-search {
+  background: #ffffff !important;
+  border-color: rgba(29, 48, 82, 0.18);
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-question-search input {
+  background: transparent !important;
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-question-search input::placeholder {
+  color: #718096;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-question-search kbd {
+  color: #52627a;
+  border-color: rgba(29, 48, 82, 0.2);
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .subtopics-container {
+  border-color: rgba(29, 48, 82, 0.12);
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-question-count,
+#root .app-shell[data-theme="light"] .java-coding-page .coding-question-count strong {
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-question-card {
+  background: #ffffff !important;
+  border-color: rgba(29, 48, 82, 0.15);
+  box-shadow: 0 5px 16px rgba(29, 48, 82, 0.06);
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-question-card:hover {
+  background: #ffffff !important;
+  border-color: rgba(49, 89, 221, 0.38);
+  box-shadow: 0 10px 24px rgba(49, 89, 221, 0.12);
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .question-number {
+  background: #eaf0fb;
+  border-color: rgba(49, 89, 221, 0.2);
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .question-text {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .answer-toggle {
+  background: #f1f5fb !important;
+  border-color: rgba(29, 48, 82, 0.18) !important;
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .answer-toggle:hover {
+  background: #eaf0fb !important;
+  border-color: rgba(49, 89, 221, 0.4) !important;
+  color: #2347bd !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .question-meta-item {
+  background: #f1f5fb;
+  border-color: rgba(29, 48, 82, 0.12);
+  color: #46556d !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .question-meta-item strong,
+#root .app-shell[data-theme="light"] .java-coding-page .question-answer-content h3 {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .question-answer-explanation {
+  background: #f6f8fc;
+  border-color: rgba(29, 48, 82, 0.12);
+  color: #34445c !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .question-answer-explanation p,
+#root .app-shell[data-theme="light"] .java-coding-page .question-answer-complexity,
+#root .app-shell[data-theme="light"] .java-coding-page .question-answer-complexity strong {
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .question-answer-pre {
+  background: #0d1117 !important;
+  border-color: #263445;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .question-answer-pre code.hljs {
+  background: #0d1117 !important;
+  color: #abb2bf !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-questions-empty {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.2);
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .java-coding-page .coding-questions-empty h2 {
+  color: #17243b !important;
 
   .java-coding-page .coding-question-card {
     padding: 0.85rem;

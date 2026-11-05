@@ -159,6 +159,24 @@
   filter: brightness(1.15) drop-shadow(0 0 14px rgba(0, 140, 255, 0.35));
 }
 
+.brand-loader-logo-only {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  min-height: 100vh;
+  padding: 0;
+  background: #000;
+}
+
+.brand-loader-logo-only .brand-loader-ring {
+  width: min(40vw, 150px);
+}
+
+.brand-loader-logo-only .brand-loader-logo {
+  width: min(20vw, 75px);
+  filter: brightness(1.15) drop-shadow(0 0 18px rgba(0, 140, 255, 0.35));
+}
+
 .brand-loader-label {
   margin: 0;
   color: #cbd5e1;
@@ -393,6 +411,25 @@
   display: flex;
   gap: 4px;
   align-items: center;
+}
+
+@media (min-width: 769px) {
+  .nav-inner {
+    column-gap: 12px;
+  }
+
+  .nav-links {
+    flex: initial;
+    margin-left: auto;
+  }
+
+  .nav-user-wrapper {
+    margin-left: 0;
+  }
+
+  .nav-inner > .theme-toggle {
+    margin-left: 8px;
+  }
 }
 
 .nav-link {
@@ -1032,6 +1069,7 @@
 
   .nav-links {
     position: fixed;
+    flex: initial;
     top: 0;
     right: -100%;
     width: 280px;
@@ -1041,6 +1079,7 @@
     -webkit-backdrop-filter: blur(30px);
     flex-direction: column;
     padding: 80px 24px 24px;
+    margin-left: 0;
     gap: 6px;
     transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border-left: 1px solid rgba(59, 130, 246, 0.1);
@@ -1083,6 +1122,7 @@
     align-items: stretch;
     justify-content: center;
     width: 100%;
+    margin-left: 0;
     padding: 8px 16px;
     gap: 4px;
     border-radius: 12px;
@@ -5480,4 +5520,624 @@
     height: 22px;
     border-radius: 6px;
   }
+}
+
+/* Portfolio-inspired light theme; all rules stay outside the portfolio page. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  background: #f5f7fb;
+}
+
+body[data-theme="light"] {
+  background: #f5f7fb;
+}
+
+.app-shell[data-theme="light"] {
+  --text: #34445c;
+  --text-h: #17243b;
+  --bg: #f5f7fb;
+  --bg-secondary: #ffffff;
+  --border: rgba(29, 48, 82, 0.15);
+  --code-bg: #eaf0fb;
+  --accent: #3159dd;
+  --accent-light: #3159dd;
+  --accent-lighter: #5678ed;
+  --accent-bg: rgba(49, 89, 221, 0.1);
+  --accent-border: rgba(49, 89, 221, 0.24);
+  --surface: #ffffff;
+  --surface-hover: #eaf0fb;
+  --glass: rgba(49, 89, 221, 0.035);
+  --glass-border: rgba(29, 48, 82, 0.12);
+  --shadow-sm: 0 1px 3px rgba(29, 48, 82, 0.08);
+  --shadow-md: 0 4px 20px rgba(29, 48, 82, 0.1);
+  --shadow-lg: 0 8px 40px rgba(29, 48, 82, 0.14);
+  --dark-blue: #eaf0fb;
+  --dark-teal: #eaf0fb;
+  --dark-indigo: #f5f7fb;
+  --dark-slate: #ffffff;
+  --dark-charcoal: #f5f7fb;
+  --dark-navy: #f5f7fb;
+
+  background: #f5f7fb;
+  color: #46556d;
+}
+
+.app-shell[data-theme="light"] .page-container {
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .page-container > :not(.vb-portfolio) {
+  background: #f5f7fb !important;
+  color: #34445c !important;
+}
+
+.app-shell[data-theme="light"] .page-container :where(
+    :not(.vb-portfolio):not(.vb-portfolio *)
+  ) :is([class$="-section"], [class*="toolbar"], [class*="controls"]):not(
+    .vb-portfolio *
+  ) {
+  background: #ffffff !important;
+  border-color: rgba(29, 48, 82, 0.14);
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .page-container :where(
+    :not(.vb-portfolio):not(.vb-portfolio *)
+) button:not(.mjobs-more):not(.cta-button):not(
+    .danger
+  ):not([class*="delete"]):not(.vb-portfolio *) {
+  border-color: rgba(49, 89, 221, 0.24) !important;
+  background: #eaf0fb !important;
+  color: #3159dd !important;
+}
+
+.app-shell[data-theme="light"] :where(
+  :not(.vb-portfolio):not(.vb-portfolio *)
+) :is(
+  [class*="badge"],
+  [class*="tag"],
+  [class*="chip"],
+  [class*="pill"]
+) :not(.vb-portfolio *):not(.founder-modal *) {
+  border-color: rgba(49, 89, 221, 0.22);
+  background-color: #eaf0fb;
+  color: #3159dd !important;
+  text-shadow: none;
+}
+
+.app-shell[data-theme="light"] .skill-card-badge,
+.app-shell[data-theme="light"] .skill-card-btn {
+  border-color: rgba(49, 89, 221, 0.24) !important;
+  background: #eaf0fb !important;
+  color: #3159dd !important;
+  text-shadow: none;
+}
+
+.app-shell[data-theme="light"] .skill-card-line {
+  background: rgba(49, 89, 221, 0.2);
+}
+
+#root .app-shell[data-theme="light"] :where(:not(.vb-portfolio):not(.vb-portfolio *)) :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  li,
+  label,
+  small,
+  dt,
+  dd,
+  td,
+  th,
+  strong,
+  em,
+  blockquote,
+  figcaption,
+  :where(
+    span:not([class*="icon"]):not([class*="badge"]):not([class*="logo"]):not(
+        [class*="emoji"]
+      ):not([class*="status"]):not([class*="tag"]):not([class*="accent"]):not(
+        [style*="color"]
+      )
+  ),
+  :where(
+    [class*="subtitle"],
+    [class*="description"],
+    [class*="desc"],
+    [class*="muted"],
+    [class*="text"]:not([class*="icon"]):not([style*="color"]),
+    [class*="label"],
+    [class*="name"]
+  )
+):not(button *):not(.nav-link *):not(pre *):not(code *):not(.vb-portfolio *):not(.founder-modal *) {
+  color: #34445c !important;
+  opacity: 1;
+}
+
+#root .app-shell[data-theme="light"] :where(:not(.vb-portfolio):not(.vb-portfolio *)) :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  [class*="title"]:not([class*="subtitle"]),
+  [class*="heading"]
+):not(pre *):not(code *):not(.vb-portfolio *):not(.founder-modal *) {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] :where(:not(.vb-portfolio):not(.vb-portfolio *)) a:not(.yt-round):not(
+    [class*="button"]
+  ):not([class*="btn"]):not([class*="badge"]):not(.mjobs-apply):not([style*="color"]):not(
+    .vb-portfolio *
+  ):not(.founder-modal *) {
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] :where(:not(.vb-portfolio):not(.vb-portfolio *)) :is(
+  [class~="card"],
+  [class$="-card"],
+  [class*="-card "],
+  [class~="panel"],
+  [class$="-panel"],
+  [class*="-panel "],
+  [class~="modal"],
+  [class$="-modal"],
+  [class*="-modal "],
+  [class~="dropdown"],
+  [class$="-dropdown"],
+  [class*="-dropdown "],
+  [class~="surface"],
+  [class$="-surface"],
+  [class*="-surface "]
+):not(.vb-portfolio *):not(.founder-modal *) {
+  background-color: #ffffff;
+  border-color: rgba(29, 48, 82, 0.18);
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] :where(:not(.vb-portfolio):not(.vb-portfolio *)) :is(
+  [class~="card"],
+  [class$="-card"],
+  [class*="-card "],
+  [class~="panel"],
+  [class$="-panel"],
+  [class*="-panel "],
+  [class~="modal"],
+  [class$="-modal"],
+  [class*="-modal "],
+  [class~="dropdown"],
+  [class$="-dropdown"],
+  [class*="-dropdown "],
+  [class~="surface"],
+  [class$="-surface"],
+  [class*="-surface "]
+):not(.vb-portfolio *):not(.founder-modal *) {
+  border: 1px solid rgba(29, 48, 82, 0.16);
+  box-shadow: 0 4px 18px rgba(29, 48, 82, 0.06);
+}
+
+#root .app-shell[data-theme="light"] .skills-section {
+  background: transparent !important;
+}
+
+#root .app-shell[data-theme="light"] .skill-card-container {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#root .app-shell[data-theme="light"] :is(
+  .skill-card-top,
+  .skill-card-middle,
+  .skill-card-bottom
+) {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#root .app-shell[data-theme="light"] .skill-card-line {
+  border: 0;
+  box-shadow: none;
+}
+
+#root .app-shell[data-theme="light"] :where(:not(.vb-portfolio):not(.vb-portfolio *)) :is(
+  input,
+  select,
+  textarea
+):not(.vb-portfolio *) {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.24);
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] :where(:not(.vb-portfolio):not(.vb-portfolio *)) :is(
+  pre,
+  code
+):not(.vb-portfolio *) {
+  background: #eaf0fb;
+  color: #17243b;
+}
+
+.app-shell[data-theme="light"] .nav-bar,
+.app-shell[data-theme="light"] .nav-bar.nav-scrolled {
+  background: rgba(250, 251, 255, 0.94);
+  border-color: rgba(29, 48, 82, 0.12);
+  box-shadow: 0 4px 20px rgba(29, 48, 82, 0.06);
+}
+
+.app-shell[data-theme="light"] .nav-logo-wrapper {
+  overflow: hidden;
+}
+
+.app-shell[data-theme="light"] .nav-logo-light {
+  width: 144px;
+  height: 96px;
+  max-width: none;
+  flex: none;
+  filter: none;
+}
+
+.auth-logo-light {
+  display: none;
+}
+
+.app-shell[data-theme="light"] .auth-logo-dark {
+  display: none;
+}
+
+.app-shell[data-theme="light"] .auth-logo-light {
+  display: block;
+  width: 112px;
+  height: 74px;
+  margin: -9px auto 7px;
+  object-fit: contain;
+}
+
+.app-shell[data-theme="light"] .nav-link {
+  color: #34445c;
+}
+
+.app-shell[data-theme="light"] .nav-user-trigger {
+  border-color: rgba(49, 89, 221, 0.2);
+  background: rgba(49, 89, 221, 0.06);
+  color: #17243b;
+}
+
+.app-shell[data-theme="light"] .nav-user-name,
+.app-shell[data-theme="light"] .nav-user-arrow,
+.app-shell[data-theme="light"] .nav-user-avatar {
+  color: #3159dd;
+}
+
+.app-shell[data-theme="light"] .profile-dropdown {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.16);
+  box-shadow: 0 12px 32px rgba(29, 48, 82, 0.16);
+}
+
+.app-shell[data-theme="light"] .profile-dropdown-header {
+  background: #eaf0fb;
+}
+
+.app-shell[data-theme="light"] .profile-name,
+.app-shell[data-theme="light"] .profile-dropdown-item {
+  color: #17243b;
+}
+
+.app-shell[data-theme="light"] .profile-dropdown-email {
+  color: #34445c;
+}
+
+.app-shell[data-theme="light"] .profile-dropdown-item:hover {
+  background: #eaf0fb;
+}
+
+.app-shell[data-theme="light"] .profile-dropdown-logout {
+  color: #b42318;
+}
+
+.app-shell[data-theme="light"] .nav-link:hover,
+.app-shell[data-theme="light"] .nav-link.active {
+  color: #3159dd;
+}
+
+.app-shell[data-theme="light"] .nav-link-cta {
+  border-color: rgba(49, 89, 221, 0.24) !important;
+  background: #3159dd !important;
+  color: #ffffff !important;
+}
+
+.app-shell[data-theme="light"] .nav-link-cta span {
+  color: #ffffff !important;
+}
+
+.app-shell[data-theme="light"] .nav-link-cta:hover {
+  background: #274bc4 !important;
+}
+
+.app-shell[data-theme="light"] .nav-links {
+  background: rgba(250, 251, 255, 0.98);
+}
+
+#root .app-shell[data-theme="light"] .home-maang-toggle {
+  border-color: rgba(49, 89, 221, 0.3);
+  background: #eaf0fb !important;
+  color: #3159dd !important;
+  box-shadow: 0 6px 20px rgba(49, 89, 221, 0.16);
+}
+
+.app-shell[data-theme="light"] .home-maang-kit-name {
+  color: #17243b;
+}
+
+.app-shell[data-theme="light"] .home-maang-caret {
+  color: #3159dd;
+}
+
+.app-shell[data-theme="light"] .home-maang-menu {
+  border-color: rgba(49, 89, 221, 0.2);
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(29, 48, 82, 0.14);
+}
+
+.app-shell[data-theme="light"] .home-maang-link {
+  border-color: rgba(49, 89, 221, 0.14);
+  color: #3159dd;
+}
+
+.app-shell[data-theme="light"] .cta-button.primary {
+  background: #3159dd;
+  color: #ffffff;
+}
+
+#root .app-shell[data-theme="light"] .roadmap-page .yt-round,
+#root .app-shell[data-theme="light"] .roadmap-page .yt-round span {
+  background: #b42318 !important;
+  color: #ffffff !important;
+}
+
+#root .app-shell[data-theme="light"] .roadmap-page .hero {
+  background: linear-gradient(135deg, #ffffff, #f1f5fb);
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 8px 24px rgba(29, 48, 82, 0.07);
+}
+
+#root .app-shell[data-theme="light"] .roadmap-page .main-headline {
+  background-image: linear-gradient(135deg, #3159dd, #0879b8);
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+#root .app-shell[data-theme="light"] .roadmap-page .hero-subtitle,
+#root .app-shell[data-theme="light"] .roadmap-page .sub-item,
+#root .app-shell[data-theme="light"] .roadmap-page .sub-item span:not(.sub-bullet),
+#root .app-shell[data-theme="light"] .roadmap-page .goal-highlight,
+#root .app-shell[data-theme="light"] .roadmap-page .footer {
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .roadmap-page .card {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 6px 20px rgba(29, 48, 82, 0.08);
+}
+
+#root .app-shell[data-theme="light"] .roadmap-page .card:hover {
+  border-color: rgba(49, 89, 221, 0.32);
+  box-shadow: 0 12px 28px rgba(49, 89, 221, 0.12);
+}
+
+#root .app-shell[data-theme="light"] .roadmap-page .week-header {
+  background: #f1f5fb;
+  border-bottom-color: rgba(29, 48, 82, 0.1);
+}
+
+#root .app-shell[data-theme="light"] .roadmap-page .week-title {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .roadmap-page .topic-item {
+  background: #f1f5fb;
+  border-color: rgba(29, 48, 82, 0.12);
+  color: #34445c !important;
+}
+
+#root .app-shell[data-theme="light"] .roadmap-page .goal-highlight {
+  background: #eef4ff;
+  border-left-color: #3159dd;
+}
+
+.app-shell[data-theme="light"] .hamburger,
+.app-shell[data-theme="light"] .theme-toggle {
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border: 1px solid rgba(49, 89, 221, 0.2);
+  border-radius: 12px;
+  background: #ffffff;
+  color: #3159dd;
+}
+
+.app-shell[data-theme="light"] .theme-toggle {
+  cursor: pointer;
+  font-size: 1.05rem;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.app-shell[data-theme="light"] .theme-toggle:hover {
+  transform: translateY(-1px);
+  background: #eaf0fb;
+  border-color: rgba(49, 89, 221, 0.38);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.08);
+  color: #93c5fd;
+  cursor: pointer;
+  font-size: 1.05rem;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-1px);
+  background: rgba(59, 130, 246, 0.16);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid #3159dd;
+  outline-offset: 3px;
+}
+
+.app-shell[data-theme="light"] .skills-grid .skill-card:hover,
+.app-shell[data-theme="light"] .skills-grid .skill-card-link:focus-visible .skill-card {
+  transition: none;
+  transform: none;
+  border-color: #3159dd !important;
+  box-shadow:
+    0 14px 30px rgba(23, 36, 59, 0.18),
+    0 0 0 1px rgba(49, 89, 221, 0.12) !important;
+}
+
+.app-shell[data-theme="light"] .skill-card-link.green-glow .skill-card {
+  border-color: rgba(49, 89, 221, 0.55) !important;
+  box-shadow:
+    0 0 0 1px rgba(49, 89, 221, 0.12),
+    0 10px 24px rgba(23, 36, 59, 0.14) !important;
+}
+
+.app-shell[data-theme="light"] .skill-card-link.green-glow .skill-card:hover {
+  border-color: #3159dd !important;
+  box-shadow:
+    0 0 0 1px rgba(49, 89, 221, 0.18),
+    0 14px 30px rgba(23, 36, 59, 0.2) !important;
+}
+
+#root .app-shell[data-theme="light"] .maang-page-hero {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(49, 89, 221, 0.1), transparent 70%),
+    linear-gradient(135deg, #ffffff, #f1f5fb);
+  border-color: rgba(29, 48, 82, 0.12);
+  box-shadow: 0 10px 28px rgba(29, 48, 82, 0.08);
+}
+
+#root .app-shell[data-theme="light"] .maang-subtopic-card {
+  border-color: rgba(29, 48, 82, 0.14);
+  background: linear-gradient(145deg, #eaf0fb, #f8faff);
+  box-shadow: 0 6px 18px rgba(29, 48, 82, 0.08);
+}
+
+#root .app-shell[data-theme="light"] .maang-subtopic-card::after {
+  background: linear-gradient(150deg, #ffffff, #f8faff);
+}
+
+#root .app-shell[data-theme="light"] .maang-subtopic-card:hover::after {
+  background: linear-gradient(150deg, #ffffff, #eef3ff);
+}
+
+#root .app-shell[data-theme="light"] .maang-subtopic-card:hover {
+  border-color: rgba(49, 89, 221, 0.36);
+  box-shadow: 0 12px 26px rgba(49, 89, 221, 0.14);
+}
+
+#root .app-shell[data-theme="light"] .maang-subtopic-name,
+#root .app-shell[data-theme="light"] .maang-subtopic-card:hover .maang-subtopic-name {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .maang-subtopic-num,
+#root .app-shell[data-theme="light"] .maang-subtopic-card:hover .maang-subtopic-num {
+  background: #eaf0fb;
+  border-color: rgba(49, 89, 221, 0.18);
+  color: #46556d;
+}
+
+#root .app-shell[data-theme="light"] .founder-modal {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#root .app-shell[data-theme="light"] .founder-modal-inner {
+  background: linear-gradient(160deg, rgba(17, 27, 48, 0.97), rgba(8, 14, 28, 0.98)) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #cbd5e1 !important;
+}
+
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-name {
+  color: #f8fafc !important;
+}
+
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-headline,
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-headline-stat strong,
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-section-label {
+  color: #fbbf24 !important;
+}
+
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-headline-stat span,
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-bio,
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-highlights li,
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-social small {
+  color: #cbd5e1 !important;
+}
+
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-bio-lead {
+  color: #fcd34d !important;
+  -webkit-text-fill-color: #fcd34d;
+}
+
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-expanded .founder-bio strong {
+  color: #fbbf24 !important;
+}
+
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-badge {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #fcd34d !important;
+}
+
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-headline-stat {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-modal-close {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #cbd5e1 !important;
+}
+
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-view-all {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  border-color: transparent !important;
+  color: #0b1020 !important;
+}
+
+#root .app-shell[data-theme="light"] .founder-modal-inner .founder-social {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.28) !important;
+  color: #fcd34d !important;
+}
+
+#root .app-shell[data-theme="light"] .page-container > .brand-loader-logo-only {
+  background: #000 !important;
+  color: #fff !important;
 }

@@ -258,3 +258,68 @@
     line-clamp: 5;
   }
 }
+
+#root .app-shell[data-theme="light"] .spring-boot-course-page {
+  background: transparent;
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .spring-boot-course-page .back-button {
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] .spring-boot-course-page .course-subtitle {
+  color: #52627a;
+}
+
+#root .app-shell[data-theme="light"] .spring-boot-course-page .stat-pill {
+  background: #eaf0fb !important;
+  border-color: rgba(49, 89, 221, 0.2) !important;
+  color: #34445c !important;
+}
+
+#root .app-shell[data-theme="light"] .spring-boot-course-page .stat-value {
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] .spring-boot-course-page .lesson-category {
+  background: #ffffff !important;
+  border: 1px solid rgba(29, 48, 82, 0.14);
+  box-shadow: 0 8px 24px rgba(29, 48, 82, 0.07);
+}
+
+#root .app-shell[data-theme="light"] .spring-boot-course-page .lesson-category-title {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .spring-boot-course-page .lesson-category-count {
+  background: #eaf0fb !important;
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] .page-container .spring-boot-course-page .lessons-section .lesson-category .lessons-grid button.lesson-card {
+  background: #ffffff !important;
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 4px 14px rgba(29, 48, 82, 0.06);
+  color: #34445c !important;
+}
+
+#root .app-shell[data-theme="light"] .page-container .spring-boot-course-page .lessons-section .lesson-category .lessons-grid button.lesson-card:hover {
+  background: #f8faff !important;
+  border-color: rgba(49, 89, 221, 0.38);
+  box-shadow: 0 10px 24px rgba(49, 89, 221, 0.12);
+}
+
+#root .app-shell[data-theme="light"] .spring-boot-course-page .lesson-number {
+  background: #eaf0fb !important;
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] .spring-boot-course-page .lesson-title {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .spring-boot-course-page .lesson-duration,
+#root .app-shell[data-theme="light"] .spring-boot-course-page .lesson-desc {
+  color: #52627a !important;
+}

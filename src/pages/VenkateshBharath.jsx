@@ -49,6 +49,7 @@ import {
 } from "react-icons/si";
 import { loadPortfolioProfile } from "../services/portfolioProfile";
 import { loadPortfolioSkills } from "../services/portfolioSkills";
+import BrandLoader from "../components/BrandLoader";
 import "./VenkateshBharath.css";
 
 const SKILL_ICONS = {
@@ -1046,20 +1047,18 @@ function VenkateshBharath() {
     void submitQuestion(suggestion);
   };
 
-  if (profileLoading || profileLoadError) {
+  if (profileLoading) {
+    return <BrandLoader logoOnly />;
+  }
+
+  if (profileLoadError) {
     return (
       <main className="vb-portfolio vb-profile-status" role="status">
-        {profileLoading
-          ? "Loading portfolio from Firestore…"
-          : (
-            <>
-                  {profileLoadError.includes("not been published")
-                    ? "Portfolio details have not been published yet."
-                    : "Portfolio details are temporarily unavailable."}{" "}
-                  The portfolio owner can update them from the Portfolio tab in
-                  the <a href="/bsk-admin-97">admin console</a>.
-                </>
-              )}
+        {profileLoadError.includes("not been published")
+          ? "Portfolio details have not been published yet."
+          : "Portfolio details are temporarily unavailable."}{" "}
+        The portfolio owner can update them from the Portfolio tab in the{" "}
+        <a href="/bsk-admin-97">admin console</a>.
       </main>
     );
   }

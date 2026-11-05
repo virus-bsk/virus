@@ -443,3 +443,146 @@
     flex-direction: column;
   }
 }
+
+#root .app-shell[data-theme="light"] .react-course-page {
+  background: transparent;
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .react-course-hero {
+  background: linear-gradient(135deg, #ffffff, #f1f5fb);
+  border-color: rgba(29, 48, 82, 0.14);
+}
+
+#root .app-shell[data-theme="light"] .react-course-kicker {
+  color: #0879b8;
+}
+
+#root .app-shell[data-theme="light"] .react-course-hero h1 {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .react-course-hero p,
+#root .app-shell[data-theme="light"] .react-course-description {
+  color: #52627a;
+}
+
+#root .app-shell[data-theme="light"] .react-course-stats span {
+  background: #eaf0fb;
+  border-color: rgba(49, 89, 221, 0.18);
+  color: #46556d;
+}
+
+#root .app-shell[data-theme="light"] .react-course-stats strong {
+  color: #0879b8;
+}
+
+#root .app-shell[data-theme="light"] .react-course-sidebar,
+#root .app-shell[data-theme="light"] .react-course-detail {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 6px 18px rgba(29, 48, 82, 0.07);
+}
+
+#root .app-shell[data-theme="light"] .react-course-sidebar-top label {
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .react-course-sidebar-top input {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.2);
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .react-course-filters button,
+#root .app-shell[data-theme="light"] .react-course-pagination button,
+#root .app-shell[data-theme="light"] .react-course-detail-nav button,
+#root .app-shell[data-theme="light"] .react-course-mobile-toggle {
+  background: #f1f5fb !important;
+  border-color: rgba(29, 48, 82, 0.16) !important;
+  color: #34445c !important;
+}
+
+#root .app-shell[data-theme="light"] .react-course-filters button.active {
+  background: #3159dd !important;
+  border-color: #3159dd !important;
+  color: #ffffff !important;
+}
+
+#root .app-shell[data-theme="light"] .page-container .react-course-filters button.active:not(.cta-button):not(.danger):not([class*="delete"]) {
+  background: #3159dd !important;
+  border-color: #3159dd !important;
+  color: #ffffff !important;
+}
+
+#root .app-shell[data-theme="light"] .react-course-nav-item {
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .react-course-nav-item:hover {
+  background: #f1f5fb;
+}
+
+#root .app-shell[data-theme="light"] .react-course-nav-item.selected {
+  background: #eaf0fb;
+  border-color: rgba(49, 89, 221, 0.22);
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .page-container .react-course-nav-item.selected:not(.cta-button):not(.danger):not([class*="delete"]) {
+  background: #eaf0fb !important;
+  border-color: rgba(49, 89, 221, 0.22) !important;
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .react-course-nav-item > span,
+#root .app-shell[data-theme="light"] .react-course-nav-item small,
+#root .app-shell[data-theme="light"] .react-course-number,
+#root .app-shell[data-theme="light"] .react-course-pagination span {
+  color: #52627a;
+}
+
+#root .app-shell[data-theme="light"] .react-course-detail h2 {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .react-course-category {
+  background: #eaf0fb;
+  color: #3159dd;
+}
+
+#root .app-shell[data-theme="light"] .react-course-explain-grid section {
+  background: #f1f5fb;
+  border-left-color: #3159dd;
+}
+
+#root .app-shell[data-theme="light"] .react-course-explain-grid h3,
+#root .app-shell[data-theme="light"] .react-course-example h3 {
+  color: #3159dd;
+}
+
+#root .app-shell[data-theme="light"] .react-course-explain-grid p {
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .react-course-example {
+  border-color: rgba(29, 48, 82, 0.18);
+}
+
+#root .app-shell[data-theme="light"] .react-course-example-heading {
+  background: #f1f5fb;
+}
+
+#root .app-shell[data-theme="light"] .react-course-example-heading span {
+  color: #52627a;
+}
+
+#root .app-shell[data-theme="light"] .react-course-example pre,
+#root .app-shell[data-theme="light"] .react-course-example pre code.hljs {
+  background: #0d1117 !important;
+  color: #e2e8f0 !important;
+}
+
+#root .app-shell[data-theme="light"] .react-course-pagination {
+  border-color: rgba(29, 48, 82, 0.12);
+}

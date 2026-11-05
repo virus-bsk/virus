@@ -201,3 +201,70 @@
     font-size: 0.8rem;
   }
 }
+
+#root .app-shell[data-theme="light"] .sql-course-page {
+  background: transparent;
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .sql-course-page .back-button {
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] .sql-course-page .course-title {
+  background-image: linear-gradient(135deg, #0879b8, #3159dd);
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+#root .app-shell[data-theme="light"] .sql-course-page .course-subtitle {
+  color: #52627a;
+}
+
+#root .app-shell[data-theme="light"] .sql-course-page .lesson-category {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 8px 24px rgba(29, 48, 82, 0.07);
+}
+
+#root .app-shell[data-theme="light"] .sql-course-page .lesson-category-title {
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .sql-course-page .lesson-category-count {
+  background: #eaf0fb;
+  color: #3159dd;
+}
+
+#root .app-shell[data-theme="light"] .sql-course-page .lesson-card {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 4px 14px rgba(29, 48, 82, 0.06);
+}
+
+#root .app-shell[data-theme="light"] .sql-course-page .lesson-card:hover {
+  background: #ffffff;
+  border-color: #0879b8;
+  box-shadow: 0 10px 24px rgba(8, 121, 184, 0.13);
+  transform: translateY(-2px);
+}
+
+#root .app-shell[data-theme="light"] .sql-course-page .lesson-number {
+  background: #e8f4fb;
+  color: #0879b8;
+}
+
+#root .app-shell[data-theme="light"] .sql-course-page .lesson-title {
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .sql-course-page .lesson-desc {
+  color: #52627a;
+}
+
+#root .app-shell[data-theme="light"] .sql-course-page .lesson-play-btn {
+  background: #e11d48 !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}

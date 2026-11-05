@@ -304,6 +304,36 @@
   border-top: 6px solid #e94560;
 }
 
+#root .app-shell[data-theme="light"] .acid-hero {
+  background: linear-gradient(135deg, #eaf0fb, #f8faff);
+  border: 1px solid rgba(29, 48, 82, 0.12);
+  box-shadow: 0 10px 28px rgba(29, 48, 82, 0.08);
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .acid-hero::after {
+  opacity: 0.25;
+}
+
+#root .app-shell[data-theme="light"] .acid-title,
+#root .app-shell[data-theme="light"] .acid-title span {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .acid-subtitle {
+  color: #46556d !important;
+}
+
+#root .app-shell[data-theme="light"] .acid-subtitle strong {
+  color: #3159dd;
+}
+
+#root .app-shell[data-theme="light"] .acid-chip {
+  background: #ffffff;
+  color: #3159dd !important;
+  box-shadow: 0 2px 6px rgba(29, 48, 82, 0.08);
+}
+
 .acid-detail-header {
   display: flex;
   align-items: center;

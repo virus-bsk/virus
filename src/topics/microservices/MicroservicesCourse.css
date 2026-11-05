@@ -233,3 +233,67 @@
     font-size: 0.8rem;
   }
 }
+
+#root .app-shell[data-theme="light"] .microservices-course-page .course-subtitle {
+  color: #34445c !important;
+}
+
+#root .app-shell[data-theme="light"] .microservices-course-page .stat-pill {
+  background: #e8f7f4;
+  border-color: rgba(0, 150, 125, 0.28);
+  color: #245b54 !important;
+}
+
+#root .app-shell[data-theme="light"] .microservices-course-page .stat-pill .stat-value {
+  color: #087f6b !important;
+}
+
+#root .app-shell[data-theme="light"] .microservices-course-page .lesson-category {
+  background: linear-gradient(145deg, #ffffff, #f7fafc) !important;
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 6px 20px rgba(29, 48, 82, 0.08);
+}
+
+#root .app-shell[data-theme="light"] .microservices-course-page .lesson-category-title {
+  color: #087f6b !important;
+}
+
+#root .app-shell[data-theme="light"] .microservices-course-page .lesson-category-count {
+  background: #e8f7f4 !important;
+  color: #32675f !important;
+}
+
+#root .app-shell[data-theme="light"] .page-container .microservices-course-page .lessons-section .lesson-category .lessons-grid button.lesson-card:not(.danger):not([class*="delete"]) {
+  background: #ffffff !important;
+  border-color: rgba(29, 48, 82, 0.14) !important;
+  box-shadow: 0 3px 12px rgba(29, 48, 82, 0.06);
+  color: #26364d !important;
+}
+
+#root .app-shell[data-theme="light"] .page-container .microservices-course-page .lessons-section .lesson-category .lessons-grid button.lesson-card:not(.danger):not([class*="delete"]):hover {
+  background: #fafffe !important;
+  border-color: rgba(8, 127, 107, 0.42) !important;
+  box-shadow: 0 8px 20px rgba(8, 127, 107, 0.12);
+}
+
+#root .app-shell[data-theme="light"] .microservices-course-page .lesson-number {
+  background: #e8f7f4;
+  color: #087f6b !important;
+}
+
+#root .app-shell[data-theme="light"] .microservices-course-page .lesson-title {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .microservices-course-page .lesson-duration {
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .microservices-course-page .lesson-desc {
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .microservices-course-page .lesson-play-btn {
+  background: #c94343 !important;
+  color: #ffffff !important;
+}

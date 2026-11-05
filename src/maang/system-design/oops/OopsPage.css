@@ -273,6 +273,56 @@
   }
 }
 
+#root .app-shell[data-theme="light"] .oops-main-header {
+  background: linear-gradient(135deg, #eaf0fb, #f8faff);
+  border: 1px solid rgba(29, 48, 82, 0.14);
+  box-shadow: 0 10px 28px rgba(29, 48, 82, 0.08);
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .oops-main-header h1 {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .oops-sub-info {
+  color: #46556d;
+}
+
+#root .app-shell[data-theme="light"] .oops-java-badge {
+  background: #ffffff;
+  color: #3159dd;
+}
+
+#root .app-shell[data-theme="light"] .oops-topic-card {
+  background: #ffffff;
+  border: 1px solid rgba(29, 48, 82, 0.15);
+  border-left: 4px solid #3159dd;
+  box-shadow: 0 6px 18px rgba(29, 48, 82, 0.07);
+}
+
+#root .app-shell[data-theme="light"] .oops-topic-card:hover,
+#root .app-shell[data-theme="light"] .oops-topic-card.active {
+  background: #f8faff;
+  border-left-color: #3159dd;
+  box-shadow: 0 12px 26px rgba(49, 89, 221, 0.13);
+  transform: translateY(-2px);
+}
+
+#root .app-shell[data-theme="light"] .oops-topic-card h3,
+#root .app-shell[data-theme="light"] .oops-card-icon {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .oops-card-sub,
+#root .app-shell[data-theme="light"] .oops-topic-card p {
+  color: #52627a;
+}
+
+#root .app-shell[data-theme="light"] .oops-card-tag {
+  background: #eaf0fb;
+  color: #3159dd;
+}
+
 .oops-topic-card {
   background: white;
   border-radius: 16px;

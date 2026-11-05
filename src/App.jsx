@@ -264,7 +264,12 @@ function ScrollToTop() {
   return null;
 }
 
-function PlatformChrome({ onOpenChangePassword, onOpenFounder }) {
+function PlatformChrome({
+  onOpenChangePassword,
+  onOpenFounder,
+  theme,
+  onToggleTheme,
+}) {
   const { pathname } = useLocation();
 
   if (/^\/venkatesh-bharath(?:\/|$)/.test(pathname)) {
@@ -278,6 +283,8 @@ function PlatformChrome({ onOpenChangePassword, onOpenFounder }) {
         <NavBar
           onOpenChangePassword={onOpenChangePassword}
           onOpenFounder={onOpenFounder}
+          theme={theme}
+          onToggleTheme={onToggleTheme}
         />
       </div>
       <AppBreadcrumbs />
@@ -288,6 +295,18 @@ function PlatformChrome({ onOpenChangePassword, onOpenFounder }) {
 function App() {
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [founderOpen, setFounderOpen] = useState(false);
+  const [theme, setTheme] = useState(
+    () => (localStorage.getItem("bsk_theme") === "light" ? "light" : "dark"),
+  );
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.body.dataset.theme = theme;
+    localStorage.setItem("bsk_theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () =>
+    setTheme((currentTheme) => (currentTheme === "light" ? "dark" : "light"));
 
   return (
     <BrowserRouter basename={BASENAME}>
@@ -295,10 +314,12 @@ function App() {
       <ErrorBoundary>
         <YouTubeLinkHandler />
         <RouteRestorer />
-        <div className="app-shell">
+        <div className="app-shell" data-theme={theme}>
           <PlatformChrome
             onOpenChangePassword={() => setShowChangePassword(true)}
             onOpenFounder={() => setFounderOpen(true)}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
           <main className="page-container">
             {/* Branded fallback: while a lazy route chunk downloads, keep the
@@ -806,7 +827,14 @@ function App() {
                 <Route path="/cline-test" element={<ClineChatTest />} />
                 <Route path="/profile" element={<Profile />} />
                 {/* Public portfolio/resume page for Venkatesh Bharath (no auth required) */}
-                <Route path="/venkatesh-bharath" element={<VenkateshBharath />} />
+                <Route
+                  path="/venkatesh-bharath"
+                  element={
+                    <Suspense fallback={<BrandLoader logoOnly />}>
+                      <VenkateshBharath />
+                    </Suspense>
+                  }
+                />
                 {/* Payment: live account status from Firestore + Cashfree checkout (wired up later) */}
                 <Route
                   path="/payment"

@@ -547,6 +547,160 @@
   font-family: "Fira Code", Consolas, Monaco, monospace;
 }
 
+.app-shell[data-theme="light"] .company-interview-page {
+  background: transparent;
+  color: #17243b;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-title {
+  background-image: linear-gradient(135deg, #3159dd, #5678ed);
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .back-button {
+  background: transparent !important;
+  color: #3159dd !important;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .back-button:hover {
+  color: #274bc4 !important;
+}
+
+#root .app-shell[data-theme="light"] .company-interview-page .ci-flow,
+#root .app-shell[data-theme="light"] .company-interview-page .ci-stat {
+  border-color: rgba(49, 89, 221, 0.2);
+  background: #eaf0fb;
+  color: #3159dd !important;
+  -webkit-text-fill-color: #3159dd !important;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-subtitle,
+.app-shell[data-theme="light"] .company-interview-page .ci-company-meta,
+.app-shell[data-theme="light"] .company-interview-page .ci-interview-meta,
+.app-shell[data-theme="light"] .company-interview-page .ci-doc-label,
+.app-shell[data-theme="light"] .company-interview-page .ci-empty {
+  color: #52627a;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-company-card,
+.app-shell[data-theme="light"] .company-interview-page .ci-interview-section,
+.app-shell[data-theme="light"] .company-interview-page .ci-round-block {
+  border-color: rgba(29, 48, 82, 0.14);
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(29, 48, 82, 0.07);
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-company-card:hover,
+.app-shell[data-theme="light"] .company-interview-page .ci-interview-section:hover,
+.app-shell[data-theme="light"] .company-interview-page .ci-round-block:hover {
+  border-color: rgba(49, 89, 221, 0.32);
+  box-shadow: 0 12px 28px rgba(29, 48, 82, 0.12);
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-company-name,
+.app-shell[data-theme="light"] .company-interview-page .ci-interview-name,
+.app-shell[data-theme="light"] .company-interview-page .ci-round-title,
+.app-shell[data-theme="light"] .company-interview-page .ci-q-text,
+.app-shell[data-theme="light"] .company-interview-page .ci-answer-h3 {
+  color: #17243b;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-company-logo,
+.app-shell[data-theme="light"] .company-interview-page .ci-interview-logo {
+  text-shadow: none;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-interview-header {
+  border-color: rgba(29, 48, 82, 0.1);
+  background: #f8faff;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-round-filter {
+  border-color: rgba(29, 48, 82, 0.16);
+  background: #ffffff !important;
+  color: #46556d !important;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-round-filter:hover,
+.app-shell[data-theme="light"] .company-interview-page .ci-round-filter.active {
+  border-color: rgba(49, 89, 221, 0.3);
+  background: #eaf0fb !important;
+  color: #3159dd !important;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-round-header {
+  border-color: rgba(29, 48, 82, 0.12);
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-round-qcount,
+.app-shell[data-theme="light"] .company-interview-page .ci-q-number {
+  background: #eaf0fb;
+  color: #3159dd;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-question {
+  border-color: rgba(29, 48, 82, 0.14);
+  background: #f8faff;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-question:hover {
+  border-color: rgba(49, 89, 221, 0.32);
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-question.active {
+  border-color: rgba(49, 89, 221, 0.34);
+  background: #edf2ff;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-arrow,
+.app-shell[data-theme="light"] .company-interview-page .ci-arrow.expanded {
+  color: #3159dd;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-answer-wrap {
+  border-color: rgba(29, 48, 82, 0.12);
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-answer-title {
+  color: #187347 !important;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-answer-text,
+.app-shell[data-theme="light"] .company-interview-page .ci-answer-list li,
+.app-shell[data-theme="light"] .company-interview-page .ci-answer-h4 {
+  color: #34445c;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-answer-h3 {
+  border-color: rgba(29, 48, 82, 0.16);
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-answer-table {
+  border-color: rgba(29, 48, 82, 0.16);
+  background: #f1f5fb;
+  color: #26364f;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-code-block {
+  border-color: rgba(29, 48, 82, 0.18);
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-code-header {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: #17243b;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-code-block pre {
+  background: #0d1117 !important;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-code-block code {
+  background: transparent !important;
+  color: #e2e8f0 !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .company-interview-page {

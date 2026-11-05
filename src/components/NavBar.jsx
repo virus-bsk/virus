@@ -3,10 +3,11 @@ import { useEffect, useState, useRef } from "react";
 import { getCurrentUser, logout } from "../utils/auth";
 import { isAdminEmail } from "../utils/admin";
 import bskimg from "../assets/bskimg.svg";
+import { FaMoon, FaSun } from "react-icons/fa";
 
 const CURRENT_USER_KEY = "bsk_current_user";
 
-function NavBar({ onOpenChangePassword, onOpenFounder }) {
+function NavBar({ onOpenChangePassword, onOpenFounder, theme, onToggleTheme }) {
   const [user, setUser] = useState(getCurrentUser());
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -128,6 +129,8 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
   const handleGlowClick = () => {
     setGlowColor(glowColor === "blue" ? "green" : "blue");
   };
+  const logoSrc =
+    theme === "light" ? `${import.meta.env.BASE_URL}bskcoding.png` : bskimg;
 
   return (
     <header className={`nav-bar${scrolled ? " nav-scrolled" : ""}`}>
@@ -137,7 +140,11 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
             className={`nav-logo-wrapper${glowColor === "green" ? " green-glow" : ""}`}
             onClick={handleGlowClick}
           >
-            <img src={bskimg} alt="BSK Coding" className="nav-logo" />
+            <img
+              src={logoSrc}
+              alt="BSK Coding"
+              className={`nav-logo${theme === "light" ? " nav-logo-light" : ""}`}
+            />
           </div>
         </NavLink>
 
@@ -302,6 +309,21 @@ function NavBar({ onOpenChangePassword, onOpenFounder }) {
             </>
           )}
         </nav>
+
+        <button
+          type="button"
+          className="theme-toggle"
+          onClick={onToggleTheme}
+          aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
+          aria-pressed={theme === "light"}
+          title={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
+        >
+          {theme === "light" ? (
+            <FaMoon aria-hidden="true" />
+          ) : (
+            <FaSun aria-hidden="true" />
+          )}
+        </button>
       </div>
     </header>
   );

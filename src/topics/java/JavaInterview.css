@@ -467,6 +467,104 @@
   }
 }
 
+#root .app-shell[data-theme="light"] .interview-page {
+  background: transparent;
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .interview-header {
+  background: linear-gradient(135deg, #eaf0fb, #f8faff);
+  border-color: rgba(29, 48, 82, 0.12);
+}
+
+#root .app-shell[data-theme="light"] .interview-page .interview-title {
+  background-image: linear-gradient(135deg, #3159dd, #5678ed);
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .interview-subtitle,
+#root .app-shell[data-theme="light"] .interview-page .stat-label {
+  color: #52627a;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .interview-stat {
+  background: #ffffff;
+  border-color: rgba(49, 89, 221, 0.18);
+  box-shadow: 0 4px 14px rgba(29, 48, 82, 0.06);
+}
+
+#root .app-shell[data-theme="light"] .interview-page .stat-number {
+  color: #3159dd;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .category-title {
+  color: #17243b;
+  border-color: rgba(49, 89, 221, 0.25);
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-item-vertical,
+#root .app-shell[data-theme="light"] .interview-page .question-card {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 4px 14px rgba(29, 48, 82, 0.06);
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-item-vertical:hover,
+#root .app-shell[data-theme="light"] .interview-page .question-item-vertical.active {
+  background: #f6f8ff;
+  border-color: rgba(49, 89, 221, 0.34);
+  box-shadow: 0 8px 22px rgba(49, 89, 221, 0.1);
+}
+
+#root .app-shell[data-theme="light"] .interview-page .q-number {
+  background: #eaf0fb;
+  color: #3159dd;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-item-vertical.active .q-number {
+  background: #e6f4ec;
+  color: #187347;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .q-text,
+#root .app-shell[data-theme="light"] .interview-page .question-text,
+#root .app-shell[data-theme="light"] .interview-page .answer-text {
+  color: #34445c !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-item-content {
+  border-color: rgba(29, 48, 82, 0.12);
+}
+
+#root .app-shell[data-theme="light"] .interview-page .answer-text {
+  background: #f5f8ff;
+  border-left-color: #3159dd;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .answer-example,
+#root .app-shell[data-theme="light"] .interview-page .answer-note {
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .answer-example {
+  background: #eef7ff;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .answer-note {
+  background: #fff8e6;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .code-block pre {
+  background: #0d1117 !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .code-block code {
+  background: transparent !important;
+  color: #e2e8f0 !important;
+}
+
 /* Prism.js Syntax Highlighting - Catppuccin Mocha Theme */
 .token.comment,
 .token.prolog,

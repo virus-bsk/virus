@@ -333,3 +333,94 @@
     padding: 4px 8px;
   }
 }
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page {
+  background: transparent;
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-title {
+  background-image: linear-gradient(135deg, #3159dd, #5678ed);
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-subtitle,
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-filter-label {
+  color: #52627a;
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-stat,
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-filter-count {
+  background: #eaf0fb;
+  border-color: rgba(49, 89, 221, 0.2);
+  color: #3159dd;
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-filter-bar {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 4px 14px rgba(29, 48, 82, 0.06);
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-filter-select {
+  background-color: #ffffff;
+  border-color: rgba(29, 48, 82, 0.2);
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-filter-select option {
+  background: #ffffff;
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-problem {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 4px 14px rgba(29, 48, 82, 0.06);
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-problem:hover {
+  background: #ffffff;
+  border-color: #3159dd;
+  box-shadow: 0 10px 24px rgba(49, 89, 221, 0.14);
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-problem-name {
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-problem-actions {
+  border-color: rgba(29, 48, 82, 0.12);
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-easy {
+  background: #e6f4ec;
+  border-color: #b6dfc7;
+  color: #187347;
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-medium {
+  background: #fff4d6;
+  border-color: #f2d48a;
+  color: #815600;
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-hard {
+  background: #fce8e7;
+  border-color: #f3b5b0;
+  color: #b42318;
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-intro {
+  background: #f0eafe;
+  border-color: #d3c4f7;
+  color: #5b3aa5;
+}
+
+#root .app-shell[data-theme="light"] .dsa-leetcode-page .lc-problem-topic {
+  background: #f1f5fb;
+  border-color: rgba(49, 89, 221, 0.16);
+  color: #46556d;
+}

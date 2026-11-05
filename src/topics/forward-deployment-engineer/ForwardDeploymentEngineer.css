@@ -464,3 +464,70 @@
     padding: 1.3rem 1.1rem;
   }
 }
+
+#root .app-shell[data-theme="light"] .fde-hero,
+#root .app-shell[data-theme="light"] .fde-module-hero {
+  background: linear-gradient(135deg, #ffffff, #f1f5fb);
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 12px 30px rgba(29, 48, 82, 0.08);
+}
+
+#root .app-shell[data-theme="light"] .fde-title,
+#root .app-shell[data-theme="light"] .fde-module-title {
+  background-image: linear-gradient(135deg, #17243b, #3159dd);
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+#root .app-shell[data-theme="light"] .fde-tagline,
+#root .app-shell[data-theme="light"] .fde-description,
+#root .app-shell[data-theme="light"] .fde-module-summary {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.14);
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .fde-stat,
+#root .app-shell[data-theme="light"] .fde-card,
+#root .app-shell[data-theme="light"] .fde-module-section,
+#root .app-shell[data-theme="light"] .fde-module-nav-btn,
+#root .app-shell[data-theme="light"] .fde-module-missing {
+  background: #ffffff;
+  border-color: rgba(29, 48, 82, 0.14);
+  box-shadow: 0 6px 18px rgba(29, 48, 82, 0.07);
+}
+
+#root .app-shell[data-theme="light"] .fde-card:hover {
+  border-color: #3159dd;
+  box-shadow: 0 12px 26px rgba(49, 89, 221, 0.14);
+}
+
+#root .app-shell[data-theme="light"] .fde-section-title,
+#root .app-shell[data-theme="light"] .fde-module-section-head h3,
+#root .app-shell[data-theme="light"] .fde-module-missing h1,
+#root .app-shell[data-theme="light"] .fde-card-title {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .fde-card-duration,
+#root .app-shell[data-theme="light"] .fde-module-meta,
+#root .app-shell[data-theme="light"] .fde-card-open {
+  color: #187347 !important;
+}
+
+#root .app-shell[data-theme="light"] .fde-card-project,
+#root .app-shell[data-theme="light"] .fde-module-project {
+  background: #eaf0fb;
+  border-color: rgba(49, 89, 221, 0.18);
+  color: #34445c;
+}
+
+#root .app-shell[data-theme="light"] .fde-module-project-label,
+#root .app-shell[data-theme="light"] .fde-module-nav-btn span {
+  color: #52627a;
+}
+
+#root .app-shell[data-theme="light"] .fde-module-nav-btn strong {
+  color: #17243b;
+}

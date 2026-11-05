@@ -383,3 +383,124 @@
     font-size: 0.75rem;
   }
 }
+
+#root .app-shell[data-theme="light"] .page-container > .js-interview-page {
+  background: #f5f7fb !important;
+  color: #34445c !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .interview-header {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(247, 223, 30, 0.12), transparent 68%),
+    linear-gradient(135deg, #ffffff, #f8f6e9) !important;
+  border-bottom-color: rgba(29, 48, 82, 0.12);
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .interview-subtitle,
+#root .app-shell[data-theme="light"] .js-interview-page .interview-stat .stat-label {
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .interview-stat {
+  background: #ffffff !important;
+  border-color: rgba(190, 155, 0, 0.24);
+  box-shadow: 0 4px 14px rgba(29, 48, 82, 0.06);
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .interview-stat .stat-number {
+  color: #806600 !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .questions-section {
+  background: #ffffff !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .category-title {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .question-item-vertical,
+#root .app-shell[data-theme="light"] .js-interview-page .question-item-vertical:hover,
+#root .app-shell[data-theme="light"] .js-interview-page .question-item-vertical.active {
+  background: #ffffff !important;
+  border-color: rgba(29, 48, 82, 0.16);
+  box-shadow: 0 3px 12px rgba(29, 48, 82, 0.06);
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .question-item-vertical:hover {
+  border-color: rgba(190, 155, 0, 0.42);
+  box-shadow: 0 6px 18px rgba(29, 48, 82, 0.1);
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .question-item-vertical.active {
+  border-color: rgba(34, 160, 102, 0.42);
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .q-text {
+  color: #26364d !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .q-number {
+  background: #fbf6d8 !important;
+  color: #806600 !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .question-item-vertical.active .q-number {
+  background: #e8f7ef !important;
+  color: #15803d !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .expand-arrow {
+  color: #806600 !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .question-item-content {
+  border-top-color: rgba(29, 48, 82, 0.12);
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .question-card {
+  background: #f8faff !important;
+  border-color: rgba(29, 48, 82, 0.12);
+  box-shadow: none;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .answer-title {
+  color: #806600 !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .question-item-vertical.active .answer-title {
+  color: #15803d !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .answer-text {
+  background: #fbf8e9 !important;
+  border-left-color: #b89a00;
+  color: #34445c !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .question-item-vertical.active .answer-text {
+  background: #eff8f2 !important;
+  border-left-color: #22a366;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .code-block {
+  background: #080c14 !important;
+  border-color: rgba(250, 204, 21, 0.3);
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .code-header {
+  background: rgba(250, 204, 21, 0.1) !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .code-language {
+  color: #facc15 !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .code-block pre {
+  background: #080c14 !important;
+}
+
+#root .app-shell[data-theme="light"] .js-interview-page .code-block code {
+  background: transparent !important;
+  color: #ffffff !important;
+}
