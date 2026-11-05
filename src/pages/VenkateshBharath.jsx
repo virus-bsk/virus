@@ -46,6 +46,7 @@ import {
   SiPython,
   SiSwagger,
   SiZensar,
+  SiSpring,
 } from "react-icons/si";
 import { loadPortfolioProfile } from "../services/portfolioProfile";
 import { loadPortfolioSkills } from "../services/portfolioSkills";
@@ -370,10 +371,56 @@ function getCompanyLogoAssets(organization) {
 
 function getProjectBrand(project) {
   const name = project.name || "";
-  return COMPANY_LOGO_ASSETS.find(
-    (asset) =>
-      ["American Express", "PayPal"].includes(asset.name) &&
-      asset.pattern.test(name),
+  return COMPANY_LOGO_ASSETS.find((asset) => asset.pattern.test(name));
+}
+
+function renderProjectBrand(project) {
+  const brand = getProjectBrand(project);
+  if (!brand) return null;
+
+  return (
+    <span
+      className="vb-project-brand"
+      role="img"
+      aria-label={`Client: ${brand.name}`}
+    >
+      <img
+        className="vb-company-logo-image"
+        src={brand.src}
+        alt=""
+        title={brand.name}
+      />
+      <span>{brand.name}</span>
+    </span>
+  );
+}
+
+function renderCertificationLogo(certification) {
+  if (BRAND_LOGOS[certification.logo]) return BRAND_LOGOS[certification.logo];
+
+  const issuer = certification.issuer || "";
+  const asset = COMPANY_LOGO_ASSETS.find((item) => item.pattern.test(issuer));
+  if (asset) {
+    return (
+      <img
+        className="vb-certification-logo-image"
+        src={asset.src}
+        alt=""
+        title={asset.name}
+      />
+    );
+  }
+  if (/google(?: cloud)?/i.test(issuer)) return BRAND_LOGOS.googleCloud;
+  if (/oracle/i.test(issuer)) return BRAND_LOGOS.oracle;
+  if (/microsoft/i.test(issuer)) return <FaMicrosoft />;
+  if (/linkedin/i.test(issuer)) return <FaLinkedinIn />;
+  if (/spring/i.test(issuer)) return <SiSpring />;
+  if (/java/i.test(issuer)) return <FaJava />;
+
+  return (
+    <span className="vb-brand-wordmark">
+      {issuer.slice(0, 2).toUpperCase()}
+    </span>
   );
 }
 
@@ -1300,10 +1347,11 @@ function VenkateshBharath() {
                             <span
                               className="vb-company-logo"
                               data-company={organization.name}
+                              role="img"
+                              aria-label={organization.name}
                               key={organization.name}
                             >
                               {renderOrganizationLogo(organization)}
-                              {renderEmphasis(organization.name)}
                             </span>
                           ))}
                         </div>
@@ -1349,14 +1397,7 @@ function VenkateshBharath() {
                       {renderEmphasis(getProjectPeriod(project))}
                     </span>
                     <span className="vb-project-topline-actions">
-                      {getProjectBrand(project) && (
-                        <span className="vb-project-brand" aria-label={`Client: ${getProjectBrand(project).name}`}>
-                          {renderOrganizationLogo({
-                            name: getProjectBrand(project).name,
-                          })}
-                          <span>{getProjectBrand(project).name}</span>
-                        </span>
-                      )}
+                      {renderProjectBrand(project)}
                       <span className="vb-project-arrow" aria-hidden="true">
                         <FaArrowRight />
                       </span>
@@ -1516,13 +1557,10 @@ function VenkateshBharath() {
                   <span className="vb-certification-index">0{index + 1}</span>
                   <span
                     className="vb-certification-logo"
+                    role="img"
                     aria-label={`${certification.issuer} logo`}
                   >
-                    {BRAND_LOGOS[certification.logo] || (
-                      <span className="vb-brand-wordmark">
-                        {certification.issuer.slice(0, 2).toUpperCase()}
-                      </span>
-                    )}
+                    {renderCertificationLogo(certification)}
                   </span>
                   <div className="vb-certification-copy">
                     <h3>{renderEmphasis(certification.name)}</h3>

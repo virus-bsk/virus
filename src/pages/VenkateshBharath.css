@@ -1031,6 +1031,11 @@
   width: 25px;
 }
 
+.vb-project-brand .vb-company-logo-image[title="American Express"] {
+  width: 30px;
+  height: 24px;
+}
+
 .vb-project-brand .vb-american-express-wordmark {
   font-size: 0.53rem;
 }
@@ -1491,6 +1496,23 @@
   background: #f0f4fc;
   color: var(--vb-accent);
   font-size: 1.55rem;
+}
+
+.vb-certification-logo-image {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.vb-certification-logo-image[title="Zensar"] {
+  width: 42px;
+  height: 30px;
+  filter: brightness(0);
+}
+
+.vb-certification-logo-image[title="ACL Digital"] {
+  width: 44px;
+  height: 30px;
 }
 
 .vb-certification-logo[aria-label="Oracle logo"] {
