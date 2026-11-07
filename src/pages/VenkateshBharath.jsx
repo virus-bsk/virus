@@ -307,6 +307,16 @@ function getProjectPeriod(project) {
   return project.period || "";
 }
 
+function getProjectDisplayName(project) {
+  const name = project.name || "";
+  if (/\bmars\b/i.test(name)) return "MARS";
+  if (/\bcdas\b/i.test(name)) return "Customer Data Abstraction Services";
+  if (/\bpayments?\b/i.test(name) && /paypal/i.test(name)) return "Payments";
+  if (/\bpnc(?: bank)?\b/i.test(name)) return "RTL TAURUS";
+  if (/\baz healthcare\b/i.test(name)) return "AZ Healthcare";
+  return name;
+}
+
 const BRAND_LOGOS = {
   zensar: <SiZensar />,
   americanExpress: <SiAmericanexpress />,
@@ -331,12 +341,12 @@ const COMPANY_LOGO_ASSETS = [
   {
     name: "American Express",
     pattern: /american express/i,
-    src: `${import.meta.env.BASE_URL}company-logos/american-express.svg`,
+    src: `${import.meta.env.BASE_URL}company-logos/american-express-wordmark.svg`,
   },
   {
     name: "ACL Digital",
     pattern: /acl digital/i,
-    src: `${import.meta.env.BASE_URL}company-logos/acl-digital.webp`,
+    src: `${import.meta.env.BASE_URL}company-logos/acl-digital-user.png`,
   },
   {
     name: "PayPal",
@@ -347,6 +357,16 @@ const COMPANY_LOGO_ASSETS = [
     name: "Virtusa",
     pattern: /virtusa/i,
     src: `${import.meta.env.BASE_URL}company-logos/virtusa.svg`,
+  },
+  {
+    name: "AstraZeneca",
+    pattern: /astrazeneca|az healthcare/i,
+    src: `${import.meta.env.BASE_URL}company-logos/astrazeneca.svg`,
+  },
+  {
+    name: "PNC Bank",
+    pattern: /\bpnc(?: bank)?\b/i,
+    src: `${import.meta.env.BASE_URL}company-logos/pnc.svg`,
   },
 ];
 const BSK_CODING_URL = "https://bskcoding.com/";
@@ -371,6 +391,12 @@ function getCompanyLogoAssets(organization) {
 
 function getProjectBrand(project) {
   const name = project.name || "";
+  if (/\bmars\b/i.test(name)) {
+    return COMPANY_LOGO_ASSETS.find((asset) => asset.name === "American Express");
+  }
+  if (/\bcdas\b|paypal/i.test(name)) {
+    return COMPANY_LOGO_ASSETS.find((asset) => asset.name === "PayPal");
+  }
   return COMPANY_LOGO_ASSETS.find((asset) => asset.pattern.test(name));
 }
 
@@ -390,7 +416,6 @@ function renderProjectBrand(project) {
         alt=""
         title={brand.name}
       />
-      <span>{brand.name}</span>
     </span>
   );
 }
@@ -427,26 +452,15 @@ function renderCertificationLogo(certification) {
 function renderOrganizationLogo(organization) {
   const assets = getCompanyLogoAssets(organization);
   if (assets.length) {
-    return assets.map((asset) =>
-      asset.name === "American Express" ? (
-        <span
-          className="vb-american-express-wordmark"
-          key={asset.name}
-          aria-label="American Express"
-        >
-          <span>AMERICAN</span>
-          <span>EXPRESS</span>
-        </span>
-      ) : (
-        <img
-          className="vb-company-logo-image"
-          key={asset.name}
-          src={asset.src}
-          alt=""
-          title={asset.name}
-        />
-      ),
-    );
+    return assets.map((asset) => (
+      <img
+        className="vb-company-logo-image"
+        key={asset.name}
+        src={asset.src}
+        alt=""
+        title={asset.name}
+      />
+    ));
   }
   if (BRAND_LOGOS[organization.logo]) {
     return <i aria-hidden="true">{BRAND_LOGOS[organization.logo]}</i>;
@@ -1404,7 +1418,7 @@ function VenkateshBharath() {
                     </span>
                   </span>
                   <span className="vb-project-title">
-                    {renderEmphasis(project.name)}
+                    {renderEmphasis(getProjectDisplayName(project))}
                   </span>
                   {(project.summary || project.businessProblem) && (
                     <span className="vb-project-preview">

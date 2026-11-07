@@ -795,24 +795,27 @@
 }
 
 .vb-company-logo-image[title="ACL Digital"] {
-  width: 85px;
-  height: 30px;
+  width: 112px;
+  height: 36px;
 }
 
-.vb-american-express-wordmark {
-  display: inline-flex;
-  flex-direction: column;
-  justify-content: center;
-  color: #1768ac;
-  font-size: 0.57rem;
-  font-weight: 950;
-  letter-spacing: -0.035em;
-  line-height: 0.98;
-  white-space: nowrap;
+.vb-company-logo-image[title="American Express"] {
+  width: 96px;
+  height: 50px;
 }
 
 .vb-company-logo-image[title="Virtusa"] {
   width: 88px;
+}
+
+.vb-company-logo-image[title="AstraZeneca"] {
+  width: 96px;
+  height: 30px;
+}
+
+.vb-company-logo-image[title="PNC Bank"] {
+  width: 96px;
+  height: 30px;
 }
 
 .vb-company-logo-image[title="PayPal"] {
@@ -1032,12 +1035,19 @@
 }
 
 .vb-project-brand .vb-company-logo-image[title="American Express"] {
-  width: 30px;
-  height: 24px;
+  width: 76px;
+  height: 40px;
 }
 
-.vb-project-brand .vb-american-express-wordmark {
-  font-size: 0.53rem;
+.vb-project-brand .vb-company-logo-image[title="ACL Digital"] {
+  width: 104px;
+  height: 34px;
+}
+
+.vb-project-brand .vb-company-logo-image[title="AstraZeneca"],
+.vb-project-brand .vb-company-logo-image[title="PNC Bank"] {
+  width: 72px;
+  height: 24px;
 }
 
 .vb-project-brand > span:last-child {

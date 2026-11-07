@@ -2030,8 +2030,11 @@ button.mdsa-video-btn:focus-visible {
 #root .app-shell[data-theme="light"] .mdsa-problem-card:focus-visible {
   transform: translateY(-3px);
   background: #ffffff;
-  border-color: #3159dd;
-  box-shadow: 0 12px 26px rgba(49, 89, 221, 0.14);
+  border-color: #3b82f6;
+  box-shadow:
+    0 0 0 2px rgba(59, 130, 246, 0.18),
+    0 12px 26px rgba(49, 89, 221, 0.2),
+    0 0 30px rgba(59, 130, 246, 0.24);
 }
 
 #root .app-shell[data-theme="light"] .mdsa-problem-id {
@@ -2052,4 +2055,139 @@ button.mdsa-video-btn:focus-visible {
 #root .app-shell[data-theme="light"] .mdsa-problem-desc,
 #root .app-shell[data-theme="light"] .mdsa-problem-body p {
   color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .page-container .mdsa-page .mdsa-problem-card button.mdsa-video-btn.available {
+  background: linear-gradient(135deg, #ef4444, #c81e1e) !important;
+  color: #ffffff !important;
+  border-color: rgba(200, 30, 30, 0.35) !important;
+}
+
+#root .app-shell[data-theme="light"] .page-container .mdsa-page .mdsa-problem-card button.mdsa-video-btn.available .mdsa-solve-text {
+  color: #ffffff !important;
+}
+
+#root .app-shell[data-theme="light"] .page-container .mdsa-page .mdsa-problem-card button.mdsa-video-btn.available:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  border-color: #b91c1c !important;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-pane .mdsa-wp-day:not(:first-child) {
+  border-top-color: #d7dfeb;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-day-no {
+  color: #17243b;
+  background: color-mix(in srgb, var(--day-accent, #3159dd) 12%, #ffffff);
+  border-color: color-mix(in srgb, var(--day-accent, #3159dd) 45%, #ffffff);
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-day-name {
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-tag.practice {
+  color: #34445c;
+  background: color-mix(in srgb, var(--day-accent, #3159dd) 10%, #ffffff);
+  border-color: color-mix(in srgb, var(--day-accent, #3159dd) 35%, #ffffff);
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-tag.test-week,
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-day.test-week .mdsa-wp-day-name {
+  color: #8a5700;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-tag.test-week {
+  background: #fff7e6;
+  border-color: #f0c36d;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-tag.test-mixed,
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-day.test-mixed .mdsa-wp-day-name {
+  color: #6041a6;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-tag.test-mixed {
+  background: #f5f1ff;
+  border-color: #c9b8f1;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-today-chip {
+  color: #067647;
+  background: #ecfdf5;
+  border-color: #86efac;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-day.today .mdsa-wp-day-name {
+  color: #067647;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-problem-card {
+  border-color: #d3dce9;
+  border-left-color: var(--day-accent, #3159dd);
+  box-shadow: 0 6px 18px rgba(29, 48, 82, 0.08);
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-problem-title {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-problem-description,
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-problem-desc,
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-problem-body p {
+  color: #3f4f67 !important;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-problem-id {
+  color: #52627a;
+  border-bottom-color: #e2e8f0;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-difficulty-badge.mdsa-easy,
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-difficulty-badge.easy {
+  color: #067647;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-difficulty-badge.mdsa-medium,
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-difficulty-badge.medium {
+  color: #8a5700;
+  background: #fff7e6;
+  border-color: #f0c36d;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-difficulty-badge.mdsa-hard,
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-difficulty-badge.hard {
+  color: #b42318;
+  background: #fff1f0;
+  border-color: #fda29b;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-random-note {
+  color: #52627a;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-reveal-btn.test-week {
+  color: #8a5700;
+  background: #fff7e6;
+  border-color: #f0c36d;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-wp-reveal-btn.test-mixed {
+  color: #6041a6;
+  background: #f5f1ff;
+  border-color: #c9b8f1;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-video-btn.soon,
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-video-btn.soon .mdsa-solve-text {
+  color: #52627a;
+}
+
+#root .app-shell[data-theme="light"] .mdsa-page-weekly .mdsa-video-btn.soon {
+  background: #f1f5f9;
+  border-color: #d7dfeb;
 }

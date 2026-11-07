@@ -5580,7 +5580,12 @@ body[data-theme="light"] {
     :not(.vb-portfolio):not(.vb-portfolio *)
 ) button:not(.mjobs-more):not(.cta-button):not(
     .danger
-  ):not([class*="delete"]):not(.vb-portfolio *) {
+  ):not([class*="delete"]):not(
+    .mdsa-video-btn,
+    .mdsa-solve-btn[data-platform="youtube"],
+    .lesson-play-btn,
+    .lc-play-btn
+  ):not(.vb-portfolio *) {
   border-color: rgba(49, 89, 221, 0.24) !important;
   background: #eaf0fb !important;
   color: #3159dd !important;
@@ -5645,7 +5650,16 @@ body[data-theme="light"] {
     [class*="label"],
     [class*="name"]
   )
-):not(button *):not(.nav-link *):not(pre *):not(code *):not(.vb-portfolio *):not(.founder-modal *) {
+):not(button *):not(.nav-link *):not(
+  .sd-video-btn *,
+  .oops-video-link *,
+  .dbc-video-link *,
+  .maang-intro-video *,
+  .cap-card-badge *,
+  .cache-card-badge *,
+  .slc-card-badge *,
+  .lb-card-badge *
+):not(pre *):not(code *):not(.vb-portfolio *):not(.founder-modal *) {
   color: #34445c !important;
   opacity: 1;
 }
@@ -5664,6 +5678,9 @@ body[data-theme="light"] {
 #root .app-shell[data-theme="light"] :where(:not(.vb-portfolio):not(.vb-portfolio *)) a:not(.yt-round):not(
     [class*="button"]
   ):not([class*="btn"]):not([class*="badge"]):not(.mjobs-apply):not([style*="color"]):not(
+    .oops-video-link,
+    .dbc-video-link,
+    .maang-intro-video,
     .vb-portfolio *
   ):not(.founder-modal *) {
   color: #3159dd !important;
@@ -5710,6 +5727,73 @@ body[data-theme="light"] {
 ):not(.vb-portfolio *):not(.founder-modal *) {
   border: 1px solid rgba(29, 48, 82, 0.16);
   box-shadow: 0 4px 18px rgba(29, 48, 82, 0.06);
+}
+
+#root .app-shell .page-container :is(
+  .mdsa-video-btn.available,
+  .mdsa-solve-btn[data-platform="youtube"],
+  .lesson-play-btn,
+  .lc-play-btn,
+  .sd-video-btn,
+  .oops-video-link,
+  .dbc-video-link:not(.dbc-video-soon),
+  .maang-intro-video,
+  .cap-card-badge,
+  .cache-card-badge,
+  .slc-card-badge,
+  .lb-card-badge
+) {
+  background: linear-gradient(135deg, #ff3333, #cc0000) !important;
+  border-color: #b91c1c !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+#root .app-shell .page-container :is(
+  .mdsa-video-btn.available,
+  .mdsa-solve-btn[data-platform="youtube"],
+  .lesson-play-btn,
+  .lc-play-btn,
+  .sd-video-btn,
+  .oops-video-link,
+  .dbc-video-link:not(.dbc-video-soon),
+  .maang-intro-video,
+  .cap-card-badge,
+  .cache-card-badge,
+  .slc-card-badge,
+  .lb-card-badge
+):is(:hover, :focus-visible, :active) {
+  background: linear-gradient(135deg, #e60000, #a80000) !important;
+  border-color: #a80000 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+#root .app-shell .page-container :is(
+  .mdsa-video-btn.available,
+  .mdsa-solve-btn[data-platform="youtube"],
+  .lesson-play-btn,
+  .lc-play-btn,
+  .sd-video-btn,
+  .oops-video-link,
+  .dbc-video-link:not(.dbc-video-soon),
+  .maang-intro-video,
+  .cap-card-badge,
+  .cache-card-badge,
+  .slc-card-badge,
+  .lb-card-badge
+) :where(*) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+#root .app-shell[data-theme="light"] .page-container .mdsa-problem-card:hover,
+#root .app-shell[data-theme="light"] .page-container .mdsa-problem-card:focus-visible {
+  border-color: #3b82f6;
+  box-shadow:
+    0 0 0 2px rgba(59, 130, 246, 0.18),
+    0 12px 26px rgba(49, 89, 221, 0.2),
+    0 0 30px rgba(59, 130, 246, 0.24);
 }
 
 #root .app-shell[data-theme="light"] .skills-section {
