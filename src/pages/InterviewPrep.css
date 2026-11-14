@@ -1745,6 +1745,23 @@
   }
 }
 
+.interview-prep-route .ip-step-chip {
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.interview-prep-route .ip-step-chip-active {
+  border-color: var(--step-color, #60a5fa);
+  background: color-mix(in srgb, var(--step-color, #60a5fa) 24%, #172438);
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--step-color, #60a5fa) 35%, transparent);
+}
+
+.interview-prep-route .ip-step-chip-active .ip-step-icon {
+  background: color-mix(in srgb, var(--step-color, #60a5fa) 24%, #172438);
+}
+
 /* Keep the page readable when the application is using its light theme. */
 #root .app-shell[data-theme="light"] .interview-prep-route,
 #root .app-shell[data-theme="light"] .interview-prep-route .page-container,
@@ -1802,6 +1819,17 @@
   border-color: var(--step-color, #3159dd);
   background: color-mix(in srgb, var(--step-color, #3159dd) 15%, #ffffff);
   color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-step-chip-active {
+  border-color: color-mix(in srgb, var(--step-color, #3159dd) 55%, #52627a);
+  background: color-mix(in srgb, var(--step-color, #3159dd) 18%, #ffffff) !important;
+  color: #17243b !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--step-color, #3159dd) 24%, transparent);
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-step-chip-active .ip-step-icon {
+  background: color-mix(in srgb, var(--step-color, #3159dd) 20%, #ffffff);
 }
 
 #root .app-shell[data-theme="light"] .interview-prep-route .ip-topic {

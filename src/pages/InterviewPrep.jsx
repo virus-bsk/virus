@@ -104,6 +104,7 @@ function highlightCode(code) {
  * Interview Answer → optional Real-time Example → Code when it helps.
  */
 function InterviewPrep() {
+  const [selectedTopicId, setSelectedTopicId] = useState(interviewPrepTopics[0]?.id ?? "");
   // popup state: { topicId, kind: "important" | "scenarios", index } | null
   const [active, setActive] = useState(null);
 
@@ -141,6 +142,7 @@ function InterviewPrep() {
   }, [active, activeList.length, closePopup]);
   const totalImportant = interviewPrepTopics.reduce((n, t) => n + t.important.length, 0);
   const totalScenarios = interviewPrepTopics.reduce((n, t) => n + t.scenarios.length, 0);
+  const selectedTopic = interviewPrepTopics.find((topic) => topic.id === selectedTopicId);
 
   return (
     <div className="ip-page">
@@ -149,8 +151,7 @@ function InterviewPrep() {
           <span className="ip-page-eyebrow">Interview preparation</span>
           <h1 className="ip-page-title">Java & Full-Stack Interview Topics</h1>
           <p className="ip-page-subtitle">
-            Click any question for a clear interview answer, a practical example where
-            useful, and code when it helps explain the idea.
+            Choose a topic to view its questions, then select a question to open its answer.
           </p>
           <div className="ip-page-stats">
             <span className="ip-stat">
@@ -172,39 +173,46 @@ function InterviewPrep() {
         </Link>
       </header>
 
-      {/* Compact topic navigation: the questions are the main content. */}
+      {/* Show one topic at a time to keep the question list focused. */}
       <nav className="ip-steps ip-steps-compact" aria-label="Interview topics">
-        <span className="ip-steps-label">Jump to topic</span>
+        <span className="ip-steps-label">Choose a topic</span>
         {interviewPrepTopics.map((t) => (
-          <a key={t.id} href={`#ip-${t.id}`} className="ip-step-chip" style={{ "--step-color": t.color }}>
+          <button
+            key={t.id}
+            type="button"
+            className={`ip-step-chip${selectedTopicId === t.id ? " ip-step-chip-active" : ""}`}
+            style={{ "--step-color": t.color }}
+            aria-pressed={selectedTopicId === t.id}
+            onClick={() => setSelectedTopicId(t.id)}
+          >
             <span className="ip-step-icon">{t.icon}</span>
             <span className="ip-step-name">{t.title}</span>
-          </a>
+          </button>
         ))}
       </nav>
 
 
-      {/* Topics — one section per step */}
+      {/* Render only the selected topic */}
       <div className="ip-topics">
-        {interviewPrepTopics.map((topic, index) => (
+        {selectedTopic && (
           <section
-            key={topic.id}
-            id={`ip-${topic.id}`}
+            key={selectedTopic.id}
+            id="ip-selected-topic"
             className="ip-topic"
-            style={{ "--step-color": topic.color }}
+            style={{ "--step-color": selectedTopic.color }}
           >
             <header className="ip-topic-header">
               <div className="ip-topic-heading">
-                <span className="ip-topic-step">{topic.step}</span>
-                <span className="ip-topic-icon">{topic.icon}</span>
+                <span className="ip-topic-step">{selectedTopic.step}</span>
+                <span className="ip-topic-icon">{selectedTopic.icon}</span>
                 <div>
-                  <h2 className="ip-topic-title">{topic.title}</h2>
+                  <h2 className="ip-topic-title">{selectedTopic.title}</h2>
                   <p className="ip-topic-count">
                     <span className="ip-count-chip ip-count-chip-key">
-                      {topic.important.length} important
+                      {selectedTopic.important.length} important
                     </span>
                     <span className="ip-count-chip ip-count-chip-alt">
-                      {topic.scenarios.length} scenario-based
+                      {selectedTopic.scenarios.length} scenario-based
                     </span>
                   </p>
                 </div>
@@ -214,24 +222,24 @@ function InterviewPrep() {
             {/* 20 important concept questions */}
             <h3 className="ip-block-title">
               <span aria-hidden="true">📘</span>
-              20 Important Questions (concept-wise)
+              Important Questions
               <span className="ip-block-count ip-block-count-key">
-                {topic.important.length} Qs
+                {selectedTopic.important.length} questions
               </span>
             </h3>
             <ol className="ip-grid ip-grid-important">
-              {topic.important.map((q, i) => (
+              {selectedTopic.important.map((q, i) => (
                 <li
                   className="ip-question"
                   key={i}
                   role="button"
                   tabIndex={0}
                   title="Click to see the answer"
-                  onClick={() => openPopup(topic.id, "important", i)}
+                  onClick={() => openPopup(selectedTopic.id, "important", i)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      openPopup(topic.id, "important", i);
+                      openPopup(selectedTopic.id, "important", i);
                     }
                   }}
                 >
@@ -245,24 +253,24 @@ function InterviewPrep() {
             {/* 10 scenario-based questions */}
             <h3 className="ip-block-title ip-block-title-scenario">
               <span aria-hidden="true">🧠</span>
-              10 Scenario-Based Questions (real-time)
+              Scenario-Based Questions
               <span className="ip-block-count ip-block-count-alt">
-                {topic.scenarios.length} Qs
+                {selectedTopic.scenarios.length} questions
               </span>
             </h3>
             <ol className="ip-grid ip-grid-scenario">
-              {topic.scenarios.map((q, i) => (
+              {selectedTopic.scenarios.map((q, i) => (
                 <li
                   className="ip-question ip-question-scenario"
                   key={i}
                   role="button"
                   tabIndex={0}
                   title="Click to see the answer"
-                  onClick={() => openPopup(topic.id, "scenarios", i)}
+                  onClick={() => openPopup(selectedTopic.id, "scenarios", i)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      openPopup(topic.id, "scenarios", i);
+                      openPopup(selectedTopic.id, "scenarios", i);
                     }
                   }}
                 >
@@ -273,13 +281,8 @@ function InterviewPrep() {
               ))}
             </ol>
 
-            {index < interviewPrepTopics.length - 1 && (
-              <div className="ip-topic-divider" aria-hidden="true">
-                ▼
-              </div>
-            )}
           </section>
-        ))}
+        )}
       </div>
 
 
