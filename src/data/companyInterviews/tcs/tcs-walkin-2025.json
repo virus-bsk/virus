@@ -1,0 +1,166 @@
+{
+  "id": "tcs",
+  "name": "TCS",
+  "interviewName": "TCS 2025 Walk-in Interview - Full Stack Developer (Preparation Questions)",
+  "rounds": [
+    {
+      "name": "First Round - Technical",
+      "questions": [
+        {
+          "question": "[Java Streams] Using Java Streams, filter the even numbers from a list and sort them in ascending order.",
+          "answer": "Call stream() to process the list, filter() to keep even numbers, and sorted() to order them. Collect the result into a new list.",
+          "code": {
+            "label": "Java example",
+            "language": "java",
+            "content": "import java.util.List;\n\nList<Integer> numbers = List.of(8, 3, 6, 1, 4, 2);\nList<Integer> evenNumbers = numbers.stream()\n    .filter(number -> number % 2 == 0)\n    .sorted()\n    .toList();\n\nSystem.out.println(evenNumbers); // [2, 4, 6, 8]"
+          }
+        },
+        {
+          "question": "[Java Streams] Using Java Streams, find how many times each word appears in a list.",
+          "answer": "Use groupingBy() to group equal words and counting() to count the words in each group. The result is a map from each word to its count.",
+          "code": {
+            "label": "Java example",
+            "language": "java",
+            "content": "import java.util.List;\nimport java.util.Map;\nimport java.util.stream.Collectors;\n\nList<String> words = List.of(\"java\", \"spring\", \"java\", \"react\");\nMap<String, Long> counts = words.stream()\n    .collect(Collectors.groupingBy(\n        word -> word,\n        Collectors.counting()\n    ));\n\nSystem.out.println(counts); // {spring=1, java=2, react=1}"
+          }
+        },
+        {
+          "question": "[Java] What is the difference between String and StringBuilder in Java?",
+          "answer": "String is immutable: its value cannot be changed after it is created. StringBuilder is mutable, so you can change its contents without creating a new object each time. Use StringBuilder when building or changing text repeatedly."
+        },
+        {
+          "question": "[Java] How does a HashMap store and find values?",
+          "answer": "A HashMap stores key-value pairs. It uses the key's hash code to find a storage location, then uses equals() to identify the matching key. Keys should have consistent hashCode() and equals() implementations."
+        },
+        {
+          "question": "[Java] What is the difference between == and equals() in Java?",
+          "answer": "For objects, == checks whether two references point to the same object. equals() checks whether the objects should be considered equal by their value, when that class implements value-based equality. For primitive values, == compares the values."
+        },
+        {
+          "question": "[Java] What is the difference between checked and unchecked exceptions?",
+          "answer": "Checked exceptions are checked by the compiler, so code must catch them or declare them with throws. Unchecked exceptions are RuntimeException types; the compiler does not require them to be caught or declared."
+        },
+        {
+          "question": "[Java] What is the difference between an interface and an abstract class?",
+          "answer": "An interface describes behavior a class agrees to provide, and a class can implement multiple interfaces. An abstract class can share state and common implementation, and a class can extend only one class. Choose based on whether you need a shared base class or a behavior contract."
+        },
+        {
+          "question": "[Spring Boot] What are Spring Boot starters and auto-configuration?",
+          "answer": "A starter is a dependency bundle for a feature, such as web or data access. Auto-configuration uses the libraries on the classpath and application settings to create common Spring beans automatically. You can still override the defaults when needed."
+        },
+        {
+          "question": "[Spring Boot] What is the difference between @Controller and @RestController?",
+          "answer": "@Controller is commonly used for MVC controllers that return view names. @RestController combines @Controller and @ResponseBody, so handler return values are written to the response body, often as JSON."
+        },
+        {
+          "question": "[Microservices] What is a microservice?",
+          "answer": "A microservice is a small, independently deployable application service focused on a specific business capability. Services communicate through defined APIs or messaging. This can let teams deploy parts independently, but it also adds network and operational complexity."
+        },
+        {
+          "question": "[Microservices] How can microservices communicate with one another?",
+          "answer": "They commonly communicate synchronously through HTTP or gRPC APIs, or asynchronously through a message broker. Synchronous calls are useful when an immediate response is needed; messaging helps services work independently and handle events."
+        },
+        {
+          "question": "[Microservices] What does an API Gateway do in a microservices application?",
+          "answer": "An API Gateway provides a single entry point for clients. It can route requests to services and handle shared concerns such as authentication, rate limiting, and request logging. Business rules should generally remain in the appropriate service."
+        },
+        {
+          "question": "[Microservices] What is service discovery?",
+          "answer": "Service discovery helps one service find the network location of another service without hard-coding that location. A registry or platform keeps track of available service instances, which is useful when instances change or scale."
+        },
+        {
+          "question": "[Microservices] What is a circuit breaker in microservices?",
+          "answer": "A circuit breaker temporarily stops calls to a failing service after repeated failures. This avoids repeatedly waiting on an unhealthy dependency and gives it time to recover. A fallback may provide a safe alternative response when appropriate."
+        }
+      ]
+    },
+    {
+      "name": "Second Round - JavaScript and React",
+      "questions": [
+        {
+          "question": "[JavaScript] What is the difference between var, let, and const in JavaScript?",
+          "answer": "let and const are limited to the block where they are declared. var is limited to a function and can be accessed before its declaration due to hoisting. Use const by default, let when reassignment is needed, and avoid var in modern code."
+        },
+        {
+          "question": "[JavaScript] What is the difference between == and === in JavaScript?",
+          "answer": "== may convert the values to a common type before comparing them. === compares both type and value without that conversion. Use === in most cases to make comparisons more predictable."
+        },
+        {
+          "question": "[JavaScript] What is a closure in JavaScript?",
+          "answer": "A closure is a function together with access to variables from the surrounding scope where it was created. The function can keep using those variables even after the outer function has finished."
+        },
+        {
+          "question": "[JavaScript] What is a Promise, and how do async and await work?",
+          "answer": "A Promise represents the future result of an asynchronous operation. It can be pending, fulfilled, or rejected. async makes a function return a Promise, and await lets code inside that function wait for a Promise's result without blocking the browser's main thread."
+        },
+        {
+          "question": "[JavaScript] What is the JavaScript event loop?",
+          "answer": "JavaScript runs synchronous code on its call stack. The event loop coordinates when queued asynchronous callbacks can run after the stack is clear. Promise callbacks are handled as microtasks and generally run before timer callbacks."
+        },
+        {
+          "question": "[React] What is a React component?",
+          "answer": "A React component is a reusable piece of UI. A function component can receive input through props, keep its own state with hooks, and return JSX describing what should appear on the screen."
+        },
+        {
+          "question": "[React] What is the difference between props and state in React?",
+          "answer": "Props are inputs passed from a parent component and should be treated as read-only. State is data managed by a component, often with useState. Updating state asks React to render the UI again."
+        },
+        {
+          "question": "[React] What does the useState hook do?",
+          "answer": "useState adds a state value to a function component. It returns the current value and a setter function. Calling the setter updates the value and schedules a re-render."
+        },
+        {
+          "question": "[React] What does the useEffect hook do?",
+          "answer": "useEffect runs code for side effects, such as fetching data or subscribing to an event. Its dependency list controls when it runs again. Return a cleanup function when the effect needs to unsubscribe or cancel work."
+        },
+        {
+          "question": "[React] Why does React need keys when rendering a list?",
+          "answer": "Keys help React identify which list item was added, removed, or changed. Use a stable, unique value from the data when possible; avoid using the array index if the list can be reordered."
+        },
+        {
+          "question": "[React Coding] Write a basic React component that loads users with a Promise and displays the result.",
+          "answer": "fetch() returns a Promise. The component shows a loading message first, stores the users when the request succeeds, and shows an error message if the request fails.",
+          "code": {
+            "label": "React component using a Promise",
+            "language": "jsx",
+            "content": "import { useEffect, useState } from \"react\";\n\nfunction Users() {\n  const [users, setUsers] = useState([]);\n  const [error, setError] = useState(\"\");\n  const [loading, setLoading] = useState(true);\n\n  useEffect(() => {\n    const controller = new AbortController();\n\n    fetch(\"https://jsonplaceholder.typicode.com/users\", {\n      signal: controller.signal,\n    })\n      .then((response) => {\n        if (!response.ok) {\n          throw new Error(\"Could not load users\");\n        }\n        return response.json();\n      })\n      .then(setUsers)\n      .catch((requestError) => {\n        if (requestError.name !== \"AbortError\") {\n          setError(requestError.message);\n        }\n      })\n      .finally(() => {\n        if (!controller.signal.aborted) {\n          setLoading(false);\n        }\n      });\n\n    return () => controller.abort();\n  }, []);\n\n  if (loading) return <p>Loading users...</p>;\n  if (error) return <p role=\"alert\">{error}</p>;\n\n  return (\n    <ul>\n      {users.map((user) => (\n        <li key={user.id}>{user.name}</li>\n      ))}\n    </ul>\n  );\n}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Third Round - Managerial",
+      "questions": [
+        {
+          "question": "Please introduce yourself.",
+          "answer": "Use a short structure: your current role and experience, your main skills, one relevant project or achievement, and what role you are looking for. Replace the bracketed parts with your own details: \"I am [name], a [role] with [years] of experience. I work mainly with [skills]. Recently, I [brief project contribution]. I am interested in this role because [reason].\""
+        },
+        {
+          "question": "Tell me about your project and your contribution to it.",
+          "answer": "Explain the business purpose, the main technologies, your own responsibilities, one challenge you solved, and the result. Be clear about what you personally did rather than describing only what the whole team built."
+        },
+        {
+          "question": "What are your current and expected salary, and how flexible are you?",
+          "answer": "Give accurate figures for your current package if asked. For expectations, share a researched range that fits the role and your experience, and explain that you are open to discussing the complete compensation and responsibilities."
+        }
+      ]
+    },
+    {
+      "name": "HR Round - Practice Questions",
+      "questions": [
+        {
+          "question": "Why are you interested in joining TCS?",
+          "answer": "Connect your answer to the role, the kind of work you want to do, and how your experience fits. For example: \"I am interested in this role because it matches my experience in [skills] and gives me the opportunity to contribute to [type of work].\" Make the answer specific to your own reasons."
+        },
+        {
+          "question": "Are you comfortable with the work location, shifts, and relocation requirements for this role?",
+          "answer": "Answer honestly based on your situation. State which locations and shifts you can support, and raise any constraints clearly before accepting an offer."
+        },
+        {
+          "question": "What is your notice period, and when could you join?",
+          "answer": "Give your actual notice period and earliest realistic joining date. If an early release might be possible, describe it as a possibility rather than promising a date you cannot confirm."
+        }
+      ]
+    }
+  ]
+}

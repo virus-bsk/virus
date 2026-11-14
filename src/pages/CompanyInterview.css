@@ -154,6 +154,22 @@
   line-height: 1.35;
 }
 
+.ci-company-years {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #a5b4fc;
+  margin: -4px 0 0;
+}
+
+.ci-company-technologies {
+  max-width: 100%;
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
 .ci-company-meta {
   font-size: 0.78rem;
   color: #94a3b8;
@@ -269,6 +285,38 @@
   background: rgba(168, 85, 247, 0.18);
   border-color: rgba(168, 85, 247, 0.5);
   color: #c084fc;
+}
+
+.ci-interview-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  margin-bottom: 20px;
+}
+
+.ci-interview-picker label {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.ci-interview-picker select {
+  width: 100%;
+  max-width: 640px;
+  min-height: 44px;
+  padding: 9px 14px;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 10px;
+  background: #101a32;
+  color: #f8fafc;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ci-interview-picker select:focus-visible {
+  outline: 2px solid #c084fc;
+  outline-offset: 2px;
 }
 
 /* ---- Round timeline ---- */
@@ -521,9 +569,19 @@
 }
 
 .ci-code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   background: rgba(255, 255, 255, 0.04);
   padding: 6px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ci-code-label {
+  color: #e2e8f0;
+  font-size: 0.76rem;
+  font-weight: 650;
 }
 
 .ci-code-lang {
@@ -584,6 +642,10 @@
   color: #52627a;
 }
 
+.app-shell[data-theme="light"] .company-interview-page .ci-company-technologies {
+  color: #64748b;
+}
+
 .app-shell[data-theme="light"] .company-interview-page .ci-company-card,
 .app-shell[data-theme="light"] .company-interview-page .ci-interview-section,
 .app-shell[data-theme="light"] .company-interview-page .ci-round-block {
@@ -628,6 +690,16 @@
   border-color: rgba(49, 89, 221, 0.3);
   background: #eaf0fb !important;
   color: #3159dd !important;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-interview-picker label {
+  color: #334155;
+}
+
+.app-shell[data-theme="light"] .company-interview-page .ci-interview-picker select {
+  border-color: rgba(49, 89, 221, 0.28);
+  background: #ffffff;
+  color: #17243b;
 }
 
 .app-shell[data-theme="light"] .company-interview-page .ci-round-header {

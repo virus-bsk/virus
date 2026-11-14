@@ -1,0 +1,225 @@
+// AUTO-GENERATED file — company-wise interview data.
+// Source: cognizant-walkin-2026.json.
+// Regenerate with: node scripts/rebuild-cognizant-walkin-2026.mjs
+
+export const company = {
+  "id": "cognizant",
+  "name": "Cognizant",
+  "interviews": [
+    {
+      "name": "Cognizant 2026 Walk-in Interview - Java Developer",
+      "questionCount": 11,
+      "rounds": [
+        {
+          "name": "Walk-in Interview Questions",
+          "questions": [
+            {
+              "question": "Self Introduction",
+              "answer": "",
+              "code": null
+            },
+            {
+              "question": "Which Java versions have you used?",
+              "answer": "I have worked with Java 8 and Java 17. I also have knowledge of Java 21 and its latest features.\n\n| Version | Important Features |\n| --- | --- |\n| Java 8 | Lambda Expressions, Stream API, Functional Interfaces, Optional |\n| Java 11 | HTTP Client, String methods, var in Lambda |\n| Java 17 | Sealed Classes, Records, Pattern Matching for instanceof |\n| Java 21 | Virtual Threads, Sequenced Collections, Record Patterns, Pattern Matching for switch |\nImportant Java 21 features:\n\n1. Virtual Threads – Lightweight threads.\n2. Sequenced Collections – Collections with defined encounter order.\n3. Record Patterns – Deconstruct record objects.\n4. Pattern Matching for switch – Enhanced switch expressions.",
+              "code": null
+            },
+            {
+              "question": "What are Virtual Threads in Java?",
+              "answer": "Virtual Threads are lightweight threads introduced as a preview feature in Java 19 and finalized in Java 21.\n\nThey are managed by JVM instead of directly mapping one-to-one to operating system threads.\n\nThey help applications handle thousands or millions of concurrent I/O-bound tasks with less thread-management overhead.\n\nPlatform Thread vs Virtual Thread\n\n| Platform Thread | Virtual Thread |\n| --- | --- |\n| OS thread based | JVM managed |\n| Higher resource overhead | Lower resource overhead |\n| Limited concurrency | High concurrency |\n| Suitable for CPU and I/O tasks | Particularly useful for I/O-bound tasks |\n| Created using new Thread() | Created using virtual thread APIs |\n\nJava Code:\n\nOutput (illustrative):\n\nWhere do we use Virtual Threads?\n\n- Calling multiple REST APIs.\n- Database operations.\n- External service integrations.\n- I/O-intensive microservices.\nImportant: Virtual Threads improve concurrency, not CPU processing speed.",
+              "code": [
+                {
+                  "label": "Java Code",
+                  "language": "java",
+                  "content": "public class VirtualThreadExample {\n\n    public static void main(String[] args)\n            throws InterruptedException {\n\n        Thread thread = Thread.startVirtualThread(() -> {\n            System.out.println(\"Running in: \"\n                + Thread.currentThread());\n        });\n\n        thread.join();\n    }\n}"
+                },
+                {
+                  "label": "Output (illustrative)",
+                  "language": "java",
+                  "content": "Running in: VirtualThread[#...]"
+                }
+              ]
+            },
+            {
+              "question": "Inheritance, Method Overriding & Output Prediction",
+              "answer": "Consider two classes A and B, where B extends A. Predict the output.\n\nComplete Java Program:\n\nCompilation Error\nExplanation:\n\nCompilation error because a parent-class object cannot be assigned directly to a child-class reference.\n\nCorrected statement:\n\nImportant concepts: Inheritance, Method Overriding, Runtime Polymorphism and Upcasting.",
+              "code": [
+                {
+                  "label": "Complete Java Program",
+                  "language": "java",
+                  "content": "class A {\n\n    void display() {\n        System.out.println(\"A - Display Method\");\n    }\n}\n\nclass B extends A {\n\n    @Override\n    void display() {\n        System.out.println(\"B - Display Method\");\n    }\n}\n\npublic class Main {\n\n    public static void main(String[] args) {\n\n        A a = new A();\n        a.display();\n\n        B b = new B();\n        b.display();\n\n        B ba = new A();\n        ba.display();\n    }\n}"
+                },
+                {
+                  "label": "First statement",
+                  "language": "java",
+                  "content": "A a = new A();\na.display();"
+                },
+                {
+                  "label": "Output",
+                  "language": "java",
+                  "content": "A - Display Method"
+                },
+                {
+                  "label": "Second statement",
+                  "language": "java",
+                  "content": "B b = new B();\nb.display();"
+                },
+                {
+                  "label": "Output",
+                  "language": "java",
+                  "content": "B - Display Method"
+                },
+                {
+                  "label": "Third statement",
+                  "language": "java",
+                  "content": "B ba = new A();"
+                },
+                {
+                  "label": "Corrected statement",
+                  "language": "java",
+                  "content": "A ba = new B();\nba.display();"
+                },
+                {
+                  "label": "Output",
+                  "language": "java",
+                  "content": "B - Display Method"
+                }
+              ]
+            },
+            {
+              "question": "Method Overloading - Output Prediction",
+              "answer": "What happens when you execute the following Java program?\n\nComplete Java Program:\n\nCompilation Error – Ambiguous Method Call\nWhy?\n\nBoth methods are applicable.\n\n| Method | First argument | Second argument |\n| --- | --- | --- |\n| add(int, long) | Exact match | int → long |\n| add(long, int) | int → long | Exact match |\nBoth methods have one exact match and one widening conversion.\n\nThe compiler cannot decide which method is more specific.\n\nHow to resolve it?\n\n- `obj.add(9, 10L)` calls `add(int, long)`: the first argument is an exact match, and `10L` is a `long`.\n- `obj.add(9L, 10)` calls `add(long, int)`: `9L` is a `long`, and the second argument is an exact match.\n\nConcept: Method Overloading and Compile-time Polymorphism.",
+              "code": [
+                {
+                  "label": "Complete Java Program",
+                  "language": "java",
+                  "content": "class Calculator {\n\n    long add(int a, long b) {\n        return a + b;\n    }\n\n    long add(long a, int b) {\n        return a + b;\n    }\n\n    public static void main(String[] args) {\n\n        Calculator obj = new Calculator();\n\n        System.out.println(obj.add(9, 10));\n    }\n}"
+                },
+                {
+                  "label": "Overloaded method signatures",
+                  "language": "java",
+                  "content": "add(int a, long b)\nadd(long a, int b)"
+                },
+                {
+                  "label": "Ambiguous method call",
+                  "language": "java",
+                  "content": "obj.add(9, 10);"
+                },
+                {
+                  "label": "Option 1",
+                  "language": "java",
+                  "content": "obj.add(9, 10L);"
+                },
+                {
+                  "label": "Option 2",
+                  "language": "java",
+                  "content": "obj.add(9L, 10);"
+                }
+              ]
+            },
+            {
+              "question": "Which OOP Concepts Are Used in Questions 4 and 5?",
+              "answer": "Only the concepts used in the above two programs:\n\nQuestion 4 – Inheritance & Method Overriding\n\n1. Inheritance: class B extends A – B inherits methods from A.\n2. Method Overriding: B overrides the display() method of A.\n3. Runtime Polymorphism: A ab = new B(); – the overridden method of the actual B object executes.\n4. Upcasting: Assigning a child object to a parent reference.\nQuestion 5 – Method Overloading\n\n1. Method Overloading: Same method name add() with different parameter types and order.\n2. Compile-time Polymorphism: Compiler determines which overloaded method to call based on argument types. Here, the call is ambiguous and causes a compilation error.\n| Question | OOP Concepts |\n| --- | --- |\n| Question 4 | Inheritance, Method Overriding, Runtime Polymorphism, Upcasting |\n| Question 5 | Method Overloading, Compile-time Polymorphism |",
+              "code": null
+            },
+            {
+              "question": "What is Static and Dynamic Polymorphism?",
+              "answer": "Static Polymorphism – Compile-time Polymorphism\nMethod overloading is an example.\n\nCompiler selects the method based on arguments.\n\nDynamic Polymorphism – Runtime Polymorphism\nMethod overriding is an example.\n\n| Static Polymorphism | Dynamic Polymorphism |\n| --- | --- |\n| Method Overloading | Method Overriding |\n| Compile-time decision | Runtime decision |\n| Based on parameters | Based on actual object |\n| Inheritance not required | Inheritance or interface implementation required |",
+              "code": [
+                {
+                  "label": "Static polymorphism: method definitions",
+                  "language": "java",
+                  "content": "class Calculator {\n\n    int add(int a, int b) {\n        return a + b;\n    }\n\n    int add(int a, int b, int c) {\n        return a + b + c;\n    }\n}"
+                },
+                {
+                  "label": "Static polymorphism: calls",
+                  "language": "java",
+                  "content": "Calculator c = new Calculator();\n\nSystem.out.println(c.add(10, 20));\nSystem.out.println(c.add(10, 20, 30));"
+                },
+                {
+                  "label": "Output",
+                  "language": "java",
+                  "content": "30\n60"
+                },
+                {
+                  "label": "Dynamic polymorphism: complete program",
+                  "language": "java",
+                  "content": "class Animal {\n\n    void sound() {\n        System.out.println(\"Animal Sound\");\n    }\n}\n\nclass Dog extends Animal {\n\n    @Override\n    void sound() {\n        System.out.println(\"Dog Barks\");\n    }\n}\n\npublic class Main {\n\n    public static void main(String[] args) {\n\n        Animal animal = new Dog();\n        animal.sound();\n    }\n}"
+                },
+                {
+                  "label": "Output",
+                  "language": "java",
+                  "content": "Dog Barks"
+                }
+              ]
+            },
+            {
+              "question": "What are the New Features Introduced in Spring Boot 3?",
+              "answer": "Spring Boot 3 introduced several improvements, including Java 17 baseline support, Spring Framework 6, Jakarta EE migration, Native Image support, AOT processing and improved observability.\n\nImportant Features\n| Feature | Explanation |\n| --- | --- |\n| Java 17 baseline | Minimum Java version is 17 |\n| Spring Framework 6 | New framework generation |\n| Jakarta EE 9+ | Migration from javax to jakarta packages |\n| GraalVM Native Image | Build native executable applications |\n| AOT Processing | Ahead-of-time processing |\n| Observability | Micrometer Observation support |\n| Spring Security 6 | Updated security framework |\n| HTTP Interfaces | Declarative HTTP clients through Spring Framework |\n1. Jakarta Migration\n\n2. Native Image Support\n\nWith GraalVM Native Image, we can compile Java applications into native executables.\n\nAdvantages:\n\n- Faster startup.\n- Lower memory footprint in suitable applications.\n- Useful for serverless environments.\n3. Observability\n\nObservability helps monitor applications using:\n\n- Metrics\n- Logs\n- Distributed Tracing\nSpring Boot 2 vs Spring Boot 3\n\n| Spring Boot 2 | Spring Boot 3 |\n| --- | --- |\n| Java 8 minimum in earlier releases | Java 17 minimum |\n| Spring Framework 5 | Spring Framework 6 |\n| javax packages | jakarta packages |\n| Older observability integrations | Micrometer Observation |\n| Older security generation | Spring Security 6 |",
+              "code": [
+                {
+                  "label": "Spring Boot 2 imports",
+                  "language": "java",
+                  "content": "import javax.persistence.Entity;\nimport javax.persistence.Id;"
+                },
+                {
+                  "label": "Spring Boot 3 imports",
+                  "language": "java",
+                  "content": "import jakarta.persistence.Entity;\nimport jakarta.persistence.Id;"
+                }
+              ]
+            },
+            {
+              "question": "Write Code to Call User API and Product API in Parallel Using Virtual Threads",
+              "answer": "You have two REST APIs:\n\n1. User API – Fetch user details.\n2. Product API – Fetch product details.\nCall both APIs in parallel using Virtual Threads and collect both responses.\n\nJava 21 Implementation:\n\nHow does it work?\n\nMain Thread\n\nSubmits two independent API tasks\n\nVirtual Thread 1\n\nUser API\n\nVirtual Thread 2\n\nProduct API\n\nCollect Both Responses\n\nImportant points:\n\n- newVirtualThreadPerTaskExecutor() creates a virtual thread for each submitted task.\n- Both API calls start without waiting for one another.\n- Future.get() waits for the corresponding result.\n- Try-with-resources closes the executor.",
+              "code": [
+                {
+                  "label": "Java 21 virtual-thread API example",
+                  "language": "java",
+                  "content": "import java.net.URI;\nimport java.net.http.*;\nimport java.util.concurrent.*;\n\npublic class VirtualThreadApiExample {\n\n    public static void main(String[] args)\n            throws Exception {\n\n        HttpClient client = HttpClient.newHttpClient();\n\n        try (ExecutorService executor =\n             Executors.newVirtualThreadPerTaskExecutor()) {\n\n            Future<String> userFuture = executor.submit(() -> {\n\n                HttpRequest request = HttpRequest.newBuilder()\n                    .uri(URI.create(\n                        \"https://jsonplaceholder.typicode.com/users/1\"))\n                    .GET()\n                    .build();\n\n                return client.send(\n                    request,\n                    HttpResponse.BodyHandlers.ofString()\n                ).body();\n            });\n\n            Future<String> productFuture = executor.submit(() -> {\n\n                HttpRequest request = HttpRequest.newBuilder()\n                    .uri(URI.create(\n                        \"https://fakestoreapi.com/products/1\"))\n                    .GET()\n                    .build();\n\n                return client.send(\n                    request,\n                    HttpResponse.BodyHandlers.ofString()\n                ).body();\n            });\n\n            String userResponse = userFuture.get();\n            String productResponse = productFuture.get();\n\n            System.out.println(\"User Response:\");\n            System.out.println(userResponse);\n\n            System.out.println(\"Product Response:\");\n            System.out.println(productResponse);\n        }\n    }\n}"
+                }
+              ]
+            },
+            {
+              "question": "What is ExecutorService? Have You Used It in Spring Boot?",
+              "answer": "ExecutorService is an interface in Java's concurrency framework. It manages the execution of asynchronous tasks using threads and thread pools.\n\nInstead of manually creating threads for every task, we submit tasks to ExecutorService.\n\nImportant Methods\n| Method | Purpose |\n| --- | --- |\n| execute() | Execute a Runnable task |\n| submit() | Submit a task and return Future |\n| shutdown() | Stop accepting new tasks |\n| shutdownNow() | Attempt to stop running tasks |\n| isTerminated() | Check whether all tasks have completed |\n| awaitTermination() | Wait for executor termination |\nHow to implement two parallel API calls using ExecutorService?\n\nHow to use ExecutorService in Spring Boot?\nConfiguration:\n\nService:\n\nExecutorService vs Virtual Threads\n| ExecutorService with a fixed pool | Virtual-thread-per-task executor |\n| --- | --- |\n| Uses a limited number of threads | Creates a virtual thread for each task |\n| Pool size needs configuration | No fixed pool size is required |\n| Tasks may wait when all pool threads are busy | Can handle many concurrent I/O-bound tasks |\n| Useful when concurrency should be limited | Useful for many I/O-bound tasks |\n\nImportant: Virtual Threads and ExecutorService are not competitors. newVirtualThreadPerTaskExecutor() itself returns an ExecutorService.",
+              "code": [
+                {
+                  "label": "ExecutorService example",
+                  "language": "java",
+                  "content": "import java.util.concurrent.*;\n\npublic class ExecutorExample {\n\n    public static void main(String[] args)\n            throws Exception {\n\n        ExecutorService executor =\n            Executors.newFixedThreadPool(2);\n\n        try {\n\n            Future<String> userFuture =\n                executor.submit(() -> {\n                    return callUserApi();\n                });\n\n            Future<String> productFuture =\n                executor.submit(() -> {\n                    return callProductApi();\n                });\n\n            String user = userFuture.get();\n            String product = productFuture.get();\n\n            System.out.println(user);\n            System.out.println(product);\n\n        } finally {\n            executor.shutdown();\n        }\n    }\n\n    static String callUserApi() throws InterruptedException {\n        Thread.sleep(2000);\n        return \"User API Response\";\n    }\n\n    static String callProductApi() throws InterruptedException {\n        Thread.sleep(2000);\n        return \"Product API Response\";\n    }\n}"
+                },
+                {
+                  "label": "Spring Boot executor configuration",
+                  "language": "java",
+                  "content": "@Configuration\npublic class ExecutorConfig {\n\n    @Bean(destroyMethod = \"shutdown\")\n    public ExecutorService executorService() {\n\n        return Executors.newFixedThreadPool(10);\n    }\n}"
+                },
+                {
+                  "label": "Spring Boot service example",
+                  "language": "java",
+                  "content": "@Service\npublic class UserService {\n\n    private final ExecutorService executor;\n\n    public UserService(ExecutorService executor) {\n        this.executor = executor;\n    }\n\n    public List<String> getResponses() throws Exception {\n\n        Future<String> user = executor.submit(\n            () -> \"User API Response\"\n        );\n\n        Future<String> product = executor.submit(\n            () -> \"Product API Response\"\n        );\n\n        return List.of(user.get(), product.get());\n    }\n}"
+                }
+              ]
+            },
+            {
+              "question": "Given One List, Create Two Threads to Print Even and Odd Numbers Separately",
+              "answer": "You have one List of integers. Create two separate threads:\n\n- Thread 1 should print only even numbers.\n- Thread 2 should print only odd numbers.\n\nJava Program\n\nPossible Output:\n\nNote: The exact order of even and odd output can vary because both threads execute concurrently.\n\nImportant Interview Concepts\n| Method | Purpose |\n| --- | --- |\n| start() | Starts a new thread |\n| run() | Contains thread execution logic |\n| join() | Waits for a thread to finish |\n| isAlive() | Checks whether a thread is running |\nFollow-up: What is the difference between start() and run()?\n\n- start() creates a new thread of execution.\n- Calling run() directly executes the method on the current thread; it does not start a new thread.",
+              "code": [
+                {
+                  "label": "Even/odd thread program",
+                  "language": "java",
+                  "content": "import java.util.*;\n\npublic class EvenOddExample {\n\n    public static void main(String[] args)\n            throws InterruptedException {\n\n        List<Integer> numbers = Arrays.asList(\n            1, 2, 3, 4, 5, 6, 7, 8, 9, 10\n        );\n\n        // Thread 1 - Even Numbers\n        Thread evenThread = new Thread(() -> {\n\n            for (int num : numbers) {\n\n                if (num % 2 == 0) {\n                    System.out.println(\n                        \"Even Thread: \" + num\n                    );\n                }\n            }\n        });\n\n        // Thread 2 - Odd Numbers\n        Thread oddThread = new Thread(() -> {\n\n            for (int num : numbers) {\n\n                if (num % 2 != 0) {\n                    System.out.println(\n                        \"Odd Thread: \" + num\n                    );\n                }\n            }\n        });\n\n        // Start both threads\n        evenThread.start();\n        oddThread.start();\n\n        // Wait for both threads\n        evenThread.join();\n        oddThread.join();\n\n        System.out.println(\"Both threads completed\");\n    }\n}"
+                },
+                {
+                  "label": "Possible output",
+                  "language": "java",
+                  "content": "Even Thread: 2\nOdd Thread: 1\nEven Thread: 4\nOdd Thread: 3\nOdd Thread: 5\nEven Thread: 6\nEven Thread: 8\nOdd Thread: 7\nOdd Thread: 9\nEven Thread: 10\nBoth threads completed"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "questionCount": 11
+};

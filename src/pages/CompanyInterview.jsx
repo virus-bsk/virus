@@ -133,6 +133,144 @@ const COMPANY_COLORS = [
   "#fb923c",
 ];
 
+const COMPANY_GRID_DETAILS = {
+  "acl-digital-paypal-adobe": {
+    name: "ACL Digital",
+    interviews: "PayPal 2024, 2025 · Adobe 2025",
+    technologies: "Java · Spring Boot · Microservices · SQL · DSA",
+  },
+  altimetrix: {
+    name: "Altimetrix",
+    interviews: "2024",
+    technologies: "Java · Spring Boot · Microservices · JPA",
+  },
+  amazon: {
+    name: "Amazon",
+    interviews: "2025",
+    technologies: "Data Structures & Algorithms · System Design",
+  },
+  "aspire-systems": {
+    name: "Aspire Systems",
+    interviews: "2024",
+    technologies: "Java · Spring Boot · Microservices · SQL",
+  },
+  axis: {
+    name: "Axis Bank",
+    interviews: "2024",
+    technologies: "Java · React · Kafka · Docker · Kubernetes",
+  },
+  centrico: {
+    name: "Centrico",
+    interviews: "2024",
+    technologies: "Java · JavaScript · React · Spring Boot",
+  },
+  cognizant: {
+    name: "Cognizant",
+    interviews: "Ford Motor 2024 · Walk-in 2026",
+    technologies: "Java · Spring Boot · React · JavaScript · Kafka",
+  },
+  "contus-tech-walk-in": {
+    name: "ContusTech",
+    interviews: "2024",
+    technologies: "Java · Spring Boot · Microservices · Kafka · SQL",
+  },
+  datanimbus: {
+    name: "Datanimbus",
+    interviews: "2025",
+    technologies: "Java · Spring Boot · React · Kafka · SQL",
+  },
+  "ford-motor": {
+    name: "Ford Motor",
+    interviews: "2024",
+    technologies: "Java · Spring Boot · React · Hibernate · JPA",
+  },
+  fss: {
+    name: "FSS",
+    interviews: "2024",
+    technologies: "Java · Spring Boot · Microservices · Docker · SQL",
+  },
+  hcl: {
+    name: "HCL",
+    interviews: "2024 · Walk-in 2025",
+    technologies: "Java · JavaScript · React · HTML/CSS · Kafka",
+  },
+  "hire-bridge-consultancy": {
+    name: "Hire Bridge",
+    interviews: "2024",
+    technologies: "Java · Spring Boot · Microservices",
+  },
+  "ibs-software-walk-in-2025-2026": {
+    name: "IBS Software",
+    interviews: "Walk-in 2025 · Walk-in 2026",
+    technologies: "Java · SQL · Kafka",
+  },
+  "idfc-walk-in": {
+    name: "IDFC",
+    interviews: "Walk-in 2026",
+    technologies: "Kafka · System Design · Data Structures & Algorithms",
+  },
+  infosis: {
+    name: "Infosys",
+    interviews: "2024",
+    technologies: "Java · Spring Boot · React · Microservices · SQL",
+  },
+  "kvas-technologies": {
+    name: "KVAS Technologies",
+    interviews: "2024",
+    technologies: "Java · Spring Boot · JPA",
+  },
+  ltimindtree: {
+    name: "LTIMindtree",
+    interviews: "2024",
+    technologies: "Java · Microservices",
+  },
+  "m2p-fintech-walk-in": {
+    name: "M2P Fintech",
+    interviews: "Walk-in 2025",
+    technologies: "Java · Spring Boot · Microservices · SQL",
+  },
+  mindgate: {
+    name: "MindGate",
+    interviews: "2024",
+    technologies: "Java · JavaScript · React · Kafka · SQL",
+  },
+  oracle: {
+    name: "Oracle",
+    interviews: "2024",
+    technologies: "Java · Spring Boot · Microservices · SQL",
+  },
+  paypal: {
+    name: "PayPal",
+    interviews: "2025",
+    technologies: "Data Structures & Algorithms · System Design · Java",
+  },
+  synechron: {
+    name: "Synechron",
+    interviews: "2025",
+    technologies: "Java · Spring Boot · REST APIs",
+  },
+  tcs: {
+    name: "TCS",
+    interviews: "2024 · Walk-in 2025",
+    technologies: "Java · Spring Boot · JavaScript · React · Microservices",
+  },
+  "tech-mahindra": {
+    name: "Tech Mahindra",
+    interviews: "2024",
+    technologies: "Java · Spring Boot · Kafka · Microservices",
+  },
+  zensar: {
+    name: "Zensar",
+    interviews: "2026",
+    technologies: "Java · Spring Boot · React · Kafka · Microservices",
+  },
+  "zoho-walk-in": {
+    name: "ZOHO",
+    interviews: "Walk-in 2024",
+    technologies: "Java · SQL · Data Structures & Algorithms",
+  },
+};
+
 // Detect the round type to color the step badge
 function roundBadge(name) {
   const n = name.replace(/\*\*/g, "").toLowerCase();
@@ -147,11 +285,19 @@ function roundBadge(name) {
   return "general";
 }
 
+function countInterviewQuestions(interview) {
+  return interview.rounds.reduce(
+    (total, round) => total + round.questions.length,
+    0,
+  );
+}
+
 function CompanyInterview() {
   const [selectedCompanyId, setSelectedCompanyId] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [search, setSearch] = useState("");
   const [filterRound, setFilterRound] = useState("all");
+  const [selectedInterviewIdx, setSelectedInterviewIdx] = useState("all");
 
   const selectedCompany = companies.find((c) => c.id === selectedCompanyId);
 
@@ -170,6 +316,7 @@ function CompanyInterview() {
     setSelectedCompanyId(null);
     setExpandedId(null);
     setFilterRound("all");
+    setSelectedInterviewIdx("all");
   };
 
   // Company list view
@@ -213,12 +360,27 @@ function CompanyInterview() {
                 style={{
                   "--ci-color": COMPANY_COLORS[idx % COMPANY_COLORS.length],
                 }}
-                onClick={() => setSelectedCompanyId(company.id)}
+                onClick={() => {
+                  setSelectedCompanyId(company.id);
+                  setSelectedInterviewIdx("all");
+                }}
               >
                 <div className="ci-company-logo" aria-hidden="true">
                   {company.name.charAt(0).toUpperCase()}
                 </div>
-                <h3 className="ci-company-name">{company.name}</h3>
+                <h3 className="ci-company-name">
+                  {COMPANY_GRID_DETAILS[company.id]?.name || company.name}
+                </h3>
+                {COMPANY_GRID_DETAILS[company.id] && (
+                  <>
+                    <p className="ci-company-years">
+                      {COMPANY_GRID_DETAILS[company.id].interviews}
+                    </p>
+                    <p className="ci-company-technologies">
+                      Tech: {COMPANY_GRID_DETAILS[company.id].technologies}
+                    </p>
+                  </>
+                )}
                 <p className="ci-company-meta">
                   {company.interviews.length}{" "}
                   {company.interviews.length === 1 ? "interview" : "interviews"}{" "}
@@ -248,6 +410,12 @@ function CompanyInterview() {
       rounds: interview.rounds
         .map((round, roundIdx) => ({ round, interviewIdx, roundIdx }))
         .filter((r) => {
+          if (
+            selectedInterviewIdx !== "all" &&
+            interviewIdx !== Number(selectedInterviewIdx)
+          ) {
+            return false;
+          }
           if (filterRound === "all") return true;
           return roundBadge(r.round.name) === filterRound;
         }),
@@ -262,14 +430,37 @@ function CompanyInterview() {
     (sum, s) => sum + s.rounds.length,
     0,
   );
+  const selectedInterview =
+    selectedInterviewIdx === "all"
+      ? null
+      : selectedCompany.interviews[Number(selectedInterviewIdx)];
+  const visibleInterviewQuestionCount = selectedInterview
+    ? countInterviewQuestions(selectedInterview)
+    : selectedCompany.interviews.reduce(
+        (total, interview) => total + countInterviewQuestions(interview),
+        0,
+      );
 
+  const interviewsForRoundFilters =
+    selectedInterviewIdx === "all"
+      ? selectedCompany.interviews
+      : [selectedInterview];
+  const availableRoundTypes = new Set(
+    interviewsForRoundFilters.flatMap((interview) =>
+      interview.rounds.map((round) => roundBadge(round.name)),
+    ),
+  );
   const roundFilters = [
     { value: "all", label: "All Rounds" },
     { value: "technical", label: "Technical" },
     { value: "coding", label: "Coding" },
     { value: "design", label: "System Design" },
     { value: "hr", label: "HR / Manager" },
-  ];
+    { value: "general", label: "Other" },
+  ].filter(
+    (filter) =>
+      filter.value === "all" || availableRoundTypes.has(filter.value),
+  );
 
   return (
     <div className="company-interview-page">
@@ -288,17 +479,45 @@ function CompanyInterview() {
         </p>
         <div className="ci-stats">
           <span className="ci-stat">
-            {selectedCompany.interviews.length}{" "}
-            {selectedCompany.interviews.length === 1
+            {selectedInterview ? 1 : selectedCompany.interviews.length}{" "}
+            {selectedInterview || selectedCompany.interviews.length === 1
               ? "Interview"
               : "Interviews"}
           </span>
-          <span className="ci-stat">{totalRounds} Rounds</span>
           <span className="ci-stat">
-            {selectedCompany.questionCount}{" "}
-            {selectedCompany.questionCount === 1 ? "Question" : "Questions"}
+            {totalRounds} {totalRounds === 1 ? "Round" : "Rounds"}
+          </span>
+          <span className="ci-stat">
+            {visibleInterviewQuestionCount}{" "}
+            {visibleInterviewQuestionCount === 1 ? "Question" : "Questions"}
           </span>
         </div>
+
+        {multiInterview && (
+          <div className="ci-interview-picker">
+            <label htmlFor="ci-interview-select">Choose an interview</label>
+            <select
+              id="ci-interview-select"
+              value={selectedInterviewIdx}
+              onChange={(event) => {
+                setSelectedInterviewIdx(event.target.value);
+                setExpandedId(null);
+                setFilterRound("all");
+              }}
+            >
+              <option value="all">All interviews</option>
+              {selectedCompany.interviews.map((interview, index) => (
+                <option key={`${interview.name}-${index}`} value={index}>
+                  {interview.name} ({countInterviewQuestions(interview)}{" "}
+                  {countInterviewQuestions(interview) === 1
+                    ? "question"
+                    : "questions"}
+                  )
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Round filter chips */}
         <div className="ci-round-filters">
@@ -404,33 +623,51 @@ function CompanyInterview() {
                                   <div className="ci-answer">
                                     <h4 className="ci-answer-title">Answer:</h4>
                                     <AnswerContent text={q.answer} />
-                                    {q.code && q.code.content && (
-                                      <div className="ci-code-block">
-                                        <div className="ci-code-header">
-                                          <span className="ci-code-lang">
-                                            {q.code.language || "java"}
-                                          </span>
-                                        </div>
-                                        <pre
-                                          className={`language-${
-                                            q.code.language || "java"
-                                          }`}
+                                    {(Array.isArray(q.code)
+                                      ? q.code
+                                      : q.code
+                                        ? [q.code]
+                                        : []
+                                    ).map((code, codeIdx) =>
+                                      code?.content ? (
+                                        <div
+                                          className="ci-code-block"
+                                          key={`${uid}-code-${codeIdx}`}
                                         >
-                                          <code
+                                          <div className="ci-code-header">
+                                            {code.label && (
+                                              <span className="ci-code-label">
+                                                {code.label}
+                                              </span>
+                                            )}
+                                            <span className="ci-code-lang">
+                                              {code.language || "java"}
+                                            </span>
+                                          </div>
+                                          <pre
                                             className={`language-${
-                                              q.code.language || "java"
+                                              code.language || "java"
                                             }`}
-                                            dangerouslySetInnerHTML={{
-                                              __html: highlightCode(
-                                                q.code.content,
-                                                q.code.language,
-                                              ),
-                                            }}
-                                          />
-                                        </pre>
-                                      </div>
+                                          >
+                                            <code
+                                              className={`language-${
+                                                code.language || "java"
+                                              }`}
+                                              dangerouslySetInnerHTML={{
+                                                __html: highlightCode(
+                                                  code.content,
+                                                  code.language,
+                                                ),
+                                              }}
+                                            />
+                                          </pre>
+                                        </div>
+                                      ) : null,
                                     )}
-                                    {!q.answer && !q.code && (
+                                    {!q.answer &&
+                                      !(Array.isArray(q.code)
+                                        ? q.code.length
+                                        : q.code) && (
                                       <p className="ci-answer-text">
                                         <em>
                                           (No written answer provided — refer to

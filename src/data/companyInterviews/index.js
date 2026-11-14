@@ -19,12 +19,26 @@ const interviewModules = import.meta.glob("./**/*.js", {
 
 const companyMap = new Map();
 
+const countInterviewQuestions = (interview) =>
+  interview.rounds.reduce(
+    (total, round) => total + round.questions.length,
+    0,
+  );
+
 Object.values(interviewModules).forEach((company) => {
   if (!company || !company.id) return;
+  const interviews = company.interviews.map((interview) => ({
+    ...interview,
+    questionCount: countInterviewQuestions(interview),
+  }));
+  const questionCount = interviews.reduce(
+    (total, interview) => total + interview.questionCount,
+    0,
+  );
   const existing = companyMap.get(company.id);
   if (existing) {
     // Merge interviews from another file belonging to the same company folder
-    company.interviews.forEach((interview) => {
+    interviews.forEach((interview) => {
       existing.interviews.push(interview);
       existing.questionCount += interview.questionCount;
     });
@@ -32,8 +46,8 @@ Object.values(interviewModules).forEach((company) => {
     companyMap.set(company.id, {
       id: company.id,
       name: company.name,
-      interviews: [...company.interviews],
-      questionCount: company.questionCount,
+      interviews,
+      questionCount,
     });
   }
 });
