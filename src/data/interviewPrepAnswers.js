@@ -5,10 +5,10 @@
  * Keys match interviewPrepTopics[].id; each has `important` and
  * `scenarios` arrays aligned by index with the question arrays.
  *
- * Every answer uses a short, human-friendly format:
- *  1. Description — plain-English definition (what the question asks)
- *  2. Real-time Example — practical example explained like a conversation
- *  3. Code — short, focused snippet only when it helps ("" when not needed)
+ * Answers use a short, human-friendly format:
+ *  1. Interview Answer — plain-English definition (what the question asks)
+ *  2. Real-time Example — optional, only when it adds useful context
+ *  3. Code — short, focused snippet only when it helps
  *
  * Keep answers short and clear — a reader who does NOT know the
  * concept should understand it after reading.
@@ -17,9 +17,9 @@ export const interviewPrepAnswers = {
   sql: {
     important: [
       {
-        description: "A SQL query is NOT processed top-to-bottom. SQL clauses have a logical execution order, which is why a SELECT alias usually cannot be used in WHERE.",
+        description: "SQL follows a logical order: FROM, WHERE, GROUP BY, HAVING, SELECT, then ORDER BY (with LIMIT/FETCH depending on the database). WHERE runs before SELECT, so a SELECT alias usually cannot be used in WHERE.",
         example: "Think of a restaurant. First you check what ingredients are available (FROM), then remove the ones you don't want (WHERE), then group the remaining ingredients (GROUP BY), and only at the end decide what to put on the plate (SELECT). SQL works the same way.",
-        code: "SELECT dept, COUNT(*) AS total\nFROM emp\nWHERE salary > 1000\nGROUP BY dept\nHAVING COUNT(*) > 2\nORDER BY total;\n\n-- Why alias can't be used in WHERE:\n-- WHERE runs BEFORE SELECT, so 'total' alias doesn't exist yet\n-- HAVING runs AFTER SELECT, so alias is OK"
+        code: "SELECT dept, COUNT(*) AS total\nFROM emp\nWHERE salary > 1000\nGROUP BY dept\nHAVING COUNT(*) > 2\nORDER BY total;\n\n-- WHERE runs before SELECT, so 'total' does not exist yet\n-- Use the full expression in HAVING for portable SQL"
       },
       {
         description: "WHERE filters individual rows BEFORE grouping. HAVING filters groups AFTER aggregation.",
@@ -27,19 +27,19 @@ export const interviewPrepAnswers = {
         code: "SELECT dept, COUNT(*)\nFROM emp\nWHERE salary > 50000\nGROUP BY dept\nHAVING COUNT(*) > 5;"
       },
       {
-        description: "JOIN combines rows from 2+ tables using a related column.",
-        example: "You have a customers table and an orders table. A JOIN merges them so you can see each customer's orders. INNER JOIN returns only customers who placed orders. LEFT JOIN returns every customer — order columns will be NULL for those who never ordered.",
+        description: "JOIN combines related rows from tables. INNER JOIN keeps only matching rows; LEFT JOIN keeps every left-table row; FULL JOIN keeps rows from both sides, matching them where possible.",
+        example: "Imagine customers and orders. INNER JOIN shows customers who ordered. LEFT JOIN shows every customer, with empty order details for those who did not order. FULL JOIN shows every customer and every order, including unmatched rows on either side.",
         code: "SELECT c.name, o.amount\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id;\n\n-- INNER: only customers WITH orders\n-- LEFT : all customers, order columns = NULL when none"
       },
       {
-        description: "PRIMARY KEY = unique + NOT NULL identifier of a row. UNIQUE = prevents duplicates but allows one NULL. FOREIGN KEY = references a key of another table and enforces valid references.",
+        description: "A primary key uniquely identifies each row and cannot be NULL. A unique constraint prevents duplicate values. A foreign key requires a value to match a row in another table. How unique constraints handle NULLs varies by database.",
         example: "A student table and a marks table. PRIMARY KEY (student_id) uniquely identifies each student. FOREIGN KEY (student_id) in marks ensures a student must exist before you can record their marks, and deleting a student fails if they have marks.",
         code: "CREATE TABLE students (\n  student_id INT PRIMARY KEY,\n  email VARCHAR(100) UNIQUE\n);\nCREATE TABLE marks (\n  student_id INT REFERENCES students(student_id)\n);"
       },
       {
-        description: "CLUSTERED index = the actual table data is stored in index order (only 1 per table). NON-CLUSTERED index = a separate structure that points back to the data.",
+        description: "A clustered index stores or organizes table rows by the index key; a non-clustered index is a separate lookup structure that points to rows. The exact behavior and number of clustered indexes depend on the database.",
         example: "A phone book (clustered) is sorted by last name — the data itself is in that order. A book index (non-clustered) tells you which page has a topic, but you still need to go to that page to read the content.",
-        code: "CREATE INDEX idx_lastname ON students(last_name); -- non-clustered\n-- Only 1 clustered index per table — usually the primary key"
+        code: "CREATE INDEX idx_lastname ON students(last_name); -- non-clustered\n-- Clustered-index support and limits depend on the database"
       },
       {
         description: "B-tree is a balanced tree structure used by most database indexes to search efficiently.",
@@ -48,17 +48,17 @@ export const interviewPrepAnswers = {
       },
       {
         description: "ACID properties guarantee reliable transaction processing.",
-        example: "Transferring ₹500 from Account A to Account B: A (Atomicity) — both succeed or both fail. C (Consistency) — final balances must be valid. I (Isolation) — intermediate states are invisible to other transactions. D (Durability) — once committed, the balance is permanent even if the server crashes.",
+        example: "Transferring ₹500 from Account A to Account B: both updates succeed or neither does (Atomicity); valid balance rules still hold (Consistency); concurrent transfers do not interfere unexpectedly (Isolation); and a committed transfer is saved (Durability). Exact isolation behavior depends on the database and isolation level.",
         code: "-- START TRANSACTION\nUPDATE accounts SET balance = balance - 500 WHERE id = 1;\nUPDATE accounts SET balance = balance + 500 WHERE id = 2;\n-- COMMIT (or ROLLBACK on error)"
       },
       {
-        description: "Normalization organizes tables to reduce duplication and data anomalies.",
-        example: "Before normalization, an orders table might repeat the customer's address on every order. After normalization, you split it into customers and orders tables and link them — improving storage efficiency and data integrity.",
-        code: "-- Before: 1 table with redundant address\n-- After:   customers table + orders table linked by customer_id"
+        description: "Normalization splits data into related tables to reduce repeated information and avoid update mistakes. In simple terms: 1NF keeps each cell to one value; 2NF removes dependence on only part of a multi-column key; 3NF removes dependence on a non-key column.",
+        example: "If every order row repeats the customer's address, changing the address means fixing many rows. Store each customer and address once in a customers table, then refer to that customer from orders.",
+        code: "-- customers(id, name, address)\n-- orders(id, customer_id, total)\n-- customer_id links each order to one customer"
       },
       {
-        description: "A subquery is a query inside another query. A CTE (Common Table Expression) is a named, reusable temporary result set. A derived table is a subquery inside a FROM clause (may require an alias).",
-        example: "A subquery is like nested boxes — you unpack outer to reach inner. A CTE is like naming a box once, using it multiple times, and improving readability when the same subquery appears repeatedly.",
+        description: "A subquery is a query inside another query. A CTE is a named query written before the main query, often to make complex SQL easier to read. A derived table is a subquery used in the FROM clause. Whether a CTE is materialized depends on the database.",
+        example: "A subquery is like a smaller question inside the main question. A CTE gives that smaller query a name, making the rest of the SQL easier to follow.",
         code: "-- CTE example\nWITH dept_avg AS (\n  SELECT dept, AVG(salary) AS avg_sal\n  FROM emp GROUP BY dept\n)\nSELECT e.name, e.salary, d.avg_sal\nFROM emp e JOIN dept_avg d ON e.dept = d.dept;"
       },
       {
@@ -72,9 +72,9 @@ export const interviewPrepAnswers = {
         code: "SELECT name FROM customers\nUNION ALL\nSELECT name FROM prospects;"
       },
       {
-        description: "DELETE removes rows one at a time (logs each entry). TRUNCATE removes all rows quickly (resets the table). DROP deletes the entire table.",
-        example: "DELETE = erasing individual notebook pages one by one (each page is tracked). TRUNCATE = ripping out the entire notebook at once (fast but not logged per row). DROP = throwing away the entire notebook.",
-        code: "DELETE FROM emp WHERE dept = 'Sales';\nTRUNCATE TABLE emp;   -- removes ALL rows, resets auto-increment\nDROP TABLE emp;       -- removes the whole table"
+        description: "DELETE removes selected rows (or all rows); TRUNCATE removes all rows while keeping the table; DROP removes the table itself. Logging, identity reset, and transaction behavior differ by database.",
+        example: "DELETE is like removing chosen pages from a notebook. TRUNCATE empties the notebook but keeps it. DROP throws the notebook away.",
+        code: "DELETE FROM emp WHERE dept = 'Sales';\nTRUNCATE TABLE emp;   -- removes all rows; details depend on database\nDROP TABLE emp;       -- removes the table"
       },
       {
         description: "GROUP BY groups rows by one or more columns and returns one row per group. NULLs are treated as a separate group.",
@@ -82,8 +82,8 @@ export const interviewPrepAnswers = {
         code: "SELECT dept, COUNT(*), AVG(salary)\nFROM emp\nGROUP BY dept;"
       },
       {
-        description: "EXPLAIN / EXPLAIN ANALYZE shows the query execution plan — how the database will run your query, including which indexes and joins it will use.",
-        example: "It's like a map showing which roads the query takes. EXPLAIN ANALYZE actually runs it and shows real timing. You look for Seq Scan (full table scan = bad), nested loops that might be slow for large tables, or missing indexes that should be added.",
+        description: "EXPLAIN shows the database's planned steps for a query. EXPLAIN ANALYZE also runs the query and reports what happened. A full table scan is not automatically bad; compare the plan and timing with the amount of data and expected results.",
+        example: "Think of the plan as a route map. Check which tables are scanned, how tables are joined, and whether the estimated row counts and actual time look reasonable before deciding to add an index.",
         code: "EXPLAIN ANALYZE SELECT * FROM orders WHERE customer_id = 123;"
       },
       {
@@ -97,14 +97,14 @@ export const interviewPrepAnswers = {
         code: "-- Self join\nSELECT e.name AS employee, m.name AS manager\nFROM employees e\nJOIN employees m ON e.manager_id = m.employee_id;\n\n-- Recursive CTE\nWITH RECURSIVE org AS (\n  SELECT employee_id, name, manager_id, 0 AS level\n  FROM employees WHERE manager_id IS NULL\n  UNION ALL\n  SELECT e.employee_id, e.name, e.manager_id, o.level + 1\n  FROM employees e JOIN org o ON e.manager_id = o.employee_id\n)\nSELECT * FROM org;"
       },
       {
-        description: "Transaction isolation levels control how concurrent transactions interact and what data they can see, preventing problems like dirty reads, non-repeatable reads, and phantom reads.",
-        example: "Isolation levels prevent problems like: dirty reads (seeing uncommitted data), non-repeatable reads (same query returns different results), and phantom reads (new rows appear between reads). Read Committed is the default. Serializable is the strictest.",
+        description: "Isolation levels decide how much one transaction can see changes made by another transaction running at the same time. Stronger isolation prevents more surprises but can reduce concurrency.",
+        example: "If two people update the same account at once, isolation rules decide what each can see and whether one must wait. The default level and the exact behavior depend on the database; Serializable is the strictest standard level.",
         code: "-- Set transaction isolation level\nSET TRANSACTION ISOLATION LEVEL SERIALIZABLE;\n\n-- PostgreSQL\nBEGIN ISOLATION LEVEL REPEATABLE READ;"
       },
       {
-        description: "An index will NOT be used when you apply functions to a column or use a leading wildcard.",
-        example: "Searching for name LIKE '%son' forces the database to scan every row because it cannot use an index. But name LIKE 'John%' can use an index because it starts with a fixed string.",
-        code: "-- Index NOT used\nSELECT * FROM users WHERE UPPER(name) = 'JOHN';\n\n-- Index USED\nSELECT * FROM users WHERE name LIKE 'John%';"
+        description: "A normal index may not help when a query changes the indexed value (for example, UPPER(name)) or searches with a leading wildcard. The database can still use a matching expression index or another access path.",
+        example: "A normal index on name may not help with LIKE '%son' because the search can start anywhere. LIKE 'John%' can often use that index, depending on the database and collation.",
+        code: "-- A normal name index may not help here\nSELECT * FROM users WHERE UPPER(name) = 'JOHN';\n\n-- A normal name index may help here; check the query plan\nSELECT * FROM users WHERE name LIKE 'John%';"
       },
       {
         description: "GROUP BY groups rows by one or more columns. DISTINCT removes duplicate rows from the entire result set.",
@@ -159,13 +159,13 @@ export const interviewPrepAnswers = {
         code: "-- parents first, then children, in batches\nINSERT INTO customers SELECT * FROM legacy.customers;\nINSERT INTO orders    SELECT * FROM legacy.orders;\nINSERT INTO order_items SELECT * FROM legacy.order_items;\n\n-- validation: must return 0 rows\nSELECT o.id FROM orders o\nLEFT JOIN customers c ON c.id = o.customer_id\nWHERE c.id IS NULL;"
       },
       {
-        description: "OFFSET skips and counts rows on every page — O(n) and slower as pages grow. Keyset (seek) pagination filters from the last seen sort key — O(log n) with the right index, and never skips rows when data shifts.",
-        example: "Instagram-style infinite scroll on millions of posts: OFFSET 999900 still walks 999,900 rows just to serve 20 — page 5000 is unusable. Keyset jumps straight to the position after the last (created_at, id) using the index, so every page costs the same.",
-        code: "-- OFFSET: slow on deep pages\nSELECT * FROM posts ORDER BY created_at DESC LIMIT 20 OFFSET 100000;\n\n-- Keyset / seek: constant cost, stable pagination\nSELECT * FROM posts\nWHERE (created_at, id) < (:last_ts, :last_id)\nORDER BY created_at DESC, id DESC\nLIMIT 20;"
+        description: "OFFSET makes the database step past earlier rows, so deep pages can get slower. Keyset pagination asks for rows after the last sort key and can be faster with a suitable index. Use a stable sort key and a tie-breaker such as id.",
+        example: "On a large posts table, asking for page 50,000 with OFFSET may require skipping many rows. Keyset pagination asks for posts older than the last post shown, so the database can seek to that position using an index.",
+        code: "-- OFFSET: slow on deep pages\nSELECT * FROM posts ORDER BY created_at DESC LIMIT 20 OFFSET 100000;\n\n        -- Keyset / seek: use the last row's sort keys\nSELECT * FROM posts\nWHERE (created_at, id) < (:last_ts, :last_id)\nORDER BY created_at DESC, id DESC\nLIMIT 20;"
       },
       {
-        description: "Index column order matters: equality columns first, then the ORDER BY column. For WHERE a=? AND b=? ORDER BY c the ideal index is (a, b, c) — it serves both filters and avoids a separate sort step.",
-        example: "A product listing API filters by brand and in-stock, sorted by price. Index (brand, in_stock, price) lets the DB seek the two equality columns and read rows already in price order — EXPLAIN shows one Index Scan and no Sort node.",
+        description: "Index column order matters. For WHERE a=? AND b=? ORDER BY c, an index on (a, b, c) may help both the filters and sorting, but the best choice depends on the database, data, and query plan.",
+        example: "A product page filters by brand and stock status, then sorts by price. An index on (brand, in_stock, price) may let the database find and sort those rows efficiently; check the query plan to confirm.",
         code: "CREATE INDEX idx_prod_brand_stock_price\n  ON products (brand, in_stock, price);\n\nEXPLAIN ANALYZE\nSELECT * FROM products\nWHERE brand = 'Nike' AND in_stock = true\nORDER BY price ASC;\n-- expect: Index Scan, no \"Sort\" node"
       },
     ],
@@ -178,19 +178,19 @@ export const interviewPrepAnswers = {
         code: "abstract class Payment { abstract void charge(int amt); }\nclass Card extends Payment {\n  private int balance;                          // encapsulation\n  @Override void charge(int amt) { balance -= amt; }\n}\nPayment p = new Card();\np.charge(100);                                  // abstraction: code sees only Payment"
       },
       {
-        description: "== compares object references (memory address), .equals() compares content (override it), and hashCode() must return the same value for equal objects so hash-based collections can find them.",
+        description: "For objects, == checks whether two references point to the same object. equals() checks equality as defined by that class. If two objects are equal, their hashCode() values must also match for HashMap and HashSet to work correctly.",
         example: "new String(\"Hi\") == new String(\"Hi\") is false — two different objects in memory, but .equals() is true. In a HashMap, if you override equals() but forget hashCode(), two equal keys hash to different buckets and the lookup silently returns null — one of the most common Java bugs.",
         code: "String a = new String(\"Hi\"), b = new String(\"Hi\");\na == b        // false - different objects\na.equals(b)   // true  - same content\n// rule for HashMap keys: a.equals(b)  =>  a.hashCode() == b.hashCode()"
       },
       {
-        description: "String is immutable — every change creates a new object. StringBuilder is mutable and fast (no synchronization). StringBuffer is mutable and synchronized — thread-safe but slower.",
-        example: "Building a 10,000-line CSV with s = s + line inside a loop creates 10,000 throwaway objects and burns CPU. StringBuilder.append reuses one buffer — typically 100x faster. StringBuffer only makes sense when multiple threads share the same builder.",
+        description: "String cannot be changed after it is created. StringBuilder can be changed and is usually the right choice for building text in one thread. StringBuffer synchronizes its individual methods for use by multiple threads, but that does not make a whole sequence of calls automatically safe.",
+        example: "When building a long message in a loop, StringBuilder reuses a changeable buffer instead of creating a new String for every step. Use StringBuffer only when its synchronized methods are specifically needed.",
         code: "String s = \"\";                 for (...) s += line;          // new object each time\nStringBuilder sb = new StringBuilder(); for (...) sb.append(line);  // fast, single buffer\nStringBuffer tb = new StringBuffer();  tb.append(line);             // thread-safe variant"
       },
       {
-        description: "final = keyword: constant variable, method that cannot be overridden, class that cannot be extended. finally = block that always runs after try/catch (cleanup). finalize() = legacy GC hook, deprecated since Java 9.",
-        example: "Closing a JDBC connection in finally guarantees it closes even when the exception propagates — code after try would be skipped. Today you use try-with-resources instead, because finalize() timing depends on the GC and is not guaranteed to ever run.",
-        code: "final int LIMIT = 10;                 // cannot reassign\ntry { risky(); } finally { conn.close(); }   // always runs\n// protected void finalize() { ... }  - deprecated, do not rely on it"
+        description: "final prevents reassignment, overriding, or subclassing depending on what it modifies; a final object reference does not make the object itself immutable. finally is cleanup code that normally runs after try/catch. finalize() is an obsolete cleanup mechanism and should not be used.",
+        example: "Use try-with-resources to close a file or database connection automatically. A finally block runs during normal exception handling, but may not run if the process or JVM is forcibly stopped.",
+        code: "final int LIMIT = 10;  // cannot be reassigned\ntry (Connection conn = dataSource.getConnection()) {\n  risky();\n} // connection is closed automatically\n// Do not use finalize() for cleanup"
       },
       {
         description: "Abstract class: state, constructors, any access modifier — you extend only one. Interface: a pure contract, with default/static methods since Java 8 — you can implement many.",
@@ -203,19 +203,19 @@ export const interviewPrepAnswers = {
         code: "class A { void go(int x) {...} void go(String s) {...} }  // overloading (compile time)\nclass B extends A { @Override void go(int x) {...} }        // overriding (runtime)\nA a = new B();\na.go(1);   // calls B.go - virtual dispatch"
       },
       {
-        description: "Checked exceptions (IOException, SQLException) must be caught or declared with throws — the compiler enforces it. Unchecked exceptions (NullPointerException, IllegalArgumentException) are programming errors and are never forced on you.",
-        example: "Reading a file means handling FileNotFoundException — a real-world failure the compiler makes you plan for. Passing a null argument into a method is a bug: fix the code, don't wrap it in try/catch. Business failures (order rejected) should be a custom unchecked exception carrying an error code.",
+        description: "Checked exceptions must be caught or listed with throws, as the compiler requires. Unchecked exceptions do not have that requirement. Either kind can represent a real failure; choose based on how callers are expected to handle it.",
+        example: "A file may be missing, so a method that reads it must handle or declare the checked IOException. An invalid method argument can use IllegalArgumentException, which callers are not forced to catch.",
         code: "try { Files.readString(path); }          // checked - must catch or throw\n  catch (IOException e) { log.error(\"read failed\", e); }\n\nthrow new IllegalArgumentException(\"qty must be > 0\");  // unchecked"
       },
       {
-        description: "The stack holds method frames — locals and references — is thread-private and auto-freed on return. The heap holds all objects and arrays, is shared between threads, and is managed by the GC. Metaspace stores class metadata.",
-        example: "Calling placeOrder() pushes a frame containing the order id and a reference to the Cart. The Cart object itself lives on the heap. When the method returns, the frame disappears; the Cart stays until nothing references it, then GC collects it.",
-        code: "void placeOrder() {\n  int id = 10;                  // primitive -> stack\n  Cart c = new Cart();          // reference -> stack, Cart object -> heap\n}                               // frame popped; Cart eligible for GC if unreferenced"
+        description: "Each thread has a stack for its method calls and local work. Objects are generally allocated on the heap, which is shared and managed by the garbage collector. The JVM may optimize how values are stored, so avoid assuming every local variable has a particular physical location.",
+        example: "When placeOrder() runs, Java keeps track of that method's current work. A Cart object can remain available after the method returns if other code still refers to it; otherwise, the garbage collector may reclaim it.",
+        code: "void placeOrder() {\n  Cart cart = new Cart();  // object is generally on the heap\n} // cart can be collected later if nothing refers to it"
       },
       {
-        description: "GC frees unreachable objects. New objects live in the Young generation — Minor GC moves survivors to the Old generation; Full GC cleans the Old generation. G1 (default) collects regions incrementally against a pause goal; ZGC targets sub-millisecond pauses.",
-        example: "Every request creates thousands of short-lived DTOs — they die in Eden almost immediately, so Minor GC is cheap. Cached sessions survive and get promoted to Old Gen. A memory leak means objects stay reachable forever (a static map nobody clears) → Old Gen fills → Full GC thrashes → OutOfMemoryError.",
-        code: "// java -Xmx512m -Xlog:gc* app.jar\njmap -histo:live <pid>     // top classes by instance count -> spot the leak\n// -XX:+UseG1GC (default) | -XX:+UseZGC for low-latency"
+        description: "Garbage collection reclaims memory used by objects the program can no longer reach. Java offers different collectors with different pause-time and throughput trade-offs; the default depends on the Java version and configuration.",
+        example: "Temporary objects from a request can be cleaned up once nothing uses them. But objects kept in a cache remain reachable, so an unbounded cache can keep using more and more memory.",
+        code: "// Example: enable GC logging on supported modern JDKs\njava -Xlog:gc* -jar app.jar\n// Choose a collector based on measured application needs"
       },
       {
         description: "List = ordered, allows duplicates (ArrayList, LinkedList). Set = unique elements (HashSet, LinkedHashSet, TreeSet). Map = key→value pairs with unique keys (HashMap, LinkedHashMap, TreeMap).",
@@ -223,7 +223,7 @@ export const interviewPrepAnswers = {
         code: "List<String> list = new ArrayList<>();          // ordered, allows duplicates\nSet<String> set = new HashSet<>();              // unique only\nMap<String, Product> map = new HashMap<>();     // O(1) get by key"
       },
       {
-        description: "HashMap is an array of buckets. hash(key) picks a bucket; collisions form a linked list that becomes a red-black tree at 8 entries. Default capacity 16, load factor 0.75 — it doubles and rehashes at 12 entries.",
+        description: "HashMap uses a table of buckets selected from a key's hash. Different keys can land in the same bucket, so it handles collisions; as the map grows, it may resize. Exact bucket and tree-conversion thresholds depend on the JDK implementation.",
         example: "Looking up 100k products by id is near O(1) because the hash jumps straight to the bucket. A key with a bad hash (or equals without hashCode) piles everything into one chain and lookups degrade to O(n) — which is why both methods must be implemented correctly for custom keys.",
         code: "h = key.hashCode() ^ (key.hashCode() >>> 16);  // spread high bits\nindex = (capacity - 1) & h;                     // bucket index\n// bin: linked list -> treeify at 8; resize when size > capacity * 0.75"
       },
@@ -233,7 +233,7 @@ export const interviewPrepAnswers = {
         code: "list.get(5000);   // ArrayList O(1) | LinkedList O(n)\nlist.add(0, x);   // ArrayList shifts O(n); LinkedList O(1) after cursor\nDeque<String> dq = new ArrayDeque<>();   // stack/queue - not LinkedList"
       },
       {
-        description: "volatile gives visibility only (reads/writes hit main memory, no caching). synchronized gives mutual exclusion plus visibility. Lock (ReentrantLock) adds tryLock, timeouts, fairness and interruptible waits.",
+        description: "volatile makes a variable's latest write visible to other threads, but does not make operations like count++ atomic. synchronized protects a block with one lock and provides visibility. ReentrantLock also offers options such as tryLock and interruptible waits.",
         example: "A refresh thread flips a config flag → volatile boolean so all worker threads see it immediately. Updating a shared balance needs synchronized/Atomic to stop lost updates. A payment thread using tryLock(2, SECONDS) can give up instead of hanging forever — impossible with synchronized.",
         code: "volatile boolean running = true;            // visibility only\nsynchronized (lock) { balance -= amt; }      // exclusion + visibility\nif (lock.tryLock(2, TimeUnit.SECONDS)) {\n  try { ... } finally { lock.unlock(); }\n}"
       },
@@ -248,18 +248,18 @@ export const interviewPrepAnswers = {
         code: "Predicate<Product> cheap = p -> p.getPrice() < 100;\nFunction<Product, String> name = Product::getName;\nConsumer<String> log = System.out::println;\nlist.stream().filter(cheap).map(name).forEach(log);"
       },
       {
-        description: "A stream is a lazy pipeline: intermediate ops (filter, map, sorted) build the chain, a terminal op (collect, forEach) triggers execution. Elements flow one at a time — no intermediate collection is built.",
-        example: "Active premium users sorted by name: filter → map → sorted → collect. Nothing runs until collect(), and each element passes through the whole pipeline before the next one is read. Parallel streams split the work across cores for CPU-heavy jobs on large data.",
+        description: "A stream builds a pipeline of operations. Intermediate operations such as filter and map usually wait until a terminal operation like collect or forEach runs. Some operations, such as sorted, may need to hold items before producing results.",
+        example: "To get active users' names in order, filter the users, map them to names, sort, then collect the result. The terminal collect starts the work.",
         code: "List<String> names = users.stream()\n  .filter(u -> u.isActive())       // intermediate (lazy)\n  .map(User::getName)              // intermediate\n  .sorted()                        // intermediate\n  .collect(Collectors.toList());   // terminal - triggers execution"
       },
       {
-        description: "Optional<T> wraps a value that may be absent and forces callers to deal with the empty case explicitly — map, filter, orElse, orElseThrow instead of raw null checks.",
-        example: "repo.findById(id) returning Optional<User> means the caller cannot forget the null check and crash three layers later with NPE. get() on an empty Optional throws immediately at the mistake — fail fast at the right place.",
+        description: "Optional<T> represents a value that may be missing. It encourages callers to choose what to do when there is no value, for example return a default or throw a clear exception.",
+        example: "If a user lookup finds no record, Optional lets the caller return a guest value or report that the user was not found instead of passing a null onward.",
         code: "Optional<User> u = repo.findById(id);\nString name = u.map(User::getName).orElse(\"guest\");\nUser strict = u.orElseThrow(() -> new NotFoundException(id));\n// avoid: opt.get() without isPresent(), Optional as a field or setter param"
       },
       {
-        description: "An immutable class has final fields set by the constructor and no setters — its state can never change after creation. A record (Java 16+) generates the constructor, getters, equals, hashCode and toString for you.",
-        example: "Money and LocalDate are immutable, so you can share them across threads without locks. Records are the default choice for DTOs: an OrderLine(price, qty) passed between services can't be corrupted by another thread, and equals() works in tests for free.",
+        description: "An immutable object cannot have its state changed after creation. A record (Java 16+) generates its constructor, accessors, equals, hashCode, and toString, but referenced objects must also be immutable if you need deep immutability.",
+        example: "A record is a concise way to define a data carrier such as OrderLine(price, quantity). Its fields cannot be reassigned, but a mutable object stored in a field could still be changed.",
         code: "record Money(BigDecimal amount, String currency) {}\n\nMoney m = new Money(new BigDecimal(\"10.00\"), \"EUR\");\nm.amount();                 // accessor, no setter - immutable by design"
       },
       {
@@ -285,9 +285,9 @@ export const interviewPrepAnswers = {
         code: "synchronized (lock) { c++; }                     // exclusive lock\nAtomicLong a = new AtomicLong(); a.incrementAndGet();  // CAS, no lock\nLongAdder adder = new LongAdder(); adder.increment();  // high contention\nlong total = adder.sum();"
       },
       {
-        description: "Store value plus expiry timestamp in a ConcurrentHashMap; on get() treat expired entries as missing and remove them, and schedule a sweep so never-read keys still get cleaned up.",
+        description: "Store each value with an expiry time. On lookup, treat expired values as missing and remove that exact entry; also periodically clean old entries that are never looked up again.",
         example: "Caching FX rates for 60 seconds: get() returns null for a stale entry so the caller reloads; a scheduled executor removes expired entries every minute, keeping memory bounded even for currencies nobody requests again.",
-        code: "record Entry(String value, long expiresAt) {}\nMap<String, Entry> cache = new ConcurrentHashMap<>();\n\nString get(String k) {\n  Entry e = cache.get(k);\n  if (e == null) return null;\n  if (e.expiresAt() < System.currentTimeMillis()) { cache.remove(k); return null; }\n  return e.value();\n}\n// cleanup: cache.entrySet().removeIf(en -> en.getValue().expiresAt() < now)"
+        code: "record Entry(String value, long expiresAt) {}\nMap<String, Entry> cache = new ConcurrentHashMap<>();\n\nString get(String k) {\n  Entry e = cache.get(k);\n  if (e == null) return null;\n          if (e.expiresAt() < System.currentTimeMillis()) { cache.remove(k, e); return null; }\n  return e.value();\n}\n// cleanup: cache.entrySet().removeIf(en -> en.getValue().expiresAt() < now)"
       },
       {
         description: "The classic deadlock is waiting while holding the lock (or two threads with inverted wait sets). Fix: a single monitor with wait/signal — wait() releases the lock — or simply use BlockingQueue, which implements this correctly.",
@@ -302,7 +302,7 @@ export const interviewPrepAnswers = {
       {
         description: "CPU-bound pools size around core count to avoid context-switch waste; IO-bound pools go much higher (cores × (1 + wait/compute)) because most threads are blocked, not computing. Bound the queue and add a rejection policy.",
         example: "An order service doing ~50ms of HTTP calls per request on 8 cores: 8 × (1 + 45/5) ≈ 80 threads keeps cores busy while others wait on the network. A pricing engine crunching numbers stays at 8 threads — 80 compute threads would only thrash the scheduler. An unbounded queue with a small pool silently queues requests and blows up latency.",
-        code: "int cpu = Runtime.getRuntime().availableProcessors();\nint ioPool  = cpu * (1 + waitTime / cpuTime);   // e.g. 8 * (1 + 45/5) = 80\nint cpuPool = cpu;                              // cores (+1 for timing luck)\nnew ThreadPoolExecutor(0, ioPool, 60, SECONDS,\n  new LinkedBlockingQueue<>(1000),\n  new ThreadPoolExecutor.CallerRunsPolicy());    // bounded queue + backpressure"
+        code: "int cpu = Runtime.getRuntime().availableProcessors();\nint ioPool = cpu * (1 + waitTime / cpuTime);  // starting estimate; measure and tune\nint cpuPool = cpu;                             // starting point for CPU-heavy work\nnew ThreadPoolExecutor(ioPool, ioPool, 0, SECONDS,\n  new LinkedBlockingQueue<>(1000),\n  new ThreadPoolExecutor.CallerRunsPolicy());   // fixed-size pool, bounded queue"
       },
       {
         description: "Count frequencies in a HashMap (stream groupingBy), then keep the K largest by count — a min-heap of size K gives O(n log K); sorting every entry is simpler but O(n log n).",
@@ -359,9 +359,9 @@ export const interviewPrepAnswers = {
         code: "@Service\nclass OrderService {\n  private final PaymentClient pay;\n  OrderService(PaymentClient pay) { this.pay = pay; }   // constructor injection\n}\n// test: new OrderService(mockPayClient)"
       },
       {
-        description: "@Component is the generic stereotype; @Service, @Repository, @Controller are specialized components that state intent — and carry behavior (e.g. @Repository translates persistence exceptions into Spring's DataAccessException hierarchy).",
-        example: "You rarely write bare @Component for application classes: @Service for business logic, @Repository for DAOs (its exception translation is real), @Controller for view handlers. AOP features like @Async and @Transactional target these stereotypes when they proxy beans.",
-        code: "@Component                // generic bean, picked up by component scan\n@Service class Pricing {...}         // business logic\n@Repository class OrderDao {...}     // DB exceptions translated\n@Controller class PageController {...} // returns view names"
+        description: "@Component is a general marker for a Spring-managed class. @Service, @Repository, and @Controller are more specific markers that describe a class's role. @Repository can also enable translation of database exceptions into Spring's data-access exceptions.",
+        example: "Use @Service for business logic, @Repository for database access, and @Controller for web requests. These annotations make the code's purpose easier to recognize.",
+        code: "@Component                 // general Spring-managed class\n@Service class Pricing {...}          // business logic\n@Repository class OrderDao {...}      // database access\n@Controller class PageController {...} // web requests"
       },
       {
         description: "@Component is class-level: Spring instantiates the annotated class itself during scanning. @Bean is method-level: you construct and configure the instance — required for third-party classes you cannot annotate.",
@@ -374,14 +374,14 @@ export const interviewPrepAnswers = {
         code: "@Service                       // singleton (default) - one instance\n@Scope(\"prototype\")\n@Component class Wizard {}      // new instance on every getBean()\n\n// singleton needs fresh prototypes? inject ObjectProvider<Wizard>"
       },
       {
-        description: "Lifecycle: instantiate → populate properties (DI) → aware callbacks → BeanPostProcessor (before) → @PostConstruct / InitializingBean.afterPropertiesSet → ready → @PreDestroy on shutdown.",
+        description: "Spring creates the bean and injects its dependencies, runs setup callbacks such as @PostConstruct, then makes it available. During shutdown it runs cleanup callbacks such as @PreDestroy. Bean post-processors can also wrap or adjust beans during startup.",
         example: "A connection pool opens its sockets in @PostConstruct, after all config is injected and before the app serves a single request — startup validation belongs there so a bad config fails fast at boot, not at the first user click. @PreDestroy closes resources during graceful shutdown.",
         code: "@Service\nclass CacheWarmer {\n  @PostConstruct void init()  { /* after DI: validate config, warm cache */ }\n  @PreDestroy  void shutdown() { /* before exit: close resources */ }\n}"
       },
       {
         description: "Profiles activate environment-specific beans and config: @Profile(\"dev\") on beans, spring.profiles.active=dev at runtime, plus application-{profile}.yml overrides on top of the default file.",
-        example: "dev uses H2 plus a stub payment gateway, prod uses MySQL and the real one — same jar deployed everywhere. Tests run with @Profile(\"test\"). Never branch on if (env.equals(\"prod\")) in business code — let the container wire the right beans per profile.",
-        code: "@Service @Profile(\"prod\") class StripePay implements Pay {...}\n@Service @Profile(\"dev\")  class StubPay   implements Pay {...}\n# application-prod.yml\nspring.profiles.active: prod"
+        example: "In development, use an in-memory database and a fake payment service; in production, use the real database and payment service. Activate the profile through the deployment configuration so the same application can use the appropriate beans in each environment.",
+        code: "@Service @Profile(\"prod\") class StripePay implements Pay {...}\n@Service @Profile(\"dev\")  class StubPay   implements Pay {...}\n\n# Activate outside profile-specific files, for example:\nSPRING_PROFILES_ACTIVE=prod"
       },
       {
         description: "Both hold the same key-value configuration; properties is flat and line-based, YAML is hierarchical and indentation-based (nicer for nested maps/lists). YAML is whitespace-sensitive — a wrong indent silently drops the setting.",
@@ -592,9 +592,9 @@ export const interviewPrepAnswers = {
         code: "res = inventory.reserve(order);          // local tx + event\ntry {\n  payment.charge(order);                   // local tx\n  orders.confirm(order);\n} catch (PaymentFailed e) {\n  inventory.release(res);                  // compensation\n  orders.cancel(order, e.reason());\n  throw e;\n}"
       },
       {
-        description: "Dedupe on a deterministic event id: store processed ids in a table with a unique key — the first message inserts and processes, a redelivery collides and is skipped. Make the business operation itself idempotent too (unique charge id).",
-        example: "payment-processed(evt#123) arrives twice because a consumer crashed after processing but before committing the offset. The handler inserts evt#123 into processed_events; the second insert throws DuplicateKeyException → ack and move on. Money moves exactly once, ever.",
-        code: "@EventListener\nvoid on(PaymentProcessed e) {\n  try { processedRepo.insert(e.eventId()); }        // PK = eventId\n  catch (DuplicateKeyException dup) { return; }      // already handled\n  wallet.credit(e.accountId(), e.amount());          // runs exactly once\n}"
+        description: "Use a stable event ID to recognize a repeated message. For a database change, record that ID and apply the change in the same transaction so a crash cannot leave one done without the other. External services should receive an idempotency key when supported.",
+        example: "If the same payment message arrives again, the wallet checks its event ID and avoids crediting the account twice. The event check and wallet update must be committed together.",
+        code: "@Transactional\nvoid on(PaymentProcessed e) {\n  if (!processedRepo.insertIfAbsent(e.eventId())) return;\n  wallet.credit(e.accountId(), e.amount()); // same DB transaction\n}"
       },
       {
         description: "The circuit breaker fails fast instead of queueing doomed calls; the bulkhead (semaphore or pool limit) caps concurrency per dependency so its latency cannot consume every thread in the service.",
@@ -661,18 +661,18 @@ export const interviewPrepAnswers = {
         code: "throughput ~ partitions x per-consumer rate\nordering: per partition only\nsame key -> same partition (ordering per key, parallelism across keys)"
       },
       {
-        description: "With a key: hash(key) % numPartitions, so the same key always lands in the same partition. Without a key: round-robin or sticky partitioning (fill one partition per batch, then move). A custom Partitioner can override.",
-        example: "All events for user 42 use key=\"user-42\" — they all land in partition 7 and are consumed strictly in order. Keyless metrics spread round-robin so no single partition becomes a hotspot.",
-        code: "partition = Math.abs(murmur2(key) % numPartitions);\n// same key -> same partition -> per-key ordering\n// no key -> sticky/round-robin for even load"
+        description: "When a message has a key, Kafka's partitioner normally sends the same key to the same partition. Without a key, the default partitioner generally chooses partitions in batches. A custom partitioner can change this behavior.",
+        example: "If every event for user 42 has the same key, Kafka puts those events in the same partition, preserving their order as that partition is written. Messages without keys are spread across partitions by the producer's partitioner.",
+        code: "partition = toPositive(murmur2(key)) % numPartitions;\n// same key -> same partition while partition count is unchanged\n// no key -> partitioner spreads records across partitions"
       },
       {
-        description: "A consumer group shares a group id: the group receives every message exactly once as a whole, with partitions divided among members — each partition owned by exactly one consumer in the group. Different groups read independently (broadcast).",
-        example: "group 'billing' with 4 consumers over 16 partitions → 4 partitions each. Scale to 8 → rebalance → 2 each. group 'analytics' separately also reads 100% of messages — groups are Kafka's broadcast mechanism.",
+        description: "Consumers with the same group ID share the work: each partition is assigned to one consumer in that group at a time. A different group gets its own view of the topic. This assignment does not guarantee that each record is processed only once; a failure can cause a record to be processed again.",
+        example: "With 16 partitions and 4 consumers in the billing group, each consumer gets about 4 partitions. A separate analytics group can read all 16 partitions independently.",
         code: "props.put(\"group.id\", \"billing\");\nconsumer.subscribe(List.of(\"orders\"));\n// each partition: one consumer per group\n// other groups see all messages independently"
       },
       {
-        description: "The coordinator divides partitions as evenly as possible (round-robin / sticky assignor): each partition to one consumer; if there are more consumers than partitions, the extras sit idle.",
-        example: "10 partitions / 4 consumers → 3,3,2,2. Add a 5th → rebalance, partitions move (committed offsets mean no loss, just a short pause). 12 consumers on 10 partitions → 2 consumers get nothing — never run more consumers than partitions.",
+        description: "Kafka's configured partition-assignment strategy distributes partitions among consumers in a group. A partition is assigned to only one consumer in that group at a time. If there are more consumers than partitions, some consumers receive no partitions.",
+        example: "With 10 partitions and 4 consumers, each consumer gets 2 or 3 partitions. With 12 consumers, at least 2 have nothing to read. A rebalance may briefly pause work and can lead to reprocessing if some records were not committed.",
         code: "10 partitions / 4 consumers -> [3,3,2,2]\n12 consumers / 10 partitions -> 2 idle\nrebalance on join/leave: revoke + reassign (COOPERATIVE sticky avoids full stop)"
       },
       {
@@ -686,19 +686,19 @@ export const interviewPrepAnswers = {
         code: "__consumer_offsets: (group, partition) -> committed offset\nauto.offset.reset = earliest | latest     // fresh group, no commit\nconsumer.seek(tp, 0L)                     // manual replay"
       },
       {
-        description: "Ordering is guaranteed only within one partition (single producer session). Cross-partition ordering requires sacrificing throughput; retries can reorder unless you use an idempotent producer or max.in.flight=1.",
-        example: "Key events by userId and that user's sequence stays in order — created, paid, shipped. A retry after a network blip could otherwise deliver an older record after a newer one: enable.idempotence=true with acks=all prevents it while keeping pipelining.",
+        description: "Kafka preserves the order records are written within a partition, not across different partitions. Use the same key to keep related records in one partition. Producer retries and settings can affect ordering, so configure and verify the producer for the ordering guarantee you need.",
+        example: "Use a customer's ID as the key so that customer's events go to the same partition. That keeps the partition's order for those events; it does not create one global order across the whole topic.",
         code: "props.put(\"enable.idempotence\", true);\nprops.put(\"acks\", \"all\");\n// strictest order (lower throughput):\nprops.put(\"max.in.flight.requests.per.connection\", 1);"
       },
       {
         description: "acks=0: fire-and-forget, may lose. acks=1: leader acknowledges alone — fast, but loss if the leader fails before replication. acks=all/-1: every in-sync replica acknowledges — safest and slowest (pair with min.insync.replicas).",
-        example: "Payment events use acks=all + min.insync.replicas=2: the leader dies right after the write and a synced follower still has the record — zero loss. Internal telemetry with acks=0 accepts losing a few points in exchange for maximum speed.",
+        example: "For important events, acks=all with min.insync.replicas=2 asks at least two in-sync replicas to confirm. This reduces the risk of losing a confirmed write, but durability still depends on the cluster and its settings. acks=0 favors speed but gives no broker confirmation.",
         code: "acks=0    // no confirmation; fastest; possible loss\nacks=1    // leader only; loss if leader fails pre-replication\nacks=all  // all ISR ack; safe with min.insync.replicas=2"
       },
       {
-        description: "The replication factor is how many copies of each partition exist across brokers. RF=1 loses data on broker failure; RF=3 is standard — survives one broker loss without data loss. Higher RF costs more storage and replication traffic.",
-        example: "RF=3 on a 3-broker cluster: leader + 2 followers on different brokers. One broker dies → its leaders promote from the ISR with zero loss. RF=5 only pays off if you must survive two simultaneous failures.",
-        code: "kafka-topics --create --topic orders \\\n  --partitions 12 --replication-factor 3\n# plus: min.insync.replicas=2 — tolerates 1 failure, no data loss"
+        description: "The replication factor is the number of copies Kafka keeps for each partition. More copies can help a partition stay available after a broker failure, but safety depends on replicas being in sync and on producer and broker settings.",
+        example: "With a replication factor of 3, Kafka aims to keep three copies on different brokers. If one broker fails, an in-sync copy can take over. This is not a guarantee of zero data loss in every configuration.",
+        code: "kafka-topics --create --topic orders \\\n  --partitions 12 --replication-factor 3\n# min.insync.replicas and producer acks also affect durability"
       },
       {
         description: "Every partition has one leader that serves all reads and writes; followers replicate from it. Only the leader talks to clients. If the leader dies, an ISR follower is promoted by the controller.",
@@ -726,14 +726,14 @@ export const interviewPrepAnswers = {
         code: "last committed offset: 50\nprocessed before crash: 51..100\nrestart -> poll resumes at 51 -> reprocess 51..100 (duplicates)\n// therefore: idempotent handler (event-id dedup)"
       },
       {
-        description: "Kafka guarantees at-least-once across restarts and rebalances — deduplicate downstream: a unique event-id table, idempotent upserts keyed by business id, or the downstream system's own natural dedup key.",
-        example: "A rebalance rolls offsets back and 500 payment events replay. The handler inserts event_id into processed_events (PK) — replays collide and are skipped — while the charge carries chargeId so the bank also rejects duplicates. Effectively exactly-once, without distributed transactions.",
-        code: "try { processedRepo.insert(e.eventId()); }      // PK = event id\ncatch (DuplicateKeyException dup) { return; }   // replay -> skip\npayments.charge(e.chargeId(), e.amount());      // chargeId deduped at bank\n\n// or upsert: INSERT ... ON CONFLICT (id) DO UPDATE"
+        description: "With the common process-then-commit approach, a crash can replay records, so consumers should make their side effects safe to repeat. A unique event ID can help, but recording it and applying a database change should happen in the same transaction. For external services, use their idempotency-key support when available.",
+        example: "If a payment event is delivered twice, store its event ID and update the wallet in one database transaction. If the event was already handled, skip it. For a separate payment provider, send the same event ID as its idempotency key so a retry does not charge twice.",
+        code: "@Transactional\nvoid handle(PaymentEvent e) {\n  if (!processedRepo.insertIfAbsent(e.eventId())) return;\n  wallet.credit(e.accountId(), e.amount()); // same DB transaction\n}\n// For an external payment API, pass eventId as its idempotency key"
       },
       {
-        description: "At-most-once: commit before processing (can lose). At-least-once: process then commit (can duplicate — the practical default). Exactly-once: Kafka EOS — idempotent producer + transactions atomic across output writes and offset commits.",
-        example: "Metrics tolerate at-most-once. Business events use at-least-once plus an idempotent consumer. Kafka→Kafka money pipelines turn on exactly_once_v2 so the produced records and the consumed offsets commit as one transaction.",
-        code: "// at-least-once (typical)\nprocess(); consumer.commitSync();\n// exactly-once for Kafka -> Kafka flows\nprops.put(\"processing.guarantee\", \"exactly_once_v2\");"
+        description: "At-most-once commits before processing, so a crash can lose work. At-least-once commits after processing, so a crash can cause a repeat. Kafka transactions can provide exactly-once processing for Kafka-to-Kafka flows when producers, consumers, and offsets are configured together; external systems need their own safeguards.",
+        example: "For logs where a missing record is acceptable, at-most-once may be enough. For business events, at-least-once plus an idempotent handler is common. Kafka Streams can use its exactly-once processing setting to atomically write Kafka results and commit input offsets.",
+        code: "// At-least-once: process, then commit (a replay is possible)\nprocess(record);\nconsumer.commitSync();\n\n// Kafka Streams configuration for Kafka-to-Kafka processing\nprops.put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG,\n          StreamsConfig.EXACTLY_ONCE_V2);"
       },
       {
         description: "From peak throughput (partitions ≥ target MB/s ÷ per-partition capacity), consumer parallelism (consumers ≤ partitions) and broker count — balanced against cost: each partition costs files, memory, replica traffic and longer rebalances. Increasing is easy; decreasing needs a new topic.",
@@ -797,23 +797,23 @@ export const interviewPrepAnswers = {
   reactive: {
     important: [
       {
-        description: "Reactive programming is an asynchronous, non-blocking, event-driven paradigm: data flows as streams of events and consumers react to them as items arrive — described by the Reactive Streams specification.",
-        example: "Nothing waits for a result: you subscribe, and when the row arrives the callback runs. A price change event triggers recalculate-cart → push-notification as a chain of reactions, without a single thread parked in between.",
-        code: "Flux.fromIterable(orders)          // stream of events\n  .filter(Order::isOpen)\n  .subscribe(this::handle);          // react when data arrives"
+        description: "Reactive programming lets your code handle data as it arrives instead of waiting for each operation to finish. It can help a program handle many ongoing tasks, but only when the work in the pipeline is non-blocking.",
+        example: "In a food delivery app, the server can work on other requests while it waits for a payment response. When the response arrives, it continues the order. The payment still takes time; a non-blocking call simply avoids keeping a thread idle while waiting.",
+        code: "Flux.just(\"open\", \"closed\", \"open\")\n  .filter(status -> status.equals(\"open\"))\n  .subscribe(System.out::println);\n\n// Output:\n// open\n// open"
       },
       {
-        description: "Imperative code calls a function and blocks the thread until it returns. Reactive code composes asynchronous pipelines — threads only run when an events fire — so a handful of threads serve thousands of concurrent operations.",
-        example: "Imperative: 100 concurrent requests × 2s downstream latency = 100 threads mostly sleeping. Reactive: 2-4 event-loop threads handle 10,000+ connections. The cost: harder debugging (stack traces end at the callback) and an absolute rule — every link in the chain must be non-blocking.",
+        description: "In typical blocking code, a thread waits for a call to finish before continuing. In a non-blocking reactive pipeline, the thread can do other work while waiting for a result. Reactive code is not automatically non-blocking; blocking calls still block a thread.",
+        example: "If 100 requests wait on a slow service, a blocking server may keep 100 threads waiting. A non-blocking server can use fewer threads for those waits, as long as every call in the path is non-blocking.",
         code: "// imperative: thread parked for 2s\nOrder o = http.get(\"/order/1\");\n\n// reactive: same result, thread released meanwhile\nhttp.get(\"/order/1\").subscribe(this::render);"
       },
       {
         description: "Reactive Streams spec: Publisher<T> emits items; Subscriber<T> receives them; Subscription is the link — request(n) declares demand, cancel() stops it; Processor<T,R> is a subscriber that is also a publisher. Backpressure is part of the contract.",
-        example: "A subscriber says 'send me 10 at a time' — the publisher must not push an 11th until more demand arrives. Reactor's Flux and Mono are the reference implementations; any spec-compliant library (Kafka Reactive Streams, RSocket) can plug into the same operators.",
+        example: "A subscriber can request 10 items, then request more when ready. This shared rule lets libraries that support Reactive Streams connect, though each library still has its own operators and APIs.",
         code: "interface Subscriber<T> {\n  void onSubscribe(Subscription s);   // s.request(n) / s.cancel()\n  void onNext(T item);                // one element\n  void onError(Throwable t);\n  void onComplete();\n}"
       },
       {
-        description: "Non-blocking I/O releases the thread immediately; a completion event delivers the result later (selectors/epoll under the hood). Blocking pins the thread for the whole operation, so scale equals thread count.",
-        example: "Blocking server with 500 threads: most threads just sleep waiting on sockets (memory + context switches). Netty event loop: one thread multiplexes thousands of connections and only runs a callback when a response actually arrives. Same box: hundreds vs tens of thousands of connections.",
+        description: "With blocking I/O, a thread waits until the read or write finishes. With non-blocking I/O, the program can do other work and handle the result when it is ready. This can reduce the number of threads needed for many waiting connections.",
+        example: "A blocking server may have many threads sitting idle while network replies arrive. A non-blocking server can watch many connections and run code when each reply is ready, provided the rest of the request handling is also non-blocking.",
         code: "// blocking — thread parked to completion\nbyte[] data = inputStream.readAllBytes();\n// non-blocking — thread freed, callback later\nchannel.read(buf).whenComplete((n, err) -> handle(n));\n// Reactor\nMono<byte[]> data = webClient.get().uri(u).bodyToMono(byte[].class);"
       },
       {
@@ -822,27 +822,27 @@ export const interviewPrepAnswers = {
         code: "// demand-driven flow\nsubscriber.request(100);        // publisher may send at most 100\n\nFlux.interval(Duration.ofMillis(1))\n  .onBackpressureBuffer(1000, BufferOverflowStrategy.DROP_OLDEST);\n// strategies: BUFFER | DROP | LATEST | ERROR"
       },
       {
-        description: "Mono<T> is a Publisher of 0 or 1 value (like a future). Flux<T> is a Publisher of 0..n values (a stream). Both are lazy, asynchronous and composable with operators — nothing happens until subscribe().",
-        example: "Mono<User> for a single lookup, Flux<Order> for a list or an endless event feed. flatMap is the bridge: fetch a user, then issue the orders call for that user and flatten the resulting Flux into the outer stream.",
-        code: "Mono<User> user = repo.findById(id);\nFlux<Order> orders = repo.findAllByUser(id);\n\nuser.flatMap(u -> client.orders(u.getId()))   // Mono -> Flux, flattened\n     .subscribe();"
+        description: "Mono can produce zero or one value; Flux can produce zero or many. They let you build a pipeline that usually starts when subscribed to. They are not automatically asynchronous: the source and scheduler determine where and how the work runs.",
+        example: "Use Mono for looking up one user and Flux for a list of orders. If looking up a user should start a request that returns multiple orders, flatMapMany turns the Mono<User> into a Flux<Order>.",
+        code: "Mono<User> user = repo.findById(id);\n\nFlux<Order> orders = user.flatMapMany(\n  u -> client.orders(u.getId())  // returns Flux<Order>\n);\n\norders.subscribe(System.out::println);"
       },
       {
-        description: "Lifecycle: assemble the pipeline (nothing runs) → subscribe() starts it → onNext 0..n times → exactly one terminal signal (onError XOR onComplete) → resources released (dispose / cancel upstream).",
-        example: "You build the pipeline when you write it; it starts when WebFlux subscribes on the incoming request. Items flow; the stream ends once with either completion or an error. If the client disconnects, dispose() cancels upstream so no more work is done for nobody.",
+        description: "A typical pipeline is assembled, then starts when subscribed to. It can send items, then finish with either an error or completion. A subscriber can also cancel it before it finishes.",
+        example: "WebFlux subscribes to a handler's pipeline for a request. If the request ends or the client disconnects, cancellation can stop work that is no longer needed.",
         code: "Disposable d = Flux.fromIterable(ids)\n  .doOnSubscribe(s -> log.info(\"started\"))\n  .subscribe(\n    x -> handle(x),\n    err -> log.error(\"failed\", err),\n    () -> log.info(\"done\"));\n\nd.dispose();   // cancel early (e.g. client disconnected)"
       },
       {
-        description: "Cold publishers run the sequence per subscriber — everyone gets the whole flow. Hot publishers share one execution: subscribers only see items emitted after they subscribe. Everything is lazy until subscribe().",
+        description: "A cold publisher starts its work separately for each subscriber, so each can receive the sequence from the beginning. A hot publisher shares an ongoing source, so a new subscriber may miss items sent before it joined. Whether work waits for a subscriber depends on the source.",
         example: "Flux.just(1,2,3) delivered twice = each subscriber sees 1-3 (cold — like re-running the query). A live price ticker is hot: join late and you've missed earlier ticks — publish() makes one shared source, replay(1) also hands the newest tick to newcomers.",
         code: "Flux.just(1, 2, 3).subscribe(::print);   // cold: per subscriber, full sequence\n\nFlux.create(sink -> feed.onTick(sink::next))\n  .publish().refCount(1);   // hot: shared, starts with first subscriber\n  // .replay(1).autoConnect() — late joiners get the last tick too"
       },
       {
-        description: "map transforms each element synchronously (1:1). flatMap transforms each element into its own Publisher and merges the results asynchronously — order may interleave, concurrency unbounded (default cap 256).",
-        example: "map: order → \"ORDER-\" + id (pure, no I/O). flatMap: order id → Mono<Order> fetched over HTTP — every lookup runs concurrently and the results flatten into the stream. Returning a Mono from map gives you Mono<Mono<Order>> — the classic sign you needed flatMap.",
+        description: "map changes each item into another value. flatMap is used when each item starts work that returns a Mono or Flux; it combines those results into one stream. Results may arrive in a different order when the inner work completes at different times.",
+        example: "Use map to turn an order into its ID. Use flatMap when each order ID must trigger an HTTP request that returns a Mono<Order>.",
         code: "flux.map(o -> o.getId())                  // T -> U, synchronous\nflux.flatMap(id -> client.getOrder(id))     // T -> Publisher<U>, merged async\n// lambda returns Mono/Flux? -> flatMap, not map"
       },
       {
-        description: "flatMap runs inner publishers concurrently and merges as results arrive (order lost, default concurrency 256). concatMap is strictly serial, one inner at a time (order kept, slowest). flatMapSequential is concurrent but emits in original order.",
+        description: "flatMap can process inner publishers concurrently and emits results as they arrive. concatMap processes them one at a time and keeps order. flatMapSequential allows concurrent work but emits results in the original order.",
         example: "Fetching details for 500 items where order doesn't matter → flatMap (fastest). Building a CSV where rows must stay in input order but calls can overlap → flatMapSequential: full concurrency with deterministic output. Each call depends on the previous result → concatMap.",
         code: "flux.flatMap(id -> fetch(id))             // concurrent, order not guaranteed\nflux.flatMapSequential(id -> fetch(id))     // concurrent, order kept\nflux.concatMap(id -> fetch(id))             // strictly serial, one at a time"
       },
@@ -887,12 +887,12 @@ export const interviewPrepAnswers = {
         code: "// MVC: thread per request, blocking is fine\n@GetMapping Order get() { return service.get(id); }\n\n// WebFlux: event loop, everything non-blocking\n@GetMapping Mono<Order> get() { return service.get(id); }"
       },
       {
-        description: "WebFlux runs handlers on a few Netty event-loop threads: a request's thread is released while awaiting I/O, and its continuation resumes when the response arrives. Concurrency equals in-flight operations, not OS threads.",
-        example: "8,000 concurrent requests each waiting 200ms on a downstream call: thread-per-request needs ~8,000 parked threads (gigabytes of stacks); the event loop needs one thread per core multiplexing thousands of channels through selectors — the same workload with a fraction of the memory.",
+        description: "WebFlux can handle many requests with a small number of event-loop threads when the request path uses non-blocking I/O. A thread can work on another request while one waits for a network response. Blocking work can stall those threads and remove this benefit.",
+        example: "If many requests are waiting for network replies, an event loop can watch those connections and continue working on ready requests instead of keeping one thread parked for each wait.",
         code: "8000 requests x 200ms wait\n// thread-per-request: ~8000 threads (mostly parked)\n// event loop: N = cores threads, selector events -> callbacks\n// thread only runs while doing actual CPU work, never while waiting"
       },
       {
-        description: "WebClient is the reactive HTTP client (Netty-backed, non-blocking). Start the calls first, then combine with zip/allOf — total latency becomes the slowest call instead of the sum. Wrap with timeout and a degradation strategy per call.",
+        description: "WebClient is Spring's client for making HTTP requests in a reactive pipeline. To make independent requests concurrently, create both publishers and combine them with zip. Add timeouts and decide what to do if either call fails.",
         example: "A page needs user (150ms) + recommendations (400ms): sequential flatMap chains take 550ms; Mono.zip takes ~400ms. Add three more services and the saving multiplies — but parallelism isn't automatic: a chain of flatMaps is sequential by design.",
         code: "Mono<User> u = webClient.get().uri(\"/users/{id}\", id)\n  .retrieve().bodyToMono(User.class);\nMono<Recs> r = webClient.get().uri(\"/recs/{id}\", id)\n  .retrieve().bodyToMono(Recs.class);\n\nMono.zip(u, r)\n  .timeout(Duration.ofSeconds(2))\n  .map(t -> new Page(t.getT1(), t.getT2()));"
       },
@@ -904,14 +904,14 @@ export const interviewPrepAnswers = {
         code: "webClient.get().uri(\"/recs/{id}\", id).retrieve().bodyToMono(Recs.class)\n  .timeout(Duration.ofMillis(500))\n  .transformDeferred(CircuitBreakerOperator.of(cb))  // resilience4j-reactor\n  .transformDeferred(BulkheadOperator.of(bh))        // max concurrent\n  .onErrorResume(e -> Mono.just(Recs.empty()));      // fallback"
       },
       {
-        description: "Demand-driven flow: the subscriber requests n items and the publisher may never exceed it; for sources you don't control, pick an explicit overflow strategy — buffer (bounded), drop, latest, or error — instead of unbounded queues.",
-        example: "A feed emits every 1ms while the DB sink writes every 50ms: limitRate(100) pulls in batches of 100 so the sink sets the pace. A live dashboard only needs the newest tick — onBackpressureDrop throws stale values away, which is exactly right for that UI.",
-        code: "Flux.create(sink -> producer.onMessage(sink::next),\n            FluxSink.OverflowStrategy.BUFFER)\n  .limitRate(100)                 // request in windows of 100\n  .onBackpressureLatest();        // keep only the newest for live views\n// strategies: BUFFER | DROP | LATEST | ERROR — never unbounded"
+        description: "Backpressure lets a subscriber control how quickly a publisher sends data. If a source cannot slow down, choose what to do when the consumer falls behind: keep only the latest item, drop items, or report an error. Use a bounded buffer when every item matters.",
+        example: "A live price display only needs the newest price, so it can drop older updates when it falls behind. A payment processor must not drop payments, so it should use a bounded queue and handle overflow rather than silently losing data.",
+        code: "Flux.create(sink -> producer.onMessage(sink::next),\n            FluxSink.OverflowStrategy.LATEST)\n  .subscribe(this::updatePrice);\n// For important events, use a bounded buffer and handle overflow"
       },
       {
         description: "Stream in batches: page through the source with a cursor, emit each page as a Flux, process chunks with bounded flatMap concurrency — heap holds one page at a time, never the whole dataset.",
         example: "Exporting 10M rows to S3: a loop of paged queries (1,000 rows each) feeds flatMap(uploadChunk, 16) — memory stays at a few MB in a 512MB container. Loading all rows into a List first is the guaranteed OOM that kills naive exports.",
-        code: "Flux.range(0, 10_000)                        // pages\n  .concatMap(i -> Mono.fromCallable(() -> repo.page(i, 1000)))\n  .flatMapIterable(List::stream)               // rows\n  .flatMap(this::uploadChunk, 16)              // bounded concurrency\n  .then();\n// heap holds ~1 page, not 10M rows"
+        code: "Flux.range(0, 10_000)                        // page numbers\n  .concatMap(i -> Mono.fromCallable(() -> repo.page(i, 1000)))\n  .flatMapIterable(page -> page)               // each page is a List\n  .flatMap(this::uploadChunk, 16)              // bounded concurrency\n  .then();"
       },
       {
         description: "Find where the time goes before touching anything: thread dumps (event loop stuck in blocking code?), GC logs (buffering leak?), WebClient connection pool exhaustion, missing timeouts causing pileups, downstream latency — via metrics first.",
@@ -944,10 +944,250 @@ export const interviewPrepAnswers = {
         code: "Flux.create(sink -> feed.onTick(sink::next))   // single upstream source\n  .publish()\n  .refCount(1);        // hot: shared, starts on first, stops on last\n\n// late joiners need the latest value:\n  .replay(1).autoConnect();   // multicast + replay last tick"
       },
       {
-        description: "An unbounded subscribe() with no demand or concurrency cap pulls the entire source into memory at once (every element and every inner Publisher queued), heap climbs, GC thrashes, and the pod OOM-kills — repeatedly. Fix: bounded flatMap concurrency + limitRate + cancellation.",
-        example: "Incident: Flux.range(0, 10_000_000).flatMap(this::call) queued all 10 million inner Monos immediately — heap hit 90% within minutes and the pod was OOM-killed 12 times in an hour. With flatMap(call, 32) and limitRate(100), memory stayed flat and p99 actually improved from queueing alone.",
-        code: "// before: unbounded demand\nFlux.range(0, 10_000_000).flatMap(this::call);      // ~10M in flight\n\n// after: bounded\nFlux.range(0, 10_000_000)\n  .flatMap(this::call, 32)          // concurrency cap\n  .limitRate(100)                   // bounded request windows\n  .subscribe();"
+        description: "Calling subscribe() starts a pipeline, and the simple subscribe overload requests an unbounded amount of data. Operators such as flatMap still apply their own concurrency limits, but uncontrolled sources or large buffers can use too much memory. Set concurrency and buffering limits that match your system.",
+        example: "A service processes millions of records and starts too many downstream calls at once. Limiting flatMap to 32 concurrent calls and using bounded buffers keeps the work manageable; the right limits depend on the database and service capacity.",
+        code: "Flux.range(0, 10_000_000)\n  .flatMap(this::call, 32)  // at most 32 inner calls at a time\n  .subscribe();"
       },
     ]
+  },
+  javascript: {
+    important: [
+      {
+        description: "JavaScript is a high-level, dynamically typed programming language primarily used to build interactive web applications.\n\nMain features:\n\n- Dynamic typing\n- Event-driven programming\n- Asynchronous programming\n- First-class functions\n- Prototype-based inheritance\n- Closures"
+      },
+      {
+        description: "These are used to declare variables.\n\n- var: Function-scoped.\n- let: Block-scoped and reassignment allowed.\n- const: Block-scoped and reassignment not allowed.",
+        code: "var a = 10;\nlet b = 20;\nconst c = 30;\n\na = 15;\nb = 25;\n// c = 35; // Error"
+      },
+      {
+        description: "JavaScript processes declarations before executing the code in their scope.\n\nlet and const are also hoisted but cannot be accessed before initialization because of the Temporal Dead Zone.",
+        code: "console.log(a); // undefined\nvar a = 10;"
+      },
+      {
+        description: "A closure allows an inner function to access variables from its outer function even after the outer function has finished execution.\n\nUses: Data privacy, callbacks and state management.",
+        code: "function counter() {\n    let count = 0;\n\n    return function() {\n        return ++count;\n    };\n}\n\nconst increment = counter();\n\nconsole.log(increment()); // 1\nconsole.log(increment()); // 2"
+      },
+      {
+        description: "The Event Loop runs queued callbacks after the current code finishes. Promise callbacks run before timer callbacks. This lets JavaScript handle other work while asynchronous operations are pending.\n\nOutput: Start, End, Promise, Timer.",
+        code: "console.log(\"Start\");\n\nsetTimeout(() => console.log(\"Timer\"), 0);\n\nPromise.resolve().then(() => console.log(\"Promise\"));\n\nconsole.log(\"End\");"
+      },
+      {
+        description: "== (loose equality): JavaScript may convert the values to the same type before comparing them. For example, 10 == \"10\" is true.\n\n=== (strict equality): JavaScript compares both the type and the value without converting them. For example, 10 === \"10\" is false.",
+        code: "console.log(10 == \"10\");  // true\nconsole.log(10 === \"10\"); // false"
+      },
+      {
+        description: "A Promise represents the eventual success or failure of an asynchronous operation.\n\nThree states:\n\n- Pending\n- Fulfilled\n- Rejected",
+        code: "const promise = Promise.resolve(\"Success\");\n\npromise.then(result => console.log(result));"
+      },
+      {
+        description: "async and await provide a cleaner way to write asynchronous code using Promises.",
+        code: "async function getData() {\n    try {\n        const response = await fetch(\"/api/users\");\n        const data = await response.json();\n\n        console.log(data);\n    } catch (error) {\n        console.log(error);\n    }\n}"
+      },
+      {
+        description: "- Map transforms elements.\n- Filter selects elements.\n- Reduce combines elements into a single result.",
+        code: "const numbers = [1, 2, 3, 4];\n\nnumbers.map(n => n * 2);\n// [2, 4, 6, 8]\n\nnumbers.filter(n => n % 2 === 0);\n// [2, 4]\n\nnumbers.reduce((sum, n) => sum + n, 0);\n// 10"
+      },
+      {
+        description: "- undefined: A variable has been declared but not assigned a value.\n- null: An intentional absence of a value.",
+        code: "let a;\nlet b = null;\n\nconsole.log(a); // undefined\nconsole.log(b); // null"
+      },
+      {
+        description: "Both use ..., but their purposes differ.\n\nSpread expands values; Rest collects values.",
+        code: "// Spread\nconst a = [1, 2];\nconst b = [...a, 3];\n\n// Rest\nfunction sum(...numbers) {\n    return numbers.reduce((a, b) => a + b, 0);\n}"
+      },
+      {
+        description: "Destructuring extracts values from arrays or objects into variables.",
+        code: "const user = {\n    name: \"Bharath\",\n    age: 29\n};\n\nconst { name, age } = user;"
+      },
+      {
+        description: "They control the this context when invoking or creating functions.",
+        code: "const user = { name: \"Bharath\" };\n\nfunction greet(city) {\n    console.log(this.name, city);\n}\n\ngreet.call(user, \"Bangalore\");\n\ngreet.apply(user, [\"Bangalore\"]);\n\nconst fn = greet.bind(user, \"Bangalore\");\nfn();"
+      },
+      {
+        description: "JavaScript objects can inherit properties and methods from other objects through the prototype chain.",
+        code: "const person = {\n    greet() {\n        console.log(\"Hello\");\n    }\n};\n\nconst employee = Object.create(person);\n\nemployee.greet();"
+      },
+      {
+        description: "- Synchronous: Operations execute sequentially.\n- Asynchronous: Operations can complete later while other work continues.\n\nOutput: Start, End, Async.",
+        code: "console.log(\"Start\");\n\nsetTimeout(() => console.log(\"Async\"), 1000);\n\nconsole.log(\"End\");"
+      },
+      {
+        description: "- Bubbling: Event travels from child to parent.\n- Capturing: Event travels from parent to child.\n\nThe third argument true enables capture phase.",
+        code: "parent.addEventListener(\"click\", handler, true);\nchild.addEventListener(\"click\", handler, false);"
+      },
+      {
+        description: "- Debouncing executes a function after activity stops.\n- Throttling limits how frequently a function executes.\nUse cases:\n\n- Debouncing: Search input.\n- Throttling: Scroll and resize events."
+      },
+      {
+        description: "Shallow copy shares nested object references. Deep copy creates independent nested copies.",
+        code: "const original = {\n    name: \"Bharath\",\n    address: { city: \"Bangalore\" }\n};\n\nconst shallow = { ...original };\nconst deep = structuredClone(original);"
+      },
+      {
+        description: "JavaScript has seven primitive types and one non-primitive category.\n\nPrimitive:\n\n1. String\n2. Number\n3. BigInt\n4. Boolean\n5. Undefined\n6. Null\n7. Symbol\nNon-primitive: Objects, including arrays and functions."
+      },
+      {
+        description: "localStorage:\n- Stored in the browser until removed.\n- Not sent to the server automatically.\n- Generally has more storage space than cookies.\n\nsessionStorage:\n- Stored for the current browser tab session.\n- Not sent to the server automatically.\n- Generally has more storage space than cookies.\n\nCookies:\n- Can have a configured expiry time.\n- Matching cookies are sent with requests to the server.\n- Have a small storage limit."
+      }
+    ],
+    scenarios: [
+      {
+        description: "Use Promise.all.\n\nAll three requests execute concurrently. If one rejects, Promise.all rejects.",
+        code: "const [users, accounts, transactions] =\n    await Promise.all([\n        getUsers(),\n        getAccounts(),\n        getTransactions()\n    ]);"
+      },
+      {
+        description: "Promise.allSettled.",
+        code: "const results = await Promise.allSettled([\n    getUsers(),\n    getAccounts(),\n    getTransactions()\n]);\n\nresults.forEach(result => {\n    console.log(result.status, result);\n});"
+      },
+      {
+        description: "Use Debouncing.",
+        code: "function debounce(fn, delay) {\n    let timer;\n\n    return (...args) => {\n        clearTimeout(timer);\n\n        timer = setTimeout(() => {\n            fn(...args);\n        }, delay);\n    };\n}"
+      },
+      {
+        description: "Disable the button while the request is processing and use a backend idempotency key.\n\nFor a real retryable payment workflow, generate the idempotency key once per logical payment and reuse it for retries.",
+        code: "let loading = false;\n\nasync function makePayment() {\n    if (loading) return;\n\n    loading = true;\n\n    try {\n        await fetch(\"/api/payment\", {\n            method: \"POST\",\n            headers: {\n                \"Idempotency-Key\": crypto.randomUUID()\n            }\n        });\n    } finally {\n        loading = false;\n    }\n}"
+      },
+      {
+        description: "Use AbortController with a timeout.",
+        code: "async function getData() {\n    const controller = new AbortController();\n\n    const timer = setTimeout(() => {\n        controller.abort();\n    }, 5000);\n\n    try {\n        const response = await fetch(\"/api/users\", {\n            signal: controller.signal\n        });\n\n        return await response.json();\n\n    } catch (error) {\n        console.log(\"Request cancelled or failed\");\n    } finally {\n        clearTimeout(timer);\n    }\n}"
+      },
+      {
+        description: "Prefer server-side filtering and pagination. For client-side data, use appropriate indexing, efficient algorithms and virtualization.",
+        code: "const filtered = employees.filter(\n    emp => emp.department === \"IT\"\n);"
+      },
+      {
+        description: "Use async/await.",
+        code: "async function getData() {\n    const user = await getUser();\n\n    const account = await getAccount(user.id);\n\n    console.log(account);\n}"
+      },
+      {
+        description: "Use a closure. It remembers whether the function has already run.\n\nOutput: Initialized (printed once).",
+        code: "function once(fn) {\n    let executed = false;\n\n    return function(...args) {\n        if (executed) return;\n\n        executed = true;\n\n        return fn.apply(this, args);\n    };\n}\n\nconst initialize = once(() => {\n    console.log(\"Initialized\");\n});\n\ninitialize();\ninitialize();\ninitialize();"
+      },
+      {
+        description: "Use Map for in-memory caching.",
+        code: "const cache = new Map();\n\nasync function getUser(id) {\n    if (cache.has(id)) {\n        return cache.get(id);\n    }\n\n    const response = await fetch(`/api/users/${id}`);\n    const data = await response.json();\n\n    cache.set(id, data);\n\n    return data;\n}"
+      },
+      {
+        description: "Use AbortController to cancel the previous request, or track request IDs.",
+        code: "let controller;\n\nasync function searchUsers(query) {\n    controller?.abort();\n\n    controller = new AbortController();\n\n    try {\n        const response = await fetch(\n            `/api/users?q=${encodeURIComponent(query)}`,\n            { signal: controller.signal }\n        );\n\n        return await response.json();\n\n    } catch (error) {\n        if (error.name !== \"AbortError\") {\n            throw error;\n        }\n    }\n}"
+      }
+    ],
+  },
+  react: {
+    important: [
+      {
+        description: "React is a JavaScript library used to build reusable and interactive user interfaces using components."
+      },
+      {
+        description: "Components are independent and reusable UI building blocks.",
+        code: "function Header() {\n    return <h1>Banking Application</h1>;\n}\n\nfunction App() {\n    return <Header />;\n}"
+      },
+      {
+        description: "JSX is a syntax extension that allows us to write HTML-like markup inside JavaScript.",
+        code: "const name = \"Bharath\";\n\nfunction App() {\n    return <h1>Hello {name}</h1>;\n}"
+      },
+      {
+        description: "Props:\n- Passed from the parent.\n- Read-only to the receiving component.\n- Used to pass data into a component.\n- The parent controls their values.\n\nState:\n- Managed within the component.\n- Updated using a state setter.\n- Used for data that can change over time.\n- The component controls its value."
+      },
+      {
+        description: "Virtual DOM is a lightweight JavaScript representation of the UI. React uses reconciliation to determine what changes need to be committed to the actual DOM."
+      },
+      {
+        description: "Reconciliation is the process React uses to compare the previous UI tree with the new UI tree and determine necessary updates."
+      },
+      {
+        description: "Hooks allow functional components to use React features such as state and Effects.\n\nCommon Hooks:\n\n- useState\n- useEffect\n- useRef\n- useContext\n- useMemo\n- useCallback\n- useReducer"
+      },
+      {
+        description: "useState allows functional components to maintain state.",
+        code: "const [count, setCount] = useState(0);\n\n<button onClick={() => setCount(c => c + 1)}>\n    {count}\n</button>"
+      },
+      {
+        description: "useEffect is used to synchronize components with external systems, such as APIs, subscriptions and timers.",
+        code: "useEffect(() => {\n    fetch(\"/api/users\")\n        .then(res => res.json())\n        .then(data => console.log(data));\n}, []);"
+      },
+      {
+        description: "useRef stores a persistent reference between renders without triggering a re-render when its value changes.",
+        code: "const inputRef = useRef(null);\n\nfunction focusInput() {\n    inputRef.current.focus();\n}"
+      },
+      {
+        description: "- useMemo: Memoizes a calculated value.\n- useCallback: Memoizes a function reference.",
+        code: "const total = useMemo(() => calculateTotal(items), [items]);\n\nconst handleClick = useCallback(() => {\n    saveData();\n}, []);"
+      },
+      {
+        description: "React.memo is a higher-order component that can skip rendering a component when its props have not changed according to its comparison.",
+        code: "const Child = React.memo(function Child({ name }) {\n    return <h1>{name}</h1>;\n});"
+      },
+      {
+        description: "useContext allows components to consume shared context data without passing props through every intermediate component.",
+        code: "const UserContext = createContext();\n\nfunction Profile() {\n    const user = useContext(UserContext);\n\n    return <h1>{user}</h1>;\n}"
+      },
+      {
+        description: "useReducer manages state through a reducer function and dispatched actions. It is useful for complex state transitions.",
+        code: "function reducer(state, action) {\n    switch (action.type) {\n        case \"INCREMENT\":\n            return { count: state.count + 1 };\n        default:\n            return state;\n    }\n}\n\nconst [state, dispatch] = useReducer(\n    reducer,\n    { count: 0 }\n);"
+      },
+      {
+        description: "Prop drilling occurs when data is passed through multiple intermediate components to reach a deeply nested child.\n\nSolutions include Context API and state management libraries."
+      },
+      {
+        description: "React Router is a routing library used for navigation between different pages in React applications.",
+        code: "<Routes>\n    <Route path=\"/\" element={<Home />} />\n    <Route path=\"/login\" element={<Login />} />\n    <Route path=\"/dashboard\" element={<Dashboard />} />\n</Routes>"
+      },
+      {
+        description: "Lazy loading loads a component only when it is needed, helping reduce the initial JavaScript bundle.",
+        code: "const Dashboard = React.lazy(\n    () => import(\"./Dashboard\")\n);\n\n<Suspense fallback={<p>Loading...</p>}>\n    <Dashboard />\n</Suspense>"
+      },
+      {
+        description: "Redux is a state management library used to manage shared application state in a predictable way.\n\nMain concepts:\n\n- Store\n- Actions\n- Reducers\n- Dispatch\n- Selectors"
+      },
+      {
+        description: "Controlled components use React state to manage form values.\n\nUncontrolled components maintain their values in the DOM, usually accessed through refs.",
+        code: "// Controlled\n<input value={name} onChange={e => setName(e.target.value)} />\n\n// Uncontrolled\n<input ref={inputRef} />"
+      },
+      {
+        description: "1. React.memo\n2. useMemo\n3. useCallback\n4. Lazy loading\n5. Code splitting\n6. List virtualization\n7. Avoid unnecessary state updates\n8. Use proper keys\n\nUse profiling tools to identify actual performance bottlenecks before applying optimizations."
+      }
+    ],
+    scenarios: [
+      {
+        description: "Use React.memo if the child receives unchanged props.\n\nFor function props, consider useCallback when necessary.",
+        code: "const Child = React.memo(({ name }) => {\n    console.log(\"Child rendered\");\n\n    return <h1>{name}</h1>;\n});"
+      },
+      {
+        description: "Use useEffect.\n\nFor production, also handle loading, errors and request cancellation.",
+        code: "function Users() {\n    const [users, setUsers] = useState([]);\n\n    useEffect(() => {\n        fetch(\"/api/users\")\n            .then(res => res.json())\n            .then(data => setUsers(data));\n    }, []);\n\n    return users.map(user => (\n        <p key={user.id}>{user.name}</p>\n    ));\n}"
+      },
+      {
+        description: "Use useEffect with a debounce timer.",
+        code: "function Search() {\n    const [search, setSearch] = useState(\"\");\n\n    useEffect(() => {\n        const timer = setTimeout(() => {\n            if (search.trim()) {\n                fetch(`/api/search?q=${encodeURIComponent(search)}`);\n            }\n        }, 500);\n\n        return () => clearTimeout(timer);\n    }, [search]);\n\n    return (\n        <input\n            value={search}\n            onChange={e => setSearch(e.target.value)}\n        />\n    );\n}"
+      },
+      {
+        description: "Use Context API or Redux.",
+        code: "const UserContext = createContext(null);\n\nfunction App() {\n    return (\n        <UserContext.Provider value=\"Bharath\">\n            <Profile />\n        </UserContext.Provider>\n    );\n}\n\nfunction Profile() {\n    const user = useContext(UserContext);\n\n    return <h1>{user}</h1>;\n}"
+      },
+      {
+        description: "Use useMemo when the calculation is expensive.",
+        code: "const total = useMemo(() => {\n    return transactions.reduce(\n        (sum, transaction) => sum + transaction.amount,\n        0\n    );\n}, [transactions]);"
+      },
+      {
+        description: "Use page state and calculate the records to display. For production, prefer backend pagination.",
+        code: "const [page, setPage] = useState(1);\n\nconst pageSize = 10;\n\nconst start = (page - 1) * pageSize;\n\nconst visibleEmployees = employees.slice(\n    start,\n    start + pageSize\n);"
+      },
+      {
+        description: "Use controlled components and state.",
+        code: "function Login() {\n    const [email, setEmail] = useState(\"\");\n    const [password, setPassword] = useState(\"\");\n\n    function handleSubmit(e) {\n        e.preventDefault();\n\n        if (!email || !password) {\n            alert(\"All fields are required\");\n            return;\n        }\n\n        console.log(\"Login submitted\");\n    }\n\n    return (\n        <form onSubmit={handleSubmit}>\n            <input\n                value={email}\n                onChange={e => setEmail(e.target.value)}\n                placeholder=\"Email\"\n            />\n\n            <input\n                type=\"password\"\n                value={password}\n                onChange={e => setPassword(e.target.value)}\n                placeholder=\"Password\"\n            />\n\n            <button type=\"submit\">Login</button>\n        </form>\n    );\n}"
+      },
+      {
+        description: "Use Optimistic UI updates.\n\nReact provides useOptimistic for this purpose.\n\nIn production, handle failed requests by reconciling the displayed state with the confirmed server state.",
+        code: "import { startTransition, useOptimistic, useState } from \"react\";\n\nfunction Balance() {\n    const [balance, setBalance] = useState(100);\n    const [optimisticBalance, updateBalance] = useOptimistic(balance);\n\n    function transfer(amount) {\n        startTransition(async () => {\n            updateBalance(balance - amount);\n\n            try {\n                const confirmedBalance = await transferMoney(amount);\n                setBalance(confirmedBalance);\n            } catch (error) {\n                console.error(\"Transfer failed\", error);\n            }\n        });\n    }\n\n    return <p>Balance: {optimisticBalance}</p>;\n}"
+      },
+      {
+        description: "Use Lazy Loading and Code Splitting.\n\nThis loads the Dashboard component when required instead of including it in the initial application bundle.",
+        code: "const Dashboard = React.lazy(\n    () => import(\"./Dashboard\")\n);\n\nfunction App() {\n    return (\n        <Suspense fallback={<p>Loading...</p>}>\n            <Dashboard />\n        </Suspense>\n    );\n}"
+      },
+      {
+        description: "Use list virtualization, which renders only the visible rows instead of all 10,000 rows.\n\nFor example, use react-window or another virtualization library.\n\nInterview explanation: Virtualization improves rendering performance by keeping only visible list elements in the DOM.",
+        code: "import { FixedSizeList } from \"react-window\";\n\nfunction TransactionList({ transactions }) {\n    return (\n        <FixedSizeList\n            height={400}\n            width={600}\n            itemCount={transactions.length}\n            itemSize={50}\n            itemData={transactions}\n        >\n            {({ index, style, data }) => (\n                <div style={style}>\n                    {data[index].description}\n                </div>\n            )}\n        </FixedSizeList>\n    );\n}"
+      }
+    ],
   }
 };

@@ -406,6 +406,10 @@
   overflow-wrap: break-word;
 }
 
+.ip-answer-section p.ip-answer-preserve-lines {
+  white-space: pre-line;
+}
+
 /* ---------- Colorful code box (editor-style) ---------- */
 .ip-codebox {
   margin-top: 8px;
@@ -1700,25 +1704,186 @@
 
 /* ---------- Uniform question-card sizing (same size everywhere) ---------- */
 .interview-prep-route .ip-grid {
-  /* Equalize every implicit row to the tallest row of the grid,
-     so cards never differ in height from row to row. */
-  grid-auto-rows: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
 }
 
 .interview-prep-route .ip-question {
-  /* Fill the assigned grid area exactly (global border-box applies). */
-  height: 100%;
-  /* Vertically center content when the row is taller than the text. */
-  align-items: center;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: start;
+  column-gap: 12px;
+  row-gap: 10px;
+  height: auto;
+  min-height: 112px;
+  padding: 16px;
+  overflow: visible;
 }
 
 .interview-prep-route .ip-qtext {
-  /* Cap text at 4 lines so one long question cannot stretch every card;
-     full question text stays in the popup and the native tooltip. */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
-  overflow: hidden;
+  grid-column: 2;
+  grid-row: 1;
+  display: block;
+  overflow: visible;
+  font-size: 0.96rem;
+  line-height: 1.55;
 }
 
+.interview-prep-route .ip-qhint {
+  display: inline-flex;
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: start;
+  margin: 0;
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .interview-prep-route .ip-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Keep the page readable when the application is using its light theme. */
+#root .app-shell[data-theme="light"] .interview-prep-route,
+#root .app-shell[data-theme="light"] .interview-prep-route .page-container,
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-page {
+  background: #f3f6fb !important;
+  color: #243247 !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-page-header {
+  border-color: #d7e0ed !important;
+  background: #ffffff !important;
+  box-shadow: 0 8px 24px rgba(31, 51, 82, 0.08) !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-page-eyebrow {
+  color: #3159a8 !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-page-title {
+  background: none !important;
+  color: #17243b !important;
+  -webkit-text-fill-color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-page-subtitle,
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-steps-label {
+  background: #ffffff !important;
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-stat {
+  border-color: #d5deeb;
+  background: #f8faff;
+  color: #43536b;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-stat b {
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-steps {
+  border-color: #d7e0ed;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(31, 51, 82, 0.07);
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-step-chip {
+  border-color: color-mix(in srgb, var(--step-color, #3159dd) 32%, #ffffff);
+  background: color-mix(in srgb, var(--step-color, #3159dd) 9%, #ffffff);
+  color: #243247 !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-step-chip:hover,
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-step-chip:focus-visible {
+  border-color: var(--step-color, #3159dd);
+  background: color-mix(in srgb, var(--step-color, #3159dd) 15%, #ffffff);
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-topic {
+  border-color: #d7e0ed;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(31, 51, 82, 0.07);
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-topic-header {
+  border-bottom-color: #e2e8f0;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-topic-title {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-topic-count {
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-count-chip-key,
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-count-chip-alt,
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-block-count-key,
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-block-count-alt {
+  border-color: #d2dced;
+  background: #f1f5fb;
+  color: #34445c !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-block-title {
+  border-color: #d7e0ed;
+  border-left-color: #3159dd;
+  background: #f5f8fd;
+  color: #243247 !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-block-title-scenario {
+  border-left-color: #b77908;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-question {
+  border-color: #d5deeb;
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgba(31, 51, 82, 0.06);
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-question-scenario {
+  border-color: #e6d9bb;
+  background: #fffdf8;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-question:hover,
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-question:focus-visible {
+  border-color: #6484cf;
+  background: #f5f8ff;
+  box-shadow: 0 8px 20px rgba(49, 89, 221, 0.1);
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-question-scenario:hover,
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-question-scenario:focus-visible {
+  border-color: #c28a24;
+  background: #fff9eb;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-question .ip-qnum {
+  border-color: #c7d5ed;
+  background: #edf3ff;
+  color: #244a9b !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-question-scenario .ip-qnum {
+  border-color: #e4d3ad;
+  background: #fff3d8;
+  color: #75510a !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-qtext {
+  color: #243247 !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-qhint {
+  border-color: #d4deef;
+  background: #f2f6ff;
+  color: #3159a8 !important;
+}

@@ -405,7 +405,9 @@ function App() {
                   path="/maang/interview-prep"
                   element={
                     <RequirePaid>
-                      <InterviewPrep />
+                      <div className="interview-prep-route">
+                        <InterviewPrep />
+                      </div>
                     </RequirePaid>
                   }
                 />

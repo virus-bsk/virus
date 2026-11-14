@@ -7,7 +7,7 @@ import "./InterviewPrep.css";
 
 /** Section labels shown in the answer popup (short human-friendly format). */
 const ANSWER_SECTIONS = [
-  ["description", "📖 Description", "#2563eb"],
+  ["description", "🎤 Interview Answer", "#2563eb"],
   ["example", "🌍 Real-time Example", "#16a34a"],
 ];
 
@@ -19,9 +19,11 @@ const CODE_LANG = {
   microservices: "Java",
   kafka: "Java",
   reactive: "Java",
+  javascript: "JavaScript",
+  react: "JavaScript / JSX",
 };
 
-/** Keywords colored inside popup code blocks (SQL + Java + a bit of shell). */
+/** Keywords colored inside popup code blocks (SQL, Java, JavaScript and shell). */
 const CODE_KEYWORDS = new Set(
   (
     "select from where group by having order limit offset join inner left right full outer on as with union all " +
@@ -30,7 +32,12 @@ const CODE_KEYWORDS = new Set(
     "row_number dense_rank lag sum count max min avg over between like exists case when then else end and or is " +
     "class public private protected static final void new return if else for while do int boolean string extends " +
     "implements interface import try catch finally throw throws synchronized volatile abstract default this super record " +
-    "var let const function async await true false null undefined newtypeof"
+    "var let const function async await true false null undefined newtypeof " +
+    "promise all allsettled then catch finally throw typeof this return if else while try " +
+    "console log fetch map filter reduce settimeout cleartimeout setinterval clearinterval " +
+    "localstorage sessionstorage object create bind call apply symbol bigint instanceof " +
+    "usestate useeffect useref usememo usecallback usereducer usecontext useoptimistic " +
+    "memo lazy suspense createcontext use dispatch"
   ).split(" "),
 );
 
@@ -85,15 +92,16 @@ function highlightCode(code) {
  *
  * Route: /maang/interview-prep
  *
- * Walks through every backend topic in order (Step 1 → Step 6):
- * Java, SQL, Spring Boot, Microservices, Kafka, Reactive Programming.
+ * Walks through backend and frontend topics:
+ * SQL, Java, Spring Boot, Microservices, Kafka, Reactive Programming,
+ * JavaScript, and React.
  * Each topic shows 20 important concept questions + 10 scenario-based
  * questions, laid out as simple grids. A sticky step bar at the top
  * lets you jump between steps.
  *
  * Clicking any question opens a white popup with a clear,
  * interview-oriented answer structured as:
- * Description → Real-time Example → Code (code only when it helps).
+ * Interview Answer → optional Real-time Example → Code when it helps.
  */
 function InterviewPrep() {
   // popup state: { topicId, kind: "important" | "scenarios", index } | null
@@ -139,10 +147,10 @@ function InterviewPrep() {
       <header className="ip-page-header">
         <div className="ip-page-heading">
           <span className="ip-page-eyebrow">Interview preparation</span>
-          <h1 className="ip-page-title">Java Backend Interview Topics</h1>
+          <h1 className="ip-page-title">Java & Full-Stack Interview Topics</h1>
           <p className="ip-page-subtitle">
-            Click any question to open a clear, interview-ready answer — description,
-            real-time example and code.
+            Click any question for a clear interview answer, a practical example where
+            useful, and code when it helps explain the idea.
           </p>
           <div className="ip-page-stats">
             <span className="ip-stat">
@@ -305,7 +313,10 @@ function InterviewPrep() {
             <div className="ip-popup-body">
               {activeAnswer ? (
                 <>
-                  {ANSWER_SECTIONS.map(([key, label, color]) =>
+                  {ANSWER_SECTIONS.filter(
+                    ([key]) =>
+                      key !== "example" || !["javascript", "react"].includes(active.topicId),
+                  ).map(([key, label, color]) =>
                     activeAnswer[key] ? (
                       <div
                         className="ip-answer-section"
@@ -315,13 +326,25 @@ function InterviewPrep() {
                         <span className="ip-answer-label" style={{ color }}>
                           {label}
                         </span>
-                        <p>{activeAnswer[key]}</p>
+                        <p
+                          className={
+                            ["javascript", "react"].includes(active.topicId)
+                              ? "ip-answer-preserve-lines"
+                              : undefined
+                          }
+                        >
+                          {activeAnswer[key]}
+                        </p>
                       </div>
                     ) : null
                   )}
                   {activeAnswer.code && (
                     <div className="ip-answer-section ip-answer-section-code">
-                      <span className="ip-answer-label">💻 Code / Query</span>
+                      <span className="ip-answer-label">
+                        {["javascript", "react"].includes(active.topicId)
+                          ? "💻 Code"
+                          : "💻 Code / Query"}
+                      </span>
                       <div className="ip-codebox">
                         <div className="ip-codebox-bar">
                           <span className="ip-codebox-lang">
@@ -337,10 +360,9 @@ function InterviewPrep() {
                 </>
               ) : (
                 <div className="ip-answer-section">
-                  <span className="ip-answer-label">📖 Description</span>
+                  <span className="ip-answer-label">🎤 Interview Answer</span>
                   <p>
-                    Answer for this question is being written. The format is simple:
-                    Description → Real-time Example → Code.
+                    An answer for this question is not available yet.
                   </p>
                 </div>
               )}
