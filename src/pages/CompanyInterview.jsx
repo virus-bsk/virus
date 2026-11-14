@@ -262,7 +262,7 @@ const COMPANY_GRID_DETAILS = {
   zensar: {
     name: "Zensar",
     interviews: "2026",
-    technologies: "Java · Spring Boot · React · Kafka · Microservices",
+    technologies: "Java · Spring WebFlux · Kafka · Microservices · Reactive APIs",
   },
   "zoho-walk-in": {
     name: "ZOHO",
