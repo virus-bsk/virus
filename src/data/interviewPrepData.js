@@ -5,10 +5,11 @@
  * src/pages/InterviewPrep.jsx (route: /maang/interview-prep).
  *
  * Each topic has:
- *   - important: 20 must-know concept questions (concept-wise order)
+ *   - important: 20 must-know concept questions
  *   - scenarios: 10 scenario-based / real-time questions
- *   - link: deep-dive interview page for that topic (optional)
+ *   - link: deep-dive interview page (optional)
  */
+
 export const interviewPrepTopics = [
   {
     id: "sql",
@@ -52,6 +53,7 @@ export const interviewPrepTopics = [
       "Design the right composite index for WHERE a=? AND b=? ORDER BY c.",
     ],
   },
+
   {
     id: "java",
     step: "Step 2",
@@ -94,6 +96,7 @@ export const interviewPrepTopics = [
       "Three independent API calls must run in parallel and join — CompletableFuture solution with timeout.",
     ],
   },
+
   {
     id: "spring-boot",
     step: "Step 3",
@@ -136,6 +139,7 @@ export const interviewPrepTopics = [
       "Production readiness checklist for a Spring Boot service (config, actuator, logs, graceful shutdown).",
     ],
   },
+
   {
     id: "microservices",
     step: "Step 4",
@@ -178,6 +182,7 @@ export const interviewPrepTopics = [
       "One service is overloaded while others are idle — scaling and load-shedding strategy.",
     ],
   },
+
   {
     id: "kafka",
     step: "Step 5",
@@ -220,6 +225,7 @@ export const interviewPrepTopics = [
       "Throughput is low — tuning checklist (batching, linger.ms, compression, partitions).",
     ],
   },
+
   {
     id: "reactive",
     step: "Step 6",
@@ -262,6 +268,7 @@ export const interviewPrepTopics = [
       "Explain a production incident where unbounded subscribe() caused memory growth and the fix.",
     ],
   },
+
   {
     id: "javascript",
     step: "Step 7",
@@ -303,6 +310,7 @@ export const interviewPrepTopics = [
       "Search responses arrive out of order. How do you stop an older response replacing newer results?",
     ],
   },
+
   {
     id: "react",
     step: "Step 8",
@@ -344,9 +352,65 @@ export const interviewPrepTopics = [
       "Rendering 10,000 transaction rows is slow. How do you improve it?",
     ],
   },
+
+  {
+    id: "multithreading",
+    step: "Step 9",
+    icon: "🧵",
+    title: "Multithreading",
+    color: "#a78bfa",
+    link: null,
+    important: [
+      "What is a thread in Java and what are the two ways to create one?",
+      "What is the difference between start() and run()?",
+      "What are the six Java thread lifecycle states?",
+      "What is the difference between sleep() and wait()?",
+      "What is the difference between synchronized and volatile?",
+      "What is the difference between join() and yield()?",
+      "What is a race condition and how do you prevent it?",
+      "What is deadlock and how do you prevent it?",
+      "What is the difference between notify() and notifyAll()?",
+      "What is the Executor Framework and why use it instead of raw threads?",
+      "What is the difference between execute() and submit()?",
+      "What is the difference between Runnable and Callable?",
+      "What is Future in Java and why does get() block?",
+      "What are the different ExecutorService thread pools?",
+      "What is CompletableFuture and how does it differ from Future?",
+      "What is the difference between shutdown() and shutdownNow()?",
+      "What is RejectedExecutionException and the common rejection policies?",
+      "What are Virtual Threads and how do they differ from platform threads?",
+      "What is thread pinning in virtual threads and how do you avoid it?",
+      "When should you use ExecutorService vs Virtual Threads?",
+    ],
+    scenarios: [
+      "Print even and odd numbers 1 to 100 in order using exactly two threads with wait()/notifyAll().",
+      "Call a Customer API and an Account API in parallel using ExecutorService, Callable and Future.",
+      "Call two APIs in parallel using CompletableFuture and combine results with allOf().",
+      "Call two external APIs in parallel using Virtual Threads (newVirtualThreadPerTaskExecutor).",
+      "Execute 100 independent API calls using Virtual Threads and discuss timeouts/rate limits.",
+      "Handle exceptions thrown inside a Virtual Thread submitted via ExecutorService (ExecutionException).",
+      "Shut down an ExecutorService gracefully with shutdown() vs forcefully with shutdownNow().",
+      "Avoid thread pinning: keep synchronized blocks short and never sleep while holding a monitor.",
+      "Configure a bounded production thread pool with a queue and an appropriate rejection policy.",
+      "Run multiple async tasks and proceed as soon as any one completes using CompletableFuture.anyOf().",
+    ],
+  },
 ];
+
 export const prepStrategy = [
-  { icon: "📖", label: "Description", tip: "Simple definition" },
-  { icon: "🌍", label: "Real-time Example", tip: "Practical, human example" },
-  { icon: "💻", label: "Code", tip: "Short, focused code snippet" },
+  {
+    icon: "📖",
+    label: "Description",
+    tip: "Simple definition",
+  },
+  {
+    icon: "🌍",
+    label: "Real-time Example",
+    tip: "Practical, human example",
+  },
+  {
+    icon: "💻",
+    label: "Code",
+    tip: "Short, focused code snippet",
+  },
 ];
