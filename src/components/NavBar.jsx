@@ -143,7 +143,7 @@ function NavBar({ onOpenChangePassword, onOpenFounder, theme, onToggleTheme }) {
             <img
               src={logoSrc}
               alt="BSK Coding"
-              className={`nav-logo${theme === "light" ? " nav-logo-light" : ""}`}
+              className="nav-logo"
             />
           </div>
         </NavLink>

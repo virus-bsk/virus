@@ -343,7 +343,7 @@
   background: #080c14;
   border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   margin: 16px 0;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
@@ -568,4 +568,180 @@
   color: #ffffff;
   background: transparent;
   text-shadow: none;
+}
+
+/* Preserve the shared interview layout's contrast in the application light theme. */
+#root .app-shell[data-theme="light"] .interview-page {
+  background: #f5f7fb !important;
+  color: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .interview-header {
+  background: linear-gradient(135deg, #ffffff 0%, #edf4ff 100%) !important;
+  border-bottom-color: #d7e2f2;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .back-button,
+#root .app-shell[data-theme="light"] .interview-page .back-to-list {
+  border-color: rgba(49, 89, 221, 0.22);
+  background: #eaf0fb;
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .interview-title {
+  background-image: linear-gradient(135deg, #3159dd, #5678ed);
+  -webkit-text-fill-color: transparent;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .interview-subtitle {
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .interview-stat {
+  border-color: rgba(49, 89, 221, 0.18);
+  background: #ffffff;
+  box-shadow: 0 5px 16px rgba(31, 51, 82, 0.07);
+}
+
+#root .app-shell[data-theme="light"] .interview-page .interview-stat .stat-number {
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .interview-stat .stat-label {
+  color: #52627a !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .questions-section {
+  background: #f5f7fb !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .list-title,
+#root .app-shell[data-theme="light"] .interview-page .category-title {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .category-title {
+  border-bottom-color: rgba(49, 89, 221, 0.24);
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-item-vertical {
+  border-color: #d7e0ed;
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgba(31, 51, 82, 0.06);
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-item-vertical:hover {
+  border-color: #8ca7e8;
+  background: #f8faff;
+  box-shadow: 0 8px 18px rgba(49, 89, 221, 0.1);
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-item-vertical.active {
+  border-color: rgba(34, 145, 91, 0.42);
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(34, 145, 91, 0.1);
+}
+
+#root .app-shell[data-theme="light"] .interview-page .q-number {
+  border: 1px solid rgba(49, 89, 221, 0.16);
+  background: #eaf0fb;
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-item-vertical.active .q-number {
+  border-color: rgba(34, 145, 91, 0.2);
+  background: #e8f6ee;
+  color: #187347 !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .q-text {
+  color: #243247 !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .expand-arrow {
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-item-vertical.active .expand-arrow {
+  color: #187347 !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-item-content {
+  border-top-color: #e2e8f0;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-item-vertical.active .question-item-content {
+  border-top-color: #d6eddf;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-card {
+  border-color: #d7e0ed;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(31, 51, 82, 0.08);
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-header {
+  border-bottom-color: #e2e8f0;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-text {
+  color: #17243b !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .answer-title {
+  color: #3159dd !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-item-vertical.active .answer-title {
+  color: #187347 !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .answer-text {
+  border-left-color: #3159dd;
+  background: #f2f6ff;
+  color: #34445c !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .answer-simple {
+  border-left-color: #0284c7;
+  background: #edf8fc;
+  color: #17445a !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .answer-analogy {
+  border-left-color: #7c3aed;
+  background: #f5f0ff;
+  color: #49356b !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .answer-tip {
+  border-left-color: #21804e;
+  background: #edf8f1;
+  color: #24543a !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .question-item-vertical.active .answer-text {
+  border-left-color: #21804e;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .code-block {
+  border-color: #263445;
+  background: #080c14;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .code-header {
+  background: #17243b;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .code-language {
+  color: #93c5fd !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .code-block pre {
+  background: #080c14 !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-page .code-block code {
+  background: transparent !important;
+  color: #e2e8f0 !important;
 }

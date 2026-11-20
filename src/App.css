@@ -5613,66 +5613,29 @@ body[data-theme="light"] {
   text-shadow: none;
 }
 
+.app-shell[data-theme="light"] .skill-card-title {
+  color: #17243b;
+  text-shadow: none;
+}
+
+.app-shell[data-theme="light"] .skill-card-desc {
+  color: #52627a;
+}
+
 .app-shell[data-theme="light"] .skill-card-line {
   background: rgba(49, 89, 221, 0.2);
 }
 
-#root .app-shell[data-theme="light"] :where(:not(.vb-portfolio):not(.vb-portfolio *)) :is(
-  h1,
-  h2,
-  h3,
-  h4,
-  p,
-  li,
-  label,
-  small,
-  dt,
-  dd,
-  td,
-  th,
-  strong,
-  em,
-  blockquote,
-  figcaption,
-  :where(
-    span:not([class*="icon"]):not([class*="badge"]):not([class*="logo"]):not(
-        [class*="emoji"]
-      ):not([class*="status"]):not([class*="tag"]):not([class*="accent"]):not(
-        [style*="color"]
-      )
-  ),
-  :where(
-    [class*="subtitle"],
-    [class*="description"],
-    [class*="desc"],
-    [class*="muted"],
-    [class*="text"]:not([class*="icon"]):not([style*="color"]),
-    [class*="label"],
-    [class*="name"]
-  )
-):not(button *):not(.nav-link *):not(
-  .sd-video-btn *,
-  .oops-video-link *,
-  .dbc-video-link *,
-  .maang-intro-video *,
-  .cap-card-badge *,
-  .cache-card-badge *,
-  .slc-card-badge *,
-  .lb-card-badge *
-):not(pre *):not(code *):not(.vb-portfolio *):not(.founder-modal *) {
-  color: #34445c !important;
-  opacity: 1;
+.app-shell[data-theme="light"] .app-breadcrumbs {
+  color: #52627a;
 }
 
-#root .app-shell[data-theme="light"] :where(:not(.vb-portfolio):not(.vb-portfolio *)) :is(
-  h1,
-  h2,
-  h3,
-  h4,
-  [class*="title"]:not([class*="subtitle"]),
-  [class*="heading"]
-):not(pre *):not(code *):not(.vb-portfolio *):not(.founder-modal *) {
-  color: #17243b !important;
+.app-shell[data-theme="light"] .app-breadcrumb-separator {
+  color: #64748b;
+}
+
+.app-shell[data-theme="light"] .app-breadcrumbs [aria-current="page"] {
+  color: #34445c;
 }
 
 #root .app-shell[data-theme="light"] :where(:not(.vb-portfolio):not(.vb-portfolio *)) a:not(.yt-round):not(
@@ -5850,11 +5813,14 @@ body[data-theme="light"] {
   overflow: hidden;
 }
 
-.app-shell[data-theme="light"] .nav-logo-light {
-  width: 144px;
-  height: 96px;
+.app-shell[data-theme="light"] .nav-logo {
+  width: 146px;
+  height: 91px;
   max-width: none;
   flex: none;
+  position: relative;
+  left: 2px;
+  object-fit: fill;
   filter: none;
 }
 

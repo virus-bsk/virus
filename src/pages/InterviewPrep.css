@@ -1915,3 +1915,281 @@
   background: #f2f6ff;
   color: #3159a8 !important;
 }
+
+/* Refined interview-prep page hierarchy */
+#root .app-shell .interview-prep-route .ip-page-header {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 158px;
+  padding: 28px 30px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(59, 130, 246, 0.18), transparent 25%),
+    linear-gradient(135deg, #121e33 0%, #0e1728 65%, #15243b 100%);
+  box-shadow: 0 16px 38px rgba(2, 6, 23, 0.2);
+}
+
+#root .app-shell .interview-prep-route .ip-page-header::after {
+  position: absolute;
+  z-index: -1;
+  top: -72px;
+  right: 7%;
+  width: 210px;
+  height: 210px;
+  border: 1px solid rgba(147, 197, 253, 0.16);
+  border-radius: 50%;
+  content: "";
+  box-shadow:
+    0 0 0 24px rgba(147, 197, 253, 0.035),
+    0 0 0 50px rgba(147, 197, 253, 0.025);
+  pointer-events: none;
+}
+
+#root .app-shell .interview-prep-route .ip-page-heading {
+  position: relative;
+  z-index: 1;
+}
+
+#root .app-shell .interview-prep-route .ip-page-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+#root .app-shell .interview-prep-route .ip-page-eyebrow::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12);
+  content: "";
+}
+
+#root .app-shell .interview-prep-route .ip-page-title {
+  max-width: 720px;
+  margin: 8px 0 6px;
+  font-size: clamp(1.55rem, 3.2vw, 2.1rem);
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+#root .app-shell .interview-prep-route .ip-page-subtitle {
+  max-width: 620px;
+  line-height: 1.6;
+}
+
+#root .app-shell .interview-prep-route .ip-page-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+#root .app-shell .interview-prep-route .ip-stat {
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.5);
+  font-size: 0.72rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+#root .app-shell .interview-prep-route .ip-stat b {
+  margin-right: 3px;
+  font-size: 0.8rem;
+}
+
+#root .app-shell .interview-prep-route .ip-back-link {
+  position: relative;
+  z-index: 1;
+  border-radius: 10px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+#root .app-shell .interview-prep-route .ip-back-link:hover {
+  box-shadow: 0 8px 18px rgba(2, 6, 23, 0.2);
+  transform: translateY(-2px);
+}
+
+#root .app-shell .interview-prep-route .ip-steps {
+  top: 8px;
+  padding: 10px;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.12);
+  scrollbar-width: thin;
+}
+
+#root .app-shell .interview-prep-route .ip-steps::-webkit-scrollbar {
+  height: 5px;
+}
+
+#root .app-shell .interview-prep-route .ip-step-chip {
+  min-height: 40px;
+  border-radius: 10px;
+}
+
+#root .app-shell .interview-prep-route .ip-step-chip-active {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--step-color, #60a5fa) 48%, transparent);
+}
+
+#root .app-shell .interview-prep-route .ip-topic {
+  border-radius: 18px;
+}
+
+#root .app-shell .interview-prep-route .ip-topic::before {
+  height: 4px;
+  background: linear-gradient(90deg, var(--step-color, #3b82f6), color-mix(in srgb, var(--step-color, #3b82f6) 25%, transparent));
+}
+
+#root .app-shell .interview-prep-route .ip-topic-header {
+  padding: 22px 0 18px;
+}
+
+#root .app-shell .interview-prep-route .ip-topic-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--step-color, #3b82f6) 18%, #101827);
+  font-size: 1.2rem;
+}
+
+#root .app-shell .interview-prep-route .ip-topic-title {
+  letter-spacing: -0.02em;
+}
+
+#root .app-shell .interview-prep-route .ip-topic-count {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 8px 0 0;
+}
+
+#root .app-shell .interview-prep-route .ip-count-chip {
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+}
+
+#root .app-shell .interview-prep-route .ip-block-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  margin-top: 20px;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+#root .app-shell .interview-prep-route .ip-block-count {
+  margin-left: auto;
+  border-radius: 999px;
+  font-size: 0.68rem;
+}
+
+#root .app-shell .interview-prep-route .ip-grid {
+  gap: 12px;
+}
+
+#root .app-shell .interview-prep-route .ip-question {
+  min-height: 82px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: 12px;
+}
+
+#root .app-shell .interview-prep-route .ip-qnum {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+}
+
+#root .app-shell .interview-prep-route .ip-qtext {
+  line-height: 1.55;
+}
+
+#root .app-shell .interview-prep-route .ip-qhint {
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-page-header {
+  border-color: #d7e2f2 !important;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(59, 130, 246, 0.12), transparent 25%),
+    linear-gradient(135deg, #ffffff 0%, #f8faff 60%, #eef4ff 100%) !important;
+  box-shadow: 0 14px 32px rgba(31, 51, 82, 0.09) !important;
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-stat {
+  border-color: #d5deeb;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 2px 6px rgba(31, 51, 82, 0.04);
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-steps {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 20px rgba(31, 51, 82, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-step-chip-active {
+  background: color-mix(in srgb, var(--step-color, #3159dd) 12%, #ffffff) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--step-color, #3159dd) 32%, transparent);
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-topic-icon {
+  background: color-mix(in srgb, var(--step-color, #3159dd) 12%, #ffffff);
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-question {
+  background: linear-gradient(145deg, #ffffff, #fbfcff);
+  box-shadow: 0 3px 10px rgba(31, 51, 82, 0.05);
+}
+
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-question:hover,
+#root .app-shell[data-theme="light"] .interview-prep-route .ip-question:focus-visible {
+  box-shadow: 0 10px 22px rgba(49, 89, 221, 0.12);
+}
+
+@media (max-width: 600px) {
+  #root .app-shell .interview-prep-route .ip-page-header {
+    min-height: 0;
+    padding: 22px 18px;
+    border-radius: 16px;
+  }
+
+  #root .app-shell .interview-prep-route .ip-page-header::after {
+    right: -120px;
+  }
+
+  #root .app-shell .interview-prep-route .ip-page-stats {
+    gap: 6px;
+  }
+
+  #root .app-shell .interview-prep-route .ip-stat {
+    padding: 6px 9px;
+    font-size: 0.68rem;
+  }
+
+  #root .app-shell .interview-prep-route .ip-topic {
+    padding-right: 14px;
+    padding-left: 14px;
+    border-radius: 14px;
+  }
+
+  #root .app-shell .interview-prep-route .ip-topic::before {
+    margin-right: -14px;
+    margin-left: -14px;
+  }
+
+  #root .app-shell .interview-prep-route .ip-question {
+    min-height: 0;
+  }
+}
