@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import hljs from "../utils/hljs";
 import { scrollActiveQuestionIntoView } from "../utils/scrollQuestion";
 import "highlight.js/styles/atom-one-dark.css";
@@ -271,6 +271,10 @@ const COMPANY_GRID_DETAILS = {
   },
 };
 
+function companyDisplayName(company) {
+  return COMPANY_GRID_DETAILS[company.id]?.name || company.name;
+}
+
 // Detect the round type to color the step badge
 function roundBadge(name) {
   const n = name.replace(/\*\*/g, "").toLowerCase();
@@ -293,13 +297,14 @@ function countInterviewQuestions(interview) {
 }
 
 function CompanyInterview() {
-  const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+  const navigate = useNavigate();
+  const { companyId } = useParams();
   const [expandedId, setExpandedId] = useState(null);
   const [search, setSearch] = useState("");
   const [filterRound, setFilterRound] = useState("all");
   const [selectedInterviewIdx, setSelectedInterviewIdx] = useState("all");
 
-  const selectedCompany = companies.find((c) => c.id === selectedCompanyId);
+  const selectedCompany = companies.find((c) => c.id === companyId);
 
   const toggleQuestion = (uid) => {
     setExpandedId(expandedId === uid ? null : uid);
@@ -312,12 +317,9 @@ function CompanyInterview() {
     scrollActiveQuestionIntoView(".ci-question", ".ci-question-header");
   }, [expandedId]);
 
-  const backToList = () => {
-    setSelectedCompanyId(null);
-    setExpandedId(null);
-    setFilterRound("all");
-    setSelectedInterviewIdx("all");
-  };
+  if (companyId && !selectedCompany) {
+    return <Navigate to="/company-interview" replace />;
+  }
 
   // Company list view
   if (!selectedCompany) {
@@ -361,7 +363,11 @@ function CompanyInterview() {
                   "--ci-color": COMPANY_COLORS[idx % COMPANY_COLORS.length],
                 }}
                 onClick={() => {
-                  setSelectedCompanyId(company.id);
+                  navigate(
+                    `/company-interview/${encodeURIComponent(company.id)}/${encodeURIComponent(companyDisplayName(company))}`,
+                  );
+                  setExpandedId(null);
+                  setFilterRound("all");
                   setSelectedInterviewIdx("all");
                 }}
               >
@@ -369,7 +375,7 @@ function CompanyInterview() {
                   {company.name.charAt(0).toUpperCase()}
                 </div>
                 <h3 className="ci-company-name">
-                  {COMPANY_GRID_DETAILS[company.id]?.name || company.name}
+                  {companyDisplayName(company)}
                 </h3>
                 {COMPANY_GRID_DETAILS[company.id] && (
                   <>
@@ -465,14 +471,12 @@ function CompanyInterview() {
   return (
     <div className="company-interview-page">
       <section className="ci-hero">
-        <button className="back-button ci-back-btn" onClick={backToList}>
-          ← All Companies
-        </button>
         <h1 className="ci-title">
-          {selectedCompany.name} <span className="ci-flow">Interview Flow</span>
+          {companyDisplayName(selectedCompany)}{" "}
+          <span className="ci-flow">Interview Flow</span>
         </h1>
         <p className="ci-subtitle">
-          {selectedCompany.name} interview experience
+          {companyDisplayName(selectedCompany)} interview experience
           {multiInterview && " — each interview shown as a separate section"} —
           rounds in the exact order they happened. Click a question to reveal
           its answer.

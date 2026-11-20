@@ -100,6 +100,7 @@ export function buildAppBreadcrumbs(pathname) {
 
   const breadcrumbs = [];
   const isMaangRoute = segments[0] === "maang";
+  const isCompanyInterviewRoute = segments[0] === "company-interview";
   let routePrefix = "";
 
   breadcrumbs.push({ label: "Home", to: "/" });
@@ -121,8 +122,19 @@ export function buildAppBreadcrumbs(pathname) {
     }
 
     routePrefix += `/${segment}`;
+    if (
+      isCompanyInterviewRoute &&
+      index === 1 &&
+      segments.length > index + 1
+    ) {
+      continue;
+    }
+
     const previous = breadcrumbs[breadcrumbs.length - 1];
-    let label = labelFor(segment, previous?.label);
+    let label =
+      isCompanyInterviewRoute && index === 2
+        ? decodeURIComponent(segment)
+        : labelFor(segment, previous?.label);
 
     if (
       segment === "forward-deployment-engineer" &&

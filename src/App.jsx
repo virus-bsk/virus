@@ -825,6 +825,14 @@ function App() {
                   path="/company-interview"
                   element={<CompanyInterview />}
                 />
+                <Route
+                  path="/company-interview/:companyId/:companyName"
+                  element={<CompanyInterview />}
+                />
+                <Route
+                  path="/company-interview/:companyId"
+                  element={<CompanyInterview />}
+                />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/cline-test" element={<ClineChatTest />} />
                 <Route path="/profile" element={<Profile />} />
