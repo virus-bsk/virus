@@ -626,10 +626,10 @@ export const dsaBasicProblems = [
   // ===== Greedy =====
   {
     id: 67,
-    title: "N meetings in one room",
+    title: "Maximum Meetings in One Room",
     topic: "Greedy",
     difficulty: "Easy",
-    link: "https://www.geeksforgeeks.org/n-meetings-in-one-room/",
+    link: "https://www.geeksforgeeks.org/problems/maximum-meetings-in-one-room/1",
     platform: "gfg",
     videoLink: null,
   },
